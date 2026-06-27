@@ -1948,6 +1948,15 @@ function renderMensajes(msgs, contenedor, esAdminView){
     contenedor.innerHTML=`<div style="text-align:center;color:var(--sub);font-size:13px;margin:auto">Sin mensajes aún.</div>`;
     return;
   }
+  
+  // Función para convertir URLs en links clicables
+  function convertirURLsALinks(texto){
+    const urlRegex=/https?:\/\/[^\s<>]+/gi;
+    return texto.replace(urlRegex,function(url){
+      return `<a href="${url}" target="_blank" rel="noopener" style="color:var(--verde);text-decoration:underline;word-break:break-all;font-weight:500">${url}</a>`;
+    });
+  }
+  
   msgs.forEach(m=>{
     if(m.de==="sistema"){
       const soli=obtenerSolicitudes().find(s=>s.id===m.solicitudId);
@@ -1970,7 +1979,8 @@ function renderMensajes(msgs, contenedor, esAdminView){
       </div>`;
     } else {
       const claseAlign=m.de==="admin"?"admin":"usuario";
-      contenedor.innerHTML+=`<div class="chat-burbuja ${claseAlign}">${m.texto.replace(/\n/g,"<br>")}<span class="hora">${m.hora}</span></div>`;
+      const textoConLinks=convertirURLsALinks(m.texto);
+      contenedor.innerHTML+=`<div class="chat-burbuja ${claseAlign}">${textoConLinks.replace(/\n/g,"<br>")}<span class="hora">${m.hora}</span></div>`;
     }
   });
   contenedor.scrollTop=contenedor.scrollHeight;
@@ -2149,7 +2159,14 @@ function renderAdminSolicitudes(){
 }
 
 function _pintarSolicitudes(){
-  const solis=obtenerSolicitudes();
+  let solis=obtenerSolicitudes();
+  
+  // Ordenar solicitudes: pendientes primero, luego aprobadas, luego rechazadas
+  solis.sort((a,b)=>{
+    const orden={pendiente:0, aprobado:1, rechazado:2};
+    return (orden[a.estado]||3)-(orden[b.estado]||3);
+  });
+  
   const body=document.getElementById("adminSolicitudesBody");
   if(solis.length===0){
     body.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--sub);padding:20px">Noch keine Anfragen vorhanden.</td></tr>`;
