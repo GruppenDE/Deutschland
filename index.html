@@ -684,7 +684,7 @@
     </div>
     <nav>
       <button class="btn-agregar" onclick="abrirAgregar()">＋ Gruppe hinzufügen</button>
-      <button class="modo" onclick="modo()" aria-label="Dunkel-/Hellmodus wechseln">🌙</button>
+      <button class="modo" onclick="modo()" aria-label="Dunkel-/Hellmodus wechseln">☾</button>
       <div id="zonaSesion"></div>
     </nav>
   </div>
@@ -2161,19 +2161,19 @@ function renderAdminSolicitudes(){
 function _pintarSolicitudes(){
   let solis=obtenerSolicitudes();
   
-  // Ordenar solicitudes: pendientes primero, luego aprobadas, luego rechazadas
-  solis.sort((a,b)=>{
+  // Crear una copia y ordenar solicitudes: pendientes primero, luego aprobadas, luego rechazadas
+  let solisOrdenadas=[...solis].sort((a,b)=>{
     const orden={pendiente:0, aprobado:1, rechazado:2};
     return (orden[a.estado]||3)-(orden[b.estado]||3);
   });
   
   const body=document.getElementById("adminSolicitudesBody");
-  if(solis.length===0){
+  if(solisOrdenadas.length===0){
     body.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--sub);padding:20px">Noch keine Anfragen vorhanden.</td></tr>`;
     document.getElementById("tabSolicitudes").textContent="🕐 Anfragen";
     return;
   }
-  body.innerHTML=solis.map(s=>`
+  body.innerHTML=solisOrdenadas.map(s=>`
     <tr>
       <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${s.nombre}">${s.nombre}</td>
       <td>${s.categoria}</td>
@@ -2190,7 +2190,7 @@ function _pintarSolicitudes(){
         `:`<span style="font-size:12px;color:var(--sub)">—</span>`}
       </td>
     </tr>`).join("");
-  const pendientes=solis.filter(s=>s.estado==="pendiente").length;
+  const pendientes=solisOrdenadas.filter(s=>s.estado==="pendiente").length;
   document.getElementById("tabSolicitudes").textContent=`🕐 Anfragen${pendientes>0?` (${pendientes})`:""}`;
 }
 
