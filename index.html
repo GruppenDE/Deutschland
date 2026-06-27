@@ -2161,11 +2161,13 @@ function renderAdminSolicitudes(){
 function _pintarSolicitudes(){
   let solis=obtenerSolicitudes();
   
-  // Crear una copia y ordenar solicitudes: pendientes primero, luego aprobadas, luego rechazadas
-  let solisOrdenadas=[...solis].sort((a,b)=>{
-    const orden={pendiente:0, aprobado:1, rechazado:2};
-    return (orden[a.estado]||3)-(orden[b.estado]||3);
-  });
+  // Separar por estado y luego concatenar en el orden correcto
+  const pendientes=solis.filter(s=>s.estado==="pendiente");
+  const aprobadas=solis.filter(s=>s.estado==="aprobado");
+  const rechazadas=solis.filter(s=>s.estado==="rechazado");
+  
+  // Concatenar en orden: Pendientes PRIMERO, luego aprobadas, luego rechazadas
+  let solisOrdenadas=[...pendientes, ...aprobadas, ...rechazadas];
   
   const body=document.getElementById("adminSolicitudesBody");
   if(solisOrdenadas.length===0){
@@ -2190,8 +2192,8 @@ function _pintarSolicitudes(){
         `:`<span style="font-size:12px;color:var(--sub)">—</span>`}
       </td>
     </tr>`).join("");
-  const pendientes=solisOrdenadas.filter(s=>s.estado==="pendiente").length;
-  document.getElementById("tabSolicitudes").textContent=`🕐 Anfragen${pendientes>0?` (${pendientes})`:""}`;
+  const numPendientes=pendientes.length;
+  document.getElementById("tabSolicitudes").textContent=`🕐 Anfragen${numPendientes>0?` (${numPendientes})`:""}`;
 }
 
 function adminAprobarSolicitud(id){
@@ -2208,19 +2210,23 @@ function adminAprobarSolicitud(id){
     plataforma:s.plataforma,
     link:s.link,
     img:s.img,
-    miembros:s.miembros,
+    miembros:s.miembros||0,
     favoritosBase:0,
     favoritos:0,
     fechaAprobacion:new Date().getTime()
   };
+  
+  // Agregar a ambos arrays (gruposExtra y grupos)
+  gruposExtra.push(nuevoGrupo);
   grupos.push(nuevoGrupo);
-  guardarGrupoUsuario(nuevoGrupo);
+  guardarGrupoFirestore(nuevoGrupo);
 
   // Notificar usuario por chat
   const msgAdmin={de:"admin",texto:`✅ Deine Gruppe *${s.nombre}* wurde genehmigt und ist jetzt auf Gruppen🇩🇪 sichtbar! 🎉 Jetzt haben andere die Möglichkeit, deine Gruppe zu favorisieren und ihr Ranking zu verbessern.`,hora:horaActual()};
   agregarMensajeChat(s.usuarioCorreo, msgAdmin);
   actualizarBadgeChat(s.usuarioCorreo);
 
+  // Actualizar vista inmediatamente
   filtrar();
   renderAdminSolicitudes();
   mostrarToast(`Gruppe „${s.nombre}" genehmigt und veröffentlicht mit 0 Favoritos ⭐`,"✅");
