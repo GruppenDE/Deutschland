@@ -1039,6 +1039,21 @@
       <textarea id="agDescripcion" placeholder="Beschreibe kurz, worum es in deiner Gruppe geht, welche Regeln gelten und welche Mitglieder ihr sucht …" rows="3" style="padding:11px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:14px;outline:none;background:#fafbfa;resize:vertical;transition:border-color .18s;font-family:inherit;line-height:1.5;width:100%;box-sizing:border-box" onfocus="this.style.borderColor='var(--verde)'" onblur="this.style.borderColor='var(--borde)'"></textarea>
     </div>
 
+    <div class="campo">
+      <label>Gruppenbild <span style="font-weight:400;color:var(--sub)">(optional — wird automatisch aus dem Link geladen)</span></label>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <label for="agImgFile" style="display:flex;align-items:center;gap:8px;padding:10px 16px;border:1.5px dashed var(--borde);border-radius:10px;background:#fafbfa;cursor:pointer;font-size:13.5px;color:var(--sub);transition:border-color .18s;flex:1;min-width:180px" id="agImgFileLabel" onmouseover="this.style.borderColor='var(--verde)'" onmouseout="this.style.borderColor='var(--borde)'">
+          <span style="font-size:20px">🖼️</span> Bild hochladen
+          <input type="file" id="agImgFile" accept="image/*" style="display:none" onchange="previewImgGrupo(this)">
+        </label>
+        <div id="agImgPreviewWrap" style="display:none;position:relative">
+          <img id="agImgPreview" src="" alt="Vorschau" style="width:90px;height:54px;object-fit:cover;border-radius:8px;border:1.5px solid var(--borde)">
+          <button onclick="limpiarImgGrupo()" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#ef4444;color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+        </div>
+      </div>
+      <span class="ayuda">Si du ein Bild hochlädst, wird es als Gruppenbild verwendet. Andernfalls versuchen wir, es automatisch aus dem WhatsApp-Link zu laden.</span>
+    </div>
+
     <div class="campo-checkbox" id="cajaConfirma18" style="display:none">
       <input type="checkbox" id="agConfirma18">
       <label for="agConfirma18">Ich bestätige, dass diese Gruppe für Personen über 18 Jahre ist und die Regeln von WhatsApp/Telegram einhält.</label>
@@ -1220,6 +1235,7 @@ function abrirAgregar(){
 function cerrarAgregar(){
   document.getElementById("overlayAgregar").classList.remove("abierto");
   document.getElementById("errorAgregar").textContent="";
+  limpiarImgGrupo();
 }
 
 function elegirPlataformaForm(p){
@@ -1236,7 +1252,53 @@ function actualizarCategoriaForm(){
   document.getElementById("cajaConfirma18").style.display=esAdulto?"flex":"none";
 }
 
-function publicarGrupo(){
+let _imgGrupoBase64=null; // imagen subida manualmente por el usuario
+
+function previewImgGrupo(input){
+  if(!input.files||!input.files[0]) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    _imgGrupoBase64=e.target.result;
+    document.getElementById("agImgPreview").src=_imgGrupoBase64;
+    document.getElementById("agImgPreviewWrap").style.display="block";
+    document.getElementById("agImgFileLabel").style.borderColor="var(--verde)";
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function limpiarImgGrupo(){
+  _imgGrupoBase64=null;
+  document.getElementById("agImgFile").value="";
+  document.getElementById("agImgPreviewWrap").style.display="none";
+  document.getElementById("agImgFileLabel").style.borderColor="var(--borde)";
+  document.getElementById("agImgPreview").src="";
+}
+
+async function obtenerImagenWhatsApp(link){
+  /* Intenta extraer la og:image del enlace de invitación de WhatsApp
+     usando múltiples proxies CORS públicos como fallback. */
+  const proxies=[
+    url=>`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+    url=>`https://corsproxy.io/?${encodeURIComponent(url)}`,
+  ];
+  for(const proxy of proxies){
+    try{
+      const res=await fetch(proxy(link),{signal:AbortSignal.timeout(6000)});
+      if(!res.ok) continue;
+      const data=await res.json().catch(async()=>({contents:await res.text()}));
+      const html=data.contents||data.body||"";
+      // Buscar og:image en el HTML devuelto
+      const match=html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+                || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+      if(match && match[1] && match[1].startsWith("http")){
+        return match[1];
+      }
+    }catch(e){/* siguiente proxy */}
+  }
+  return null;
+}
+
+async function publicarGrupo(){
   const nombre=document.getElementById("agNombre").value.trim();
   const categoria=document.getElementById("agCategoria").value;
   const link=document.getElementById("agLink").value.trim();
@@ -1251,11 +1313,30 @@ function publicarGrupo(){
     return;
   }
 
+  // Deshabilitar botón mientras se obtiene la imagen
+  const btnPublicar=document.querySelector("#overlayAgregar .btn-principal");
+  const textoOriginal=btnPublicar.textContent;
+  btnPublicar.disabled=true;
+  btnPublicar.textContent="⏳ Gruppenbild wird geladen…";
+
+  // Usar imagen subida por el usuario, o intentar obtener la del enlace de WhatsApp
+  let imgUrl=null;
+  if(_imgGrupoBase64){
+    imgUrl=_imgGrupoBase64; // imagen subida manualmente — prioridad máxima
+  } else if(plataformaForm==="WhatsApp" && link.includes("chat.whatsapp.com")){
+    imgUrl=await obtenerImagenWhatsApp(link); // extraer og:image del enlace
+  }
+  // Fallback: imagen aleatoria si no se pudo obtener de ninguna forma
+  if(!imgUrl) imgUrl=`https://picsum.photos/600/340?random=${Date.now()}`;
+
+  btnPublicar.disabled=false;
+  btnPublicar.textContent=textoOriginal;
+
   const user=obtenerSesion();
   const solicitud={
     id:Date.now().toString(),
     nombre,categoria,plataforma:plataformaForm,link,descripcion,
-    img:`https://picsum.photos/600/340?random=${Date.now()}`,
+    img:imgUrl,
     miembros:0,favoritosBase:0,
     estado:"pendiente",
     usuarioCorreo:user.correo,
@@ -1289,6 +1370,7 @@ function publicarGrupo(){
   document.getElementById("agDescripcion").value="";
   document.getElementById("cajaConfirma18").style.display="none";
   elegirPlataformaForm("WhatsApp");
+  limpiarImgGrupo();
 
   actualizarBadgeChat();
   mostrarNotif("📤","Anfrage gesendet","Der Admin prüft deine Gruppe bald.");
