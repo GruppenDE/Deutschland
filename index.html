@@ -4,6 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Gruppen🇩🇪 — Finde deine Community</title>
+
+<!-- ===== FIREBASE SDK v8 (compat — funciona con scripts normales) ===== -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyA3GpW1N7i9YNdw7KtZXx5VFgWyWoyoBYM",
+    authDomain: "gruppende-94f00.firebaseapp.com",
+    projectId: "gruppende-94f00",
+    storageBucket: "gruppende-94f00.firebasestorage.app",
+    messagingSenderId: "902209990512",
+    appId: "1:902209990512:web:eee7151f40ac41c70ba9b5",
+    measurementId: "G-WD6PVR87MR"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const _db  = firebase.firestore();
+  const _auth = firebase.auth();
+  const _googleProvider = new firebase.auth.GoogleAuthProvider();
+</script>
+<!-- ===== /FIREBASE SDK ===== -->
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -930,7 +952,7 @@
       <p class="error-campo" id="errorLogin"></p>
       <button class="btn-principal" onclick="iniciarSesion()">Anmelden</button>
       <div class="divisor">oder</div>
-      <button class="btn-google" onclick="googleSimulado()">
+      <button class="btn-google" onclick="googleSignIn()">
         <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
         Mit Google fortfahren
       </button>
@@ -956,7 +978,7 @@
       <p class="error-campo" id="errorRegistro"></p>
       <button class="btn-principal" onclick="registrar()">Konto erstellen</button>
       <div class="divisor">oder</div>
-      <button class="btn-google" onclick="googleSimulado()">
+      <button class="btn-google" onclick="googleSignIn()">
         <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
         Mit Google fortfahren
       </button>
@@ -1095,18 +1117,26 @@ const baseGrupos=[
   {nombre:"Zona Prohibida",    img:"https://picsum.photos/600/340?43", plataforma:"WhatsApp", categoria:"+18", miembros:925, link:"https://chat.whatsapp.com/", favoritosBase:46}
 ];
 
-/* Los grupos que los usuarios añaden desde el formulario se
-   guardan en localStorage y se combinan con los de arriba.
-   Así la lista crece y la paginación se recalcula sola. */
-function obtenerGruposGuardados(){
-  return JSON.parse(localStorage.getItem("grupohub_grupos_usuario")||"[]");
+/* =========================================================
+   FIREBASE DATA LAYER — usa _db (firebase.firestore()) directamente
+   localStorage se usa SOLO para sesión y preferencias de UI.
+   ========================================================= */
+
+// ── Grupos extra (añadidos por admin/usuario) ──
+let gruposExtra = [];
+const grupos=[...baseGrupos];
+
+// ── Guardar grupo en Firestore ──
+async function guardarGrupoFirestore(g){
+  try{
+    await _db.collection("grupos_extra").add({...g, creadoEn: firebase.firestore.FieldValue.serverTimestamp()});
+  }catch(e){ console.warn("FB guardarGrupo:",e); }
 }
-function guardarGrupoUsuario(g){
-  const lista=obtenerGruposGuardados();
-  lista.push(g);
-  localStorage.setItem("grupohub_grupos_usuario",JSON.stringify(lista));
+async function guardarGrupoUsuario(g){
+  gruposExtra.push(g);
+  grupos.push(g);
+  await guardarGrupoFirestore(g);
 }
-const grupos=[...baseGrupos,...obtenerGruposGuardados()];
 
 const GRUPOS_POR_PAGINA=6;
 let paginaActual=1;
@@ -1115,19 +1145,21 @@ const grid=document.getElementById("grid");
 const catRow=document.getElementById("catRow");
 const resultadoInfo=document.getElementById("resultadoInfo");
 let categoriaActiva="Todos";
-let favoritos=new Set(JSON.parse(localStorage.getItem("grupohub_favoritos")||"[]"));
+let favoritos=new Set();
+let ajustesFavoritos={};
 
 function guardarFavoritos(){
-  localStorage.setItem("grupohub_favoritos",JSON.stringify([...favoritos]));
+  const user=obtenerSesion();
+  if(!user) return;
+  const correoKey=user.correo.replace(/[.#$[\]]/g,"_");
+  _db.collection("favoritos").doc(correoKey)
+    .set({lista:[...favoritos], ajustes:ajustesFavoritos})
+    .catch(e=>console.warn("FB guardarFavoritos:",e));
 }
 
-/* Conteo de "favoritismo" — cada vez que alguien marca la estrella
-   suma un punto a ese grupo; al quitarla, resta uno. Esto decide
-   el orden de las tarjetas: más estrellas = mejor posición = más
-   probable que aparezca en la página 1 de su categoría. */
-let ajustesFavoritos=JSON.parse(localStorage.getItem("grupohub_ajustes_favoritos")||"{}");
+/* Conteo de "favoritismo" */
 function guardarAjustes(){
-  localStorage.setItem("grupohub_ajustes_favoritos",JSON.stringify(ajustesFavoritos));
+  guardarFavoritos();
 }
 function totalFavoritos(g){
   return g.favoritosBase+(ajustesFavoritos[g.nombre]||0);
@@ -1369,13 +1401,18 @@ function irPagina(n){
 
 /* =========================================================
    LÍMITE DE FAVORITOS — máximo 1 voto por grupo cada 24 horas
-   Se guarda en localStorage la fecha del último voto de cada grupo.
+   Se guarda en Firestore bajo "votos_fav/{correo}"
    ========================================================= */
-function obtenerVotosFav(){
-  return JSON.parse(localStorage.getItem("grupohub_votos_fav")||"{}");
-}
+let _votosCache={};
+function obtenerVotosFav(){ return _votosCache; }
 function guardarVotosFav(obj){
-  localStorage.setItem("grupohub_votos_fav",JSON.stringify(obj));
+  _votosCache=obj;
+  const user=obtenerSesion();
+  if(!user) return;
+  const correoKey=user.correo.replace(/[.#$[\]]/g,"_");
+  _db.collection("votos_fav").doc(correoKey)
+    .set({votos:obj})
+    .catch(e=>console.warn("FB guardarVotos:",e));
 }
 function puedeVotar(nombre){
   const votos=obtenerVotosFav();
@@ -1474,12 +1511,22 @@ function esAdmin(user){
   return user&&user.correo===ADMIN_CORREO&&user.esAdmin===true;
 }
 
-function obtenerUsuarios(){
-  return JSON.parse(localStorage.getItem("grupohub_usuarios")||"[]");
+async function obtenerUsuarioFirestore(correo){
+  const correoKey=correo.replace(/[.#$[\]]/g,"_");
+  try{
+    const snap=await _db.collection("usuarios").doc(correoKey).get();
+    return snap.exists?snap.data():null;
+  }catch(e){ console.warn("FB obtenerUsuario:",e); return null; }
 }
-function guardarUsuarios(lista){
-  localStorage.setItem("grupohub_usuarios",JSON.stringify(lista));
+async function guardarUsuarioFirestore(userData){
+  const correoKey=userData.correo.replace(/[.#$[\]]/g,"_");
+  try{
+    await _db.collection("usuarios").doc(correoKey).set(userData);
+  }catch(e){ console.warn("FB guardarUsuario:",e); }
 }
+let _usuariosCache=[];
+function obtenerUsuarios(){ return _usuariosCache; }
+function guardarUsuarios(lista){ _usuariosCache=lista; }
 function obtenerSesion(){
   return JSON.parse(localStorage.getItem("grupohub_sesion")||"null");
 }
@@ -1505,7 +1552,7 @@ function cambiarTab(tab){
   document.getElementById("vistaRegistro").style.display=esLogin?"none":"block";
 }
 
-function registrar(){
+async function registrar(){
   const nombre=document.getElementById("regNombre").value.trim();
   const correo=document.getElementById("regCorreo").value.trim().toLowerCase();
   const pass=document.getElementById("regPass").value;
@@ -1513,42 +1560,60 @@ function registrar(){
   if(!nombre||!correo||!pass){err.textContent="Bitte alle Felder ausfüllen.";return}
   if(pass.length<6){err.textContent="Das Passwort muss mindestens 6 Zeichen haben.";return}
   if(correo===ADMIN_CORREO){err.textContent="Diese E-Mail-Adresse ist reserviert.";return}
-  const usuarios=obtenerUsuarios();
-  if(usuarios.some(u=>u.correo===correo)){err.textContent="Ein Konto mit dieser E-Mail-Adresse existiert bereits.";return}
-  usuarios.push({nombre,correo,pass});
-  guardarUsuarios(usuarios);
+  const existente=await obtenerUsuarioFirestore(correo);
+  if(existente){err.textContent="Ein Konto mit dieser E-Mail-Adresse existiert bereits.";return}
+  const userData={nombre,correo,pass};
+  await guardarUsuarioFirestore(userData);
+  _usuariosCache.push(userData);
   guardarSesion({nombre,correo,metodo:"correo"});
   err.textContent="";
   cerrarAuth();
   mostrarToast(`Willkommen, ${nombre}!`,"🎉");
+  pintarSesion();
 }
 
-function iniciarSesion(){
+async function iniciarSesion(){
   const correo=document.getElementById("loginCorreo").value.trim().toLowerCase();
   const pass=document.getElementById("loginPass").value;
   const err=document.getElementById("errorLogin");
 
-  // Login de administrador
   if(correo===ADMIN_CORREO && pass===ADMIN_PASS){
     guardarSesion({nombre:"Cristhian (Admin)",correo:ADMIN_CORREO,metodo:"correo",esAdmin:true});
     err.textContent="";
     cerrarAuth();
     mostrarToast("Willkommen, Administrator! 👑","🛠️");
+    await cargarDatosAdmin();
+    pintarSesion();
+    filtrar();
     return;
   }
 
-  const usuario=obtenerUsuarios().find(u=>u.correo===correo&&u.pass===pass);
-  if(!usuario){err.textContent="E-Mail-Adresse oder Passwort falsch.";return}
+  const usuario=await obtenerUsuarioFirestore(correo);
+  if(!usuario||usuario.pass!==pass){err.textContent="E-Mail-Adresse oder Passwort falsch.";return}
   guardarSesion({nombre:usuario.nombre,correo:usuario.correo,metodo:"correo"});
   err.textContent="";
   cerrarAuth();
   mostrarToast(`Hallo wieder, ${usuario.nombre}`,"👋");
+  await cargarDatosUsuario(correo);
+  pintarSesion();
 }
 
-function googleSimulado(){
-  guardarSesion({nombre:"Google-Nutzer",correo:"usuario@gmail.com",metodo:"google"});
-  cerrarAuth();
-  mostrarToast("Mit Google angemeldet","🔵");
+async function googleSignIn(){
+  try{
+    const result=await _auth.signInWithPopup(_googleProvider);
+    const gUser=result.user;
+    const nombre=gUser.displayName||"Google-Nutzer";
+    const correo=(gUser.email||"usuario@gmail.com").toLowerCase();
+    // Guardar/actualizar usuario en Firestore
+    await guardarUsuarioFirestore({nombre,correo,metodo:"google"});
+    guardarSesion({nombre,correo,metodo:"google"});
+    cerrarAuth();
+    mostrarToast(`Willkommen, ${nombre}! 🎉`,"🔵");
+    await cargarDatosUsuario(correo);
+  }catch(e){
+    console.warn("Google Sign-In error:",e);
+    mostrarToast("Google-Anmeldung fehlgeschlagen: "+e.message,"⚠️");
+  }
 }
 
 function cerrarSesion(){
@@ -1588,13 +1653,14 @@ function pintarSesion(){
 /* =========================================================
    PANEL ADMINISTRADOR — funciones
    ========================================================= */
-/* Página fija: permite al admin anclar un grupo a una página concreta.
-   Se guarda como propiedad pagFija en el objeto del grupo.          */
-function obtenerPaginasFijas(){
-  return JSON.parse(localStorage.getItem("grupohub_paginas_fijas")||"{}");
-}
+/* Página fija: permite al admin anclar un grupo a una página concreta. */
+let _paginasFijasCache={};
+function obtenerPaginasFijas(){ return _paginasFijasCache; }
 function guardarPaginasFijas(obj){
-  localStorage.setItem("grupohub_paginas_fijas",JSON.stringify(obj));
+  _paginasFijasCache=obj;
+  _db.collection("config").doc("paginas_fijas")
+    .set(obj)
+    .catch(e=>console.warn("FB pagFija:",e));
 }
 
 function abrirAdmin(){
@@ -1722,9 +1788,13 @@ function adminGuardarPagina(i,nombre){
 function adminEliminar(i,nombre){
   if(!confirm(`Gruppe „${nombre}" löschen?`)) return;
   grupos.splice(i,1);
-  // también borrarlo de localStorage si fue añadido por usuario
-  const guardados=obtenerGruposGuardados().filter(g=>g.nombre!==nombre);
-  localStorage.setItem("grupohub_grupos_usuario",JSON.stringify(guardados));
+  const idx=gruposExtra.findIndex(g=>g.nombre===nombre);
+  if(idx!==-1){
+    gruposExtra.splice(idx,1);
+    _db.collection("grupos_extra").where("nombre","==",nombre).get().then(snap=>{
+      snap.forEach(d=>d.ref.delete().catch(console.warn));
+    });
+  }
   const pf=obtenerPaginasFijas();
   delete pf[nombre];
   guardarPaginasFijas(pf);
@@ -1745,25 +1815,89 @@ document.addEventListener("click",(e)=>{
   }
 });
 
-// Cargar páginas fijas en los grupos al iniciar
-(function aplicarPaginasFijas(){
+function aplicarPaginasFijasLocal(){
   const pf=obtenerPaginasFijas();
   grupos.forEach(g=>{if(pf[g.nombre]) g.pagFija=pf[g.nombre]});
-})();
+}
 
-pintarSesion();
-pintarCategorias();
-poblarSelectCategorias();
-pintar(grupos);
+/* =========================================================
+   FUNCIONES DE CARGA DESDE FIRESTORE
+   ========================================================= */
+async function cargarDatosUsuario(correo){
+  const correoKey=correo.replace(/[.#$[\]]/g,"_");
+  try{
+    const snap=await _db.collection("favoritos").doc(correoKey).get();
+    if(snap.exists){ const d=snap.data(); favoritos=new Set(d.lista||[]); ajustesFavoritos=d.ajustes||{}; }
+  }catch(e){console.warn("FB cargarFav:",e);}
+  try{
+    const snap=await _db.collection("votos_fav").doc(correoKey).get();
+    if(snap.exists) _votosCache=snap.data().votos||{};
+  }catch(e){console.warn("FB cargarVotos:",e);}
+  try{
+    const snap=await _db.collection("chats").doc(correoKey).get();
+    if(snap.exists) _chatsCache[correo]=snap.data().mensajes||[];
+  }catch(e){console.warn("FB cargarChat:",e);}
+  filtrar();
+}
+
+async function cargarDatosAdmin(){
+  try{
+    const snap=await _db.collection("solicitudes").get();
+    _solicitudesCache=snap.docs.map(d=>d.data());
+  }catch(e){console.warn("FB cargarSolicitudes:",e);}
+  try{
+    const snap=await _db.collection("chats").get();
+    snap.forEach(d=>{
+      // Recuperar correo original de la clave sin puntos
+      const correoKey=d.id;
+      _chatsCache[correoKey]=d.data().mensajes||[];
+    });
+  }catch(e){console.warn("FB cargarChats:",e);}
+}
+
+async function initFirebase(){
+  document.getElementById("fbLoading").style.display="flex";
+  try{
+    // 1. Grupos extra
+    const gruposSnap=await _db.collection("grupos_extra").get();
+    gruposSnap.forEach(d=>{
+      const g={...d.data()}; delete g.creadoEn;
+      gruposExtra.push(g); grupos.push(g);
+    });
+    // 2. Páginas fijas
+    const pfSnap=await _db.collection("config").doc("paginas_fijas").get();
+    if(pfSnap.exists) _paginasFijasCache=pfSnap.data();
+    aplicarPaginasFijasLocal();
+    // 3. Datos del usuario actual
+    const user=obtenerSesion();
+    if(user){
+      if(esAdmin(user)) await cargarDatosAdmin();
+      else await cargarDatosUsuario(user.correo);
+    }
+  }catch(e){
+    console.warn("Firebase init error:",e);
+    mostrarToast("⚠️ Firebase-Verbindung fehlgeschlagen — prüfe Firestore-Regeln","⚠️");
+  }
+  document.getElementById("fbLoading").style.display="none";
+  pintarSesion();
+  pintarCategorias();
+  poblarSelectCategorias();
+  pintar(grupos);
+}
+
+// Iniciar cuando el DOM esté listo
+document.addEventListener("DOMContentLoaded", initFirebase);
 
 /* =========================================================
    SISTEMA DE SOLICITUDES Y CHAT
    ========================================================= */
-function obtenerSolicitudes(){
-  return JSON.parse(localStorage.getItem("grupohub_solicitudes")||"[]");
-}
+let _solicitudesCache=[];
+function obtenerSolicitudes(){ return _solicitudesCache; }
 function guardarSolicitudes(lista){
-  localStorage.setItem("grupohub_solicitudes",JSON.stringify(lista));
+  _solicitudesCache=lista;
+  lista.forEach(s=>{
+    _db.collection("solicitudes").doc(s.id).set(s).catch(e=>console.warn("FB sol:",e));
+  });
 }
 
 function horaActual(){
@@ -1771,14 +1905,16 @@ function horaActual(){
 }
 
 /* --- CHAT --- */
+let _chatsCache={};
 function obtenerConversacion(correo){
-  const todas=JSON.parse(localStorage.getItem("grupohub_chats")||"{}");
-  return todas[correo]||[];
+  return _chatsCache[correo]||[];
 }
 function guardarConversacion(correo, msgs){
-  const todas=JSON.parse(localStorage.getItem("grupohub_chats")||"{}");
-  todas[correo]=msgs;
-  localStorage.setItem("grupohub_chats",JSON.stringify(todas));
+  _chatsCache[correo]=msgs;
+  const correoKey=correo.replace(/[.#$[\]]/g,"_");
+  _db.collection("chats").doc(correoKey)
+    .set({mensajes:msgs})
+    .catch(e=>console.warn("FB chat:",e));
 }
 function agregarMensajeChat(correo, msg){
   const msgs=obtenerConversacion(correo);
@@ -2053,7 +2189,7 @@ function adminRechazarSolicitud(id){
 
 /* --- ADMIN: CHAT DESDE PANEL ADMIN --- */
 function renderAdminChats(){
-  const todas=JSON.parse(localStorage.getItem("grupohub_chats")||"{}");
+  const todas=_chatsCache;
   const sel=document.getElementById("adminChatSelect");
   const correos=Object.keys(todas);
   sel.innerHTML=`<option value="">Benutzer auswählen...</option>`;
@@ -2100,5 +2236,13 @@ function adminEnviarMensaje(){
   }
 })();
 </script>
+<!-- FIREBASE LOADING OVERLAY -->
+<div id="fbLoading" style="display:none;position:fixed;inset:0;background:rgba(15,19,17,.82);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:18px;color:#fff;font-family:'Inter',sans-serif">
+  <div style="width:52px;height:52px;border-radius:50%;border:4px solid #1FAF5540;border-top-color:#1FAF55;animation:spin .8s linear infinite"></div>
+  <p style="margin:0;font-size:16px;font-weight:600;letter-spacing:.3px">Verbinde mit Firebase…</p>
+  <p style="margin:0;font-size:12px;opacity:.65">Daten werden geladen</p>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
 </body>
 </html>
