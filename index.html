@@ -1,0 +1,2104 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gruppen🇩🇪 — Finde deine Community</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --verde:#1FAF55;
+    --verde-d:#168a42;
+    --tele:#229ED9;
+    --tele-d:#1a7eae;
+    --oro:#F5A623;
+    --bg:#f3f5f4;
+    --card:#ffffff;
+    --texto:#1c2422;
+    --sub:#6b7674;
+    --borde:#e7ebe9;
+    --radio:16px;
+    --sombra:0 4px 16px rgba(20,30,28,.07);
+    --sombra-hov:0 10px 28px rgba(20,30,28,.14);
+  }
+  *{box-sizing:border-box}
+  body{
+    font-family:'Inter',Arial,sans-serif;
+    margin:0;background:var(--bg);color:var(--texto);
+    -webkit-font-smoothing:antialiased;
+    transition:background .25s,color .25s;
+  }
+  h1,h2,h3{font-family:'Poppins',Arial,sans-serif;margin:0}
+
+  /* HEADER */
+  header{
+    background:linear-gradient(120deg,var(--verde) 0%,var(--verde-d) 100%);
+    color:#fff;padding:18px 24px;position:sticky;top:0;z-index:50;
+    box-shadow:0 2px 10px rgba(0,0,0,.12);
+  }
+  .header-row{display:flex;align-items:center;justify-content:space-between;max-width:1100px;margin:0 auto}
+  .logo{display:flex;align-items:center;gap:10px}
+  .logo .mark{
+    width:38px;height:38px;border-radius:10px;background:#ffffff2b;
+    display:flex;align-items:center;justify-content:center;font-size:20px;
+  }
+  .logo h1{font-size:22px;letter-spacing:.2px}
+  nav{display:flex;align-items:center;gap:6px}
+  nav a, nav button.modo{
+    color:#fff;text-decoration:none;font-weight:500;font-size:14.5px;
+    padding:8px 14px;border-radius:8px;background:transparent;border:none;cursor:pointer;
+    transition:background .2s;
+  }
+  nav a:hover, nav button.modo:hover{background:rgba(255,255,255,.16)}
+
+  /* CATEGORY BAR (reemplaza el menú desplegable) */
+  .cat-bar{
+    background:#fff;border-bottom:1px solid var(--borde);position:sticky;top:74px;z-index:40;
+    box-shadow:0 1px 0 rgba(0,0,0,.02);
+  }
+  .cat-row{
+    max-width:1100px;margin:0 auto;display:flex;gap:10px;overflow-x:auto;
+    padding:12px 20px;scrollbar-width:thin;
+  }
+  .cat-row::-webkit-scrollbar{height:5px}
+  .cat-row::-webkit-scrollbar-thumb{background:#ddd;border-radius:10px}
+  .chip{
+    flex:0 0 auto;display:flex;align-items:center;gap:7px;
+    padding:9px 16px;border-radius:999px;border:1.5px solid var(--borde);
+    background:#fafbfa;color:var(--texto);font-size:14px;font-weight:500;
+    cursor:pointer;white-space:nowrap;transition:.18s ease;user-select:none;
+  }
+  .chip:hover{border-color:var(--verde);transform:translateY(-1px)}
+  .chip.activo{background:var(--verde);border-color:var(--verde);color:#fff;box-shadow:var(--sombra)}
+  .chip .ico{font-size:16px}
+
+  /* BUSCADOR */
+  #buscar{
+    width:min(560px,90%);padding:13px 18px;margin:18px auto 6px;display:block;
+    border:1.5px solid var(--borde);border-radius:12px;font-size:15px;outline:none;
+    background:#fff;box-shadow:var(--sombra);transition:border-color .2s;
+  }
+  @media (max-width:600px){
+    #buscar{width:calc(100% - 24px);margin:14px 12px 6px;font-size:14px}
+    .resultado-info{padding:0 12px}
+    .paginacion{padding:0 12px 40px}
+  }
+  #buscar:focus{border-color:var(--verde)}
+
+  .resultado-info{
+    text-align:center;color:var(--sub);font-size:13.5px;margin:4px 0 10px;
+  }
+
+  /* GRID / CARDS */
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
+    gap:22px;padding:10px 24px 40px;max-width:1100px;margin:0 auto;
+  }
+  @media (max-width:600px){
+    .grid{grid-template-columns:1fr;padding:10px 12px 40px;gap:16px}
+  }
+  .card{
+    background:var(--card);border-radius:var(--radio);box-shadow:var(--sombra);
+    overflow:hidden;display:flex;flex-direction:column;
+    transition:transform .22s ease, box-shadow .22s ease;border:1px solid var(--borde);
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:var(--sombra-hov)}
+
+  .img-wrap{position:relative;aspect-ratio:16/9;overflow:hidden;background:#e9ecea}
+  .img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
+  .card:hover .img-wrap img{transform:scale(1.06)}
+  .plataforma-badge{
+    position:absolute;top:10px;left:10px;display:flex;align-items:center;gap:5px;
+    padding:5px 10px 5px 6px;border-radius:999px;font-size:12px;font-weight:600;color:#fff;
+    backdrop-filter:blur(2px);
+  }
+  .plataforma-badge.w{background:rgba(31,175,85,.92)}
+  .plataforma-badge.t{background:rgba(34,158,217,.92)}
+  .plataforma-badge .circ{width:18px;height:18px;border-radius:50%;background:#fff2;display:flex;align-items:center;justify-content:center;font-size:11px}
+
+  .card-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .tag{
+    align-self:flex-start;font-size:11.5px;font-weight:600;color:var(--verde-d);
+    background:#1FAF551a;padding:3px 10px;border-radius:999px;
+  }
+  .card h3{font-size:17.5px;line-height:1.3}
+  .meta{color:var(--sub);font-size:13px;display:flex;align-items:center;gap:6px;margin-top:-2px}
+
+  .acciones{display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:10px}
+  .btn-unirse{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px 14px;border-radius:10px;color:#fff;text-decoration:none;
+    font-weight:600;font-size:14.5px;position:relative;overflow:hidden;
+    transition:transform .18s, box-shadow .18s;
+  }
+  .btn-unirse.w{background:linear-gradient(135deg,var(--verde),var(--verde-d))}
+  .btn-unirse.t{background:linear-gradient(135deg,var(--tele),var(--tele-d))}
+  .btn-unirse:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.18)}
+  .btn-unirse .flecha{transition:transform .18s}
+  .btn-unirse:hover .flecha{transform:translateX(3px)}
+
+  .btn-fav{
+    width:auto;min-width:42px;height:42px;border-radius:10px;border:1.5px solid var(--borde);
+    background:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;
+    gap:4px;padding:0 10px;transition:.18s ease;flex:0 0 auto;
+  }
+  .btn-fav .fav-num{font-size:12.5px;font-weight:700;color:var(--sub)}
+  .btn-fav.activo .fav-num{color:var(--oro)}
+  .btn-fav:hover{border-color:var(--oro);transform:scale(1.06)}
+  .btn-fav.activo{background:#F5A6231a;border-color:var(--oro)}
+  .btn-fav.pulso{animation:pulso .35s ease}
+  @keyframes pulso{0%{transform:scale(1)}45%{transform:scale(1.3)}100%{transform:scale(1)}}
+  .btn-fav.fav-bloqueado{opacity:.5;cursor:not-allowed}
+  .btn-fav.fav-bloqueado:hover{border-color:var(--borde);transform:none}
+
+  /* PAGINACIÓN */
+  .paginacion{
+    display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap;
+    padding:0 24px 50px;max-width:1100px;margin:0 auto;
+  }
+  .pag-btn{
+    min-width:38px;height:38px;border-radius:9px;border:1.5px solid var(--borde);
+    background:#fff;color:var(--texto);font-weight:600;font-size:14px;cursor:pointer;
+    transition:.18s ease;
+  }
+  .pag-btn:hover:not(:disabled){border-color:var(--verde);transform:translateY(-1px)}
+  .pag-btn.activo{background:var(--verde);border-color:var(--verde);color:#fff;box-shadow:var(--sombra)}
+  .pag-btn:disabled{opacity:.4;cursor:not-allowed}
+  body.dark .pag-btn{background:#171c1a;border-color:#262e2b;color:#eef2f0}
+
+  /* TOAST */
+  #toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:#1c2422;color:#fff;padding:11px 20px;border-radius:10px;font-size:14px;
+    opacity:0;pointer-events:none;transition:.25s ease;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:99;
+    display:flex;align-items:center;gap:8px;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .vacio{text-align:center;color:var(--sub);padding:60px 20px;grid-column:1/-1}
+  .vacio .e{font-size:38px;display:block;margin-bottom:10px}
+
+  /* FOOTER PROFESIONAL */
+  footer{background:#121614;color:#9aa6a2;font-size:13.8px}
+  .footer-top{
+    max-width:1100px;margin:0 auto;padding:48px 24px 32px;
+    display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:32px;
+  }
+  .footer-marca .logo{margin-bottom:12px}
+  .footer-marca .mark{background:#1FAF551f}
+  .footer-marca p{color:#7d8985;line-height:1.6;max-width:280px;margin-top:10px}
+  .footer-redes{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .footer-redes a{
+    width:38px;height:38px;border-radius:9px;background:#1c2220;display:flex;
+    align-items:center;justify-content:center;color:#cfd8d4;text-decoration:none;
+    font-size:15px;transition:.18s;
+  }
+  .footer-redes a:hover{color:#fff;transform:translateY(-2px)}
+  .footer-redes a[aria-label="WhatsApp"]:hover{background:#25D366}
+  .footer-redes a[aria-label="Telegram"]:hover{background:#229ED9}
+  .footer-redes a[aria-label="Facebook"]:hover{background:#1877F2}
+  .footer-redes a[aria-label="Instagram"]:hover{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)}
+  .footer-col h4{color:#fff;font-size:14.5px;margin-bottom:14px;letter-spacing:.3px}
+  .footer-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+  .footer-col a{color:#9aa6a2;text-decoration:none;transition:color .18s}
+  .footer-col a:hover{color:#fff}
+  .footer-bottom{
+    border-top:1px solid #202623;padding:18px 24px;max-width:1100px;margin:0 auto;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+    color:#6f7a76;font-size:12.8px;
+  }
+  .footer-bottom b{color:#cfd8d4}
+  .footer-legal{display:flex;gap:18px;flex-wrap:wrap}
+  .footer-legal a{color:#6f7a76;text-decoration:none}
+  .footer-legal a:hover{color:#cfd8d4}
+
+  @media (max-width:760px){
+    .footer-top{grid-template-columns:1fr 1fr;gap:28px 20px;padding:36px 16px 24px}
+    .footer-marca{grid-column:1/-1}
+    .footer-bottom{flex-direction:column;align-items:center;text-align:center;gap:8px;padding:16px}
+    .footer-legal{justify-content:center}
+  }
+  @media (max-width:480px){
+    .footer-top{grid-template-columns:1fr;gap:24px;padding:28px 16px 20px}
+  }
+
+  /* BANNER AÑADIR GRUPO */
+  .banner-agregar{
+    max-width:1100px;margin:18px auto 6px;padding:0 24px;
+  }
+  .banner-agregar-inner{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    background:linear-gradient(120deg,var(--verde) 0%,var(--verde-d) 100%);
+    border-radius:14px;padding:16px 22px;box-shadow:0 4px 16px rgba(31,175,85,.25);
+  }
+  .banner-agregar-texto{color:#fff}
+  .banner-agregar-texto strong{display:block;font-family:'Poppins',Arial,sans-serif;font-size:16px;font-weight:700;margin-bottom:2px}
+  .banner-agregar-texto span{font-size:13px;opacity:.88}
+  .btn-agregar-banner{
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;
+    background:#fff;color:var(--verde-d);font-weight:700;font-size:14.5px;
+    padding:11px 20px;border-radius:10px;border:none;cursor:pointer;white-space:nowrap;
+    transition:transform .15s,box-shadow .15s;box-shadow:0 2px 8px rgba(0,0,0,.12);
+  }
+  .btn-agregar-banner:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.18)}
+  .btn-agregar-banner .plus{font-size:18px;line-height:1}
+  @media (max-width:540px){
+    .banner-agregar{padding:0 12px;margin:14px auto 4px}
+    .banner-agregar-inner{flex-direction:column;align-items:flex-start;gap:12px;padding:14px 16px}
+    .btn-agregar-banner{width:100%;justify-content:center}
+  }
+
+  /* MODO OSCURO */
+  body.dark{background:#0f1311;color:#eef2f0}
+  body.dark .cat-bar{background:#161b19;border-color:#262e2b}
+  body.dark .chip{background:#1d2421;border-color:#3a4440;color:#d4deda}
+  body.dark .chip.activo{background:var(--verde);border-color:var(--verde);color:#fff}
+  body.dark #buscar{background:#1d2421;border-color:#3a4440;color:#eef2f0}
+  body.dark #buscar::placeholder{color:#8a9a96}
+  body.dark .card{background:#1a201e;border-color:#2e3835;color:#eef2f0}
+  body.dark .card h3{color:#f0f4f2}
+  body.dark .card .meta{color:#a8b8b4}
+  body.dark .btn-fav{background:#222a27;border-color:#3a4440;color:#d4deda}
+  body.dark .btn-fav .fav-num{color:#b0bfbb}
+  body.dark .btn-fav.activo .fav-num{color:var(--oro)}
+  body.dark .resultado-info{color:#a0aaa6}
+  body.dark .tag{background:#1FAF5526;color:#5dd68c}
+  body.dark .banner-agregar-inner{box-shadow:0 4px 16px rgba(31,175,85,.35)}
+  body.dark .vacio{color:#8a9a96}
+  /* pagination dark */
+  body.dark .pag-btn{background:#1a201e;border-color:#2e3835;color:#d4deda}
+  body.dark .pag-btn:hover:not(:disabled){border-color:var(--verde);color:#fff}
+  body.dark .pag-btn.activo{background:var(--verde);border-color:var(--verde);color:#fff}
+  /* modales dark */
+  body.dark .modal{background:#1a201e;color:#eef2f0}
+  body.dark .modal h2{color:#f0f4f2}
+  body.dark .modal .sub{color:#a8b8b4}
+  body.dark .campo label{color:#b0bfbb}
+  body.dark .campo input{background:#222a27;border-color:#3a4440;color:#eef2f0}
+  body.dark .campo input::placeholder{color:#6a7a76}
+  body.dark .btn-google{background:#222a27;border-color:#3a4440;color:#eef2f0}
+  body.dark .pie-auth{color:#a8b8b4}
+  body.dark .divisor{color:#8a9a96}
+  body.dark .divisor::before,.dark .divisor::after{background:#2e3835}
+  /* menu usuario dark */
+  body.dark .menu-usuario{background:#1a201e;color:#eef2f0;border:1px solid #2e3835}
+  body.dark .menu-usuario button{color:#eef2f0}
+  body.dark .menu-usuario button:hover{background:#222a27}
+  /* admin dark */
+  body.dark .admin-modal{background:#1a201e;color:#eef2f0}
+  body.dark .admin-modal h2{color:#f0f4f2}
+  body.dark .admin-campo label{color:#b0bfbb}
+  body.dark .admin-tabla th{background:#222a27;color:#c8d8d4}
+  body.dark .admin-tabla td{color:#d4deda;border-color:#2e3835}
+  body.dark .admin-tabla tr:hover{background:#1d2421}
+  /* solicitudes dark */
+  body.dark .estado-solicitud.pendiente{background:#2a2008;color:#e5bc60}
+  body.dark .estado-solicitud.aprobado{background:#0a2016;color:#4cd98a}
+  body.dark .estado-solicitud.rechazado{background:#2a0808;color:#f87171}
+  /* chat burbuja dark */
+  body.dark .chat-burbuja.admin{background:#222a27;color:#eef2f0}
+  /* agrupación textarea dark */
+  body.dark textarea{background:#222a27!important;border-color:#3a4440!important;color:#eef2f0!important}
+  body.dark textarea::placeholder{color:#6a7a76!important}
+
+  @media (max-width:520px){
+    .logo h1{font-size:18px}
+    nav a, nav button.modo{padding:7px 9px;font-size:13px}
+    .btn-agregar{display:none} /* se oculta del header en móvil, queda el banner */
+    .header-row{gap:6px}
+  }
+
+  /* NAV — sesión */
+  .btn-sesion{
+    color:#fff;background:rgba(255,255,255,.16);font-weight:600;
+    padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:14.5px;
+    transition:background .2s;
+  }
+  .btn-sesion:hover{background:rgba(255,255,255,.28)}
+  .chip-usuario{
+    display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.16);
+    padding:5px 12px 5px 6px;border-radius:999px;cursor:pointer;position:relative;
+  }
+  .chip-usuario .avatar{
+    width:28px;height:28px;border-radius:50%;background:#fff;color:var(--verde-d);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;
+  }
+  .chip-usuario span{font-size:14px;font-weight:600}
+  .menu-usuario{
+    position:absolute;top:42px;right:0;background:#fff;color:var(--texto);
+    border-radius:10px;box-shadow:var(--sombra-hov);min-width:160px;overflow:hidden;
+    display:none;z-index:60;
+  }
+  .menu-usuario.abierto{display:block}
+  .menu-usuario button{
+    width:100%;text-align:left;background:none;border:none;padding:11px 14px;
+    font-size:14px;cursor:pointer;color:var(--texto);
+  }
+  .menu-usuario button:hover{background:#f4f5f4}
+
+  /* MODALES (login / registro / verificación de edad) */
+  .overlay{
+    position:fixed;inset:0;background:rgba(10,14,12,.55);display:flex;
+    align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;
+    transition:opacity .2s;padding:18px;
+  }
+  .overlay.abierto{opacity:1;pointer-events:auto}
+  .modal{
+    background:#fff;border-radius:18px;width:min(380px,100%);padding:28px 26px 26px;
+    box-shadow:0 20px 50px rgba(0,0,0,.25);transform:translateY(14px);transition:transform .22s;
+    position:relative;max-height:92vh;overflow:auto;
+  }
+  .overlay.abierto .modal{transform:translateY(0)}
+  body.dark .modal{background:#171c1a;color:#eef2f0}
+  .modal .cerrar{
+    position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;
+    cursor:pointer;color:var(--sub);
+  }
+  .modal h2{font-size:21px;margin-bottom:4px}
+  .modal .sub{color:var(--sub);font-size:13.5px;margin-bottom:18px}
+  .tabs-auth{display:flex;background:#f1f3f2;border-radius:10px;padding:4px;margin-bottom:18px}
+  body.dark .tabs-auth{background:#1d2421}
+  .tabs-auth button{
+    flex:1;padding:8px;border:none;background:none;border-radius:8px;font-weight:600;
+    font-size:13.5px;cursor:pointer;color:var(--sub);transition:.18s;
+  }
+  .tabs-auth button.activo{background:#fff;color:var(--verde-d);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  body.dark .tabs-auth button.activo{background:#171c1a;color:#fff}
+  .campo{margin-bottom:13px;display:flex;flex-direction:column;gap:5px}
+  .campo label{font-size:12.5px;font-weight:600;color:var(--sub)}
+  .campo input{
+    padding:11px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:14.5px;
+    outline:none;background:#fafbfa;transition:border-color .18s;
+  }
+  body.dark .campo input{background:#1d2421;border-color:#2a332f;color:#fff}
+  .campo input:focus{border-color:var(--verde)}
+  .btn-principal{
+    width:100%;padding:12px;border-radius:10px;border:none;color:#fff;font-weight:700;
+    font-size:14.5px;cursor:pointer;background:linear-gradient(135deg,var(--verde),var(--verde-d));
+    margin-top:6px;transition:transform .15s;
+  }
+  .btn-principal:hover{transform:translateY(-1px)}
+  .divisor{
+    display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--sub);font-size:12.5px;
+  }
+  .divisor::before,.divisor::after{content:"";flex:1;height:1px;background:var(--borde)}
+  .btn-google{
+    width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+    padding:11px;border-radius:10px;border:1.5px solid var(--borde);background:#fff;
+    font-weight:600;font-size:14px;cursor:pointer;color:var(--texto);transition:.18s;
+  }
+  .btn-google:hover{box-shadow:var(--sombra);transform:translateY(-1px)}
+  body.dark .btn-google{background:#1d2421;border-color:#2a332f;color:#fff}
+  .pie-auth{text-align:center;font-size:13px;color:var(--sub);margin-top:16px}
+  .pie-auth a{color:var(--verde-d);font-weight:600;cursor:pointer;text-decoration:none}
+  .error-campo{color:#d9534f;font-size:12.5px;margin-top:-6px;min-height:14px}
+
+  .modal-edad{text-align:center}
+  .modal-edad .e{font-size:42px;display:block;margin-bottom:8px}
+  .acciones-edad{display:flex;gap:10px;margin-top:18px}
+  .acciones-edad button{flex:1;padding:11px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;border:1.5px solid var(--borde)}
+  .acciones-edad .si{background:linear-gradient(135deg,var(--verde),var(--verde-d));color:#fff;border:none}
+  .acciones-edad .no{background:#fff;color:var(--texto)}
+  body.dark .acciones-edad .no{background:#1d2421;color:#fff}
+
+  .tag.plus18{color:#c2410c;background:#fb923c26}
+
+  /* BOTÓN "AÑADIR GRUPO" */
+  .btn-agregar{
+    background:#fff;color:var(--verde-d);font-weight:700;font-size:14px;
+    padding:8px 16px;border-radius:8px;border:none;cursor:pointer;
+    transition:transform .15s,box-shadow .15s;
+  }
+  .btn-agregar:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.18)}
+  @media (max-width:640px){.btn-agregar{padding:8px 11px;font-size:0}.btn-agregar::before{content:"＋";font-size:18px}}
+
+  /* MODAL — AÑADIR GRUPO */
+  .modal-grande{width:min(460px,100%)}
+  .plataforma-toggle{display:flex;gap:10px;margin-bottom:16px}
+  .opcion-plataforma{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;
+    padding:14px 10px;border-radius:12px;border:1.5px solid var(--borde);cursor:pointer;
+    background:#fafbfa;transition:.18s ease;
+  }
+  body.dark .opcion-plataforma{background:#1d2421;border-color:#2a332f}
+  .opcion-plataforma .ic{font-size:22px}
+  .opcion-plataforma span.nombre{font-size:13.5px;font-weight:600}
+  .opcion-plataforma.activa.w{border-color:var(--verde);background:#1FAF551a}
+  .opcion-plataforma.activa.t{border-color:var(--tele);background:#229ED91a}
+  .campo select{
+    padding:11px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:14.5px;
+    outline:none;background:#fafbfa;transition:border-color .18s;color:var(--texto);
+    appearance:none;
+  }
+  body.dark .campo select{background:#1d2421;border-color:#2a332f;color:#fff}
+  .campo select:focus{border-color:var(--verde)}
+  .campo .ayuda{font-size:11.5px;color:var(--sub);margin-top:-2px}
+  .campo-checkbox{
+    display:flex;align-items:flex-start;gap:9px;background:#fb923c14;border:1.5px solid #fb923c40;
+    border-radius:10px;padding:11px 13px;margin:6px 0 14px;font-size:13px;line-height:1.4;color:var(--texto);
+  }
+  .campo-checkbox input{margin-top:2px;flex:0 0 auto}
+  /* ===== PANEL ADMINISTRADOR ===== */
+  .admin-badge{
+    background:linear-gradient(135deg,#f59e0b,#d97706);
+    color:#fff;font-size:10px;font-weight:800;padding:2px 7px;
+    border-radius:999px;letter-spacing:.5px;text-transform:uppercase;
+  }
+  #panelAdmin{
+    display:none;position:fixed;inset:0;z-index:300;background:rgba(8,12,10,.6);
+    align-items:flex-start;justify-content:center;padding:20px 12px;overflow-y:auto;
+  }
+  #panelAdmin.abierto{display:flex}
+  .admin-modal{
+    background:#fff;border-radius:20px;width:min(680px,100%);
+    box-shadow:0 24px 60px rgba(0,0,0,.3);position:relative;
+    padding:28px 26px 26px;margin:auto;
+  }
+  body.dark .admin-modal{background:#171c1a;color:#eef2f0}
+  .admin-modal h2{font-size:20px;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+  .admin-tabs{display:flex;gap:6px;margin:18px 0 20px;flex-wrap:wrap}
+  .admin-tab{
+    padding:8px 18px;border-radius:8px;border:1.5px solid var(--borde);
+    background:#fafbfa;font-weight:600;font-size:13.5px;cursor:pointer;transition:.18s;
+  }
+  .admin-tab.activo{background:var(--verde);border-color:var(--verde);color:#fff}
+  body.dark .admin-tab{background:#1d2421;border-color:#2a332f;color:#cfd8d4}
+  .admin-seccion{display:none}
+  .admin-seccion.activa{display:block}
+
+  /* tabla grupos admin */
+  .admin-tabla{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+  .admin-tabla th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--borde);font-size:12px;color:var(--sub);font-weight:700;white-space:nowrap}
+  .admin-tabla td{padding:9px 10px;border-bottom:1px solid var(--borde);vertical-align:middle}
+  body.dark .admin-tabla th,.admin-tabla td{border-color:#262e2b}
+  .admin-tabla tr:hover td{background:#f7f9f8}
+  body.dark .admin-tabla tr:hover td{background:#1d2421}
+  .admin-tabla input[type=number]{width:56px;padding:4px 6px;border-radius:6px;border:1.5px solid var(--borde);font-size:12px;text-align:center}
+  .admin-tabla select{padding:4px 6px;border-radius:6px;border:1.5px solid var(--borde);font-size:12px}
+  .btn-admin-sm{
+    padding:5px 10px;border-radius:6px;border:none;font-size:12px;font-weight:700;
+    cursor:pointer;transition:.15s;
+  }
+  .btn-admin-sm.del{background:#fee2e2;color:#dc2626}
+  .btn-admin-sm.del:hover{background:#dc2626;color:#fff}
+  .btn-admin-sm.save{background:#d1fae5;color:#065f46}
+  .btn-admin-sm.save:hover{background:var(--verde);color:#fff}
+
+  /* form agregar desde admin */
+  .admin-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:500px){.admin-form-grid{grid-template-columns:1fr}}
+  .admin-campo{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+  .admin-campo label{font-size:12px;font-weight:700;color:var(--sub)}
+  .admin-campo input,.admin-campo select{
+    padding:9px 11px;border-radius:8px;border:1.5px solid var(--borde);
+    font-size:13.5px;outline:none;background:#fafbfa;
+  }
+  body.dark .admin-campo input,body.dark .admin-campo select{background:#1d2421;border-color:#2a332f;color:#fff}
+  .admin-campo input:focus,.admin-campo select:focus{border-color:var(--verde)}
+  .admin-full{grid-column:1/-1}
+  .admin-tabla-wrap{max-height:340px;overflow-y:auto;border-radius:10px;border:1px solid var(--borde)}
+  body.dark .admin-tabla-wrap{border-color:#262e2b}
+
+  /* ===== SISTEMA DE APROBACIÓN Y CHAT ===== */
+  /* Botón flotante de chat */
+  #chatFlotante{
+    position:fixed;bottom:28px;right:24px;z-index:500;
+    width:56px;height:56px;border-radius:50%;
+    background:linear-gradient(135deg,var(--verde),var(--verde-d));
+    border:none;cursor:pointer;box-shadow:0 4px 18px rgba(31,175,85,.45);
+    display:none;align-items:center;justify-content:center;font-size:22px;
+    transition:transform .18s,box-shadow .18s;
+  }
+  #chatFlotante:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(31,175,85,.55)}
+  #chatFlotante.visible{display:flex}
+  #chatBadge{
+    position:absolute;top:-3px;right:-3px;background:#ef4444;color:#fff;
+    font-size:10px;font-weight:800;width:18px;height:18px;border-radius:50%;
+    display:none;align-items:center;justify-content:center;
+  }
+  #chatBadge.visible{display:flex}
+
+  /* Panel de chat */
+  #panelChat{
+    position:fixed;bottom:96px;right:24px;z-index:499;width:340px;max-height:480px;
+    background:#fff;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.22);
+    display:none;flex-direction:column;overflow:hidden;border:1px solid var(--borde);
+  }
+  body.dark #panelChat{background:#171c1a;border-color:#262e2b}
+  #panelChat.abierto{display:flex}
+  @media(max-width:400px){
+    #panelChat{width:calc(100vw - 24px);right:12px;bottom:88px}
+  }
+  .chat-header{
+    background:linear-gradient(120deg,var(--verde),var(--verde-d));
+    color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;flex:0 0 auto;
+  }
+  .chat-header .avatar-admin{
+    width:36px;height:36px;border-radius:50%;background:#fff3;
+    display:flex;align-items:center;justify-content:center;font-size:18px;
+  }
+  .chat-header-info{flex:1}
+  .chat-header-info strong{display:block;font-size:14.5px}
+  .chat-header-info span{font-size:11.5px;opacity:.85}
+  .chat-header button{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:4px}
+
+  .chat-mensajes{
+    flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:10px;
+    min-height:160px;max-height:280px;
+  }
+  .chat-burbuja{
+    max-width:78%;padding:9px 13px;border-radius:14px;font-size:13.5px;line-height:1.45;
+    word-break:break-word;
+  }
+  .chat-burbuja.admin{
+    align-self:flex-start;background:#f1f5f3;color:var(--texto);border-bottom-left-radius:4px;
+  }
+  body.dark .chat-burbuja.admin{background:#1d2421;color:#eef2f0}
+  .chat-burbuja.usuario{
+    align-self:flex-end;background:linear-gradient(135deg,var(--verde),var(--verde-d));color:#fff;
+    border-bottom-right-radius:4px;
+  }
+  .chat-burbuja .hora{display:block;font-size:10px;opacity:.6;margin-top:4px;text-align:right}
+  .chat-burbuja.admin .hora{text-align:left}
+
+  /* Solicitudes pendientes en chat */
+  .chat-solicitud{
+    background:#fef9ec;border:1.5px solid #fbbf24;border-radius:12px;
+    padding:10px 12px;font-size:13px;
+  }
+  body.dark .chat-solicitud{background:#2a2415;border-color:#d97706}
+  .chat-solicitud strong{display:block;font-size:13.5px;margin-bottom:4px}
+  .chat-solicitud .btns{display:flex;gap:6px;margin-top:8px}
+  .chat-solicitud .aprobar{
+    flex:1;padding:7px;border-radius:8px;border:none;
+    background:var(--verde);color:#fff;font-weight:700;font-size:12.5px;cursor:pointer;
+  }
+  .chat-solicitud .rechazar{
+    flex:1;padding:7px;border-radius:8px;border:none;
+    background:#fee2e2;color:#dc2626;font-weight:700;font-size:12.5px;cursor:pointer;
+  }
+  .chat-solicitud .aprobar:hover{background:var(--verde-d)}
+  .chat-solicitud .rechazar:hover{background:#dc2626;color:#fff}
+
+  .chat-input-row{
+    padding:10px 12px;border-top:1px solid var(--borde);
+    display:flex;gap:8px;align-items:center;flex:0 0 auto;
+  }
+  body.dark .chat-input-row{border-color:#262e2b}
+  .chat-input-row input{
+    flex:1;padding:9px 12px;border-radius:10px;border:1.5px solid var(--borde);
+    font-size:13.5px;outline:none;background:#fafbfa;
+  }
+  body.dark .chat-input-row input{background:#1d2421;border-color:#2a332f;color:#fff}
+  .chat-input-row input:focus{border-color:var(--verde)}
+  .chat-input-row button{
+    width:38px;height:38px;border-radius:10px;border:none;flex:0 0 auto;
+    background:var(--verde);color:#fff;font-size:18px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:.15s;
+  }
+  .chat-input-row button:hover{background:var(--verde-d)}
+
+  /* Botón galería */
+  .btn-galeria{
+    width:36px;height:36px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    border-radius:9px;cursor:pointer;color:var(--sub);transition:.18s;
+    border:1.5px solid var(--borde);background:#fafbfa;
+  }
+  body.dark .btn-galeria{background:#1d2421;border-color:#2a332f;color:#9aa6a2}
+  .btn-galeria:hover{border-color:var(--verde);color:var(--verde);background:#1FAF5514}
+  .chat-burbuja img.chat-img{
+    max-width:100%;border-radius:10px;display:block;margin-top:4px;cursor:pointer;
+  }
+
+  /* Notificación push estilo burbuja */
+  #notifPush{
+    position:fixed;bottom:100px;right:24px;z-index:600;
+    background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.2);
+    padding:12px 14px;max-width:260px;border:1px solid var(--borde);
+    display:none;animation:slideInNotif .3s ease;
+  }
+  body.dark #notifPush{background:#1d2421;border-color:#2a332f;color:#eef2f0}
+  @keyframes slideInNotif{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  #notifPush.visible{display:flex;gap:10px;align-items:flex-start}
+  .notif-ico{font-size:22px;flex:0 0 auto;line-height:1}
+  .notif-body strong{display:block;font-size:13px;font-weight:700;color:var(--texto);margin-bottom:2px}
+  body.dark .notif-body strong{color:#eef2f0}
+  .notif-body span{font-size:12px;color:var(--sub);line-height:1.4}
+  .notif-close{position:absolute;top:6px;right:8px;background:none;border:none;font-size:14px;cursor:pointer;color:var(--sub)}
+
+  /* Selector de conversación (admin) */
+  .chat-conv-sel{
+    padding:10px 12px;border-bottom:1px solid var(--borde);font-size:13px;
+    display:flex;align-items:center;gap:8px;flex:0 0 auto;
+  }
+  body.dark .chat-conv-sel{border-color:#262e2b}
+  .chat-conv-sel select{
+    flex:1;padding:6px 10px;border-radius:8px;border:1.5px solid var(--borde);
+    font-size:13px;outline:none;background:#fafbfa;color:var(--texto);
+  }
+  body.dark .chat-conv-sel select{background:#1d2421;border-color:#2a332f;color:#fff}
+
+  /* Notificación de aprobación en solicitud */
+  .estado-solicitud{
+    font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;
+    display:inline-block;margin-top:4px;
+  }
+  .estado-solicitud.pendiente{background:#fef3c7;color:#92400e}
+  .estado-solicitud.aprobado{background:#d1fae5;color:#065f46}
+  .estado-solicitud.rechazado{background:#fee2e2;color:#dc2626}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div class="logo" onclick="reiniciar();return false;" style="cursor:pointer;text-decoration:none" title="Zur Startseite">
+      <div class="mark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+      </div>
+      <h1>Gruppen🇩🇪</h1>
+    </div>
+    <nav>
+      <button class="btn-agregar" onclick="abrirAgregar()">＋ Gruppe hinzufügen</button>
+      <button class="modo" onclick="modo()" aria-label="Dunkel-/Hellmodus wechseln">🌙</button>
+      <div id="zonaSesion"></div>
+    </nav>
+  </div>
+</header>
+
+<div class="cat-bar">
+  <div class="cat-row" id="catRow"></div>
+</div>
+
+<div class="banner-agregar">
+  <div class="banner-agregar-inner">
+    <div class="banner-agregar-texto">
+      <strong>Hast du eine tolle Gruppe?</strong>
+      <span>Teile sie mit Tausenden von Menschen auf Gruppen🇩🇪</span>
+    </div>
+    <button class="btn-agregar-banner" onclick="abrirAgregar()">
+      <span class="plus">＋</span> Gruppe hinzufügen
+    </button>
+  </div>
+</div>
+
+<input id="buscar" placeholder="Gruppen nach Name oder Plattform suchen …" onkeyup="buscarCambio()">
+<p class="resultado-info" id="resultadoInfo"></p>
+
+<div class="grid" id="grid"></div>
+<div class="paginacion" id="paginacion"></div>
+
+<footer>
+  <div class="footer-top">
+    <div class="footer-marca">
+      <div class="logo"><div class="mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="#1FAF55"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></div><h1 style="color:#fff;font-size:20px">Gruppen🇩🇪</h1></div>
+      <p>Das Verzeichnis für WhatsApp- und Telegram-Communitys – finde deine Community: Gamer, Entwickler, Reisende und vieles mehr, alles an einem Ort.</p>
+      <div class="footer-redes">
+        <a href="#" aria-label="WhatsApp" title="WhatsApp">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+        </a>
+        <a href="#" aria-label="Telegram" title="Telegram">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </a>
+        <a href="#" aria-label="Facebook" title="Facebook">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+        <a href="#" aria-label="Instagram" title="Instagram">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Erkunden</h4>
+      <ul>
+        <li><a href="" onclick="reiniciar();return false;">✨ Alle Gruppen</a></li>
+        <li><a href="#" onclick="elegirCategoria('Gaming');return false;">🎮 Gaming</a></li>
+        <li><a href="#" onclick="elegirCategoria('Programación');return false;">💻 Programmierung</a></li>
+        <li><a href="#" onclick="elegirCategoria('Música');return false;">🎵 Musik</a></li>
+        <li><a href="#" onclick="elegirCategoria('Viajes');return false;">🌍 Reisen</a></li>
+        <li><a href="#" onclick="elegirCategoria('Estudio');return false;">📚 Lernen</a></li>
+        <li><a href="#" onclick="elegirCategoria('Empleo');return false;">💼 Jobs</a></li>
+        <li><a href="#" onclick="elegirCategoria('Singles');return false;">💘 Singles</a></li>
+        <li><a href="#" onclick="elegirCategoria('+18');return false;">🔞 +18</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Hilfezentrum</a></li>
+        <li><a href="#">Gruppe melden</a></li>
+        <li><a href="#">Deine Community veröffentlichen</a></li>
+        <li><a href="#">Kontakt</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 <b>Gruppen🇩🇪</b>. Alle Rechte vorbehalten.</span>
+    <div class="footer-legal">
+      <a href="#">Nutzungsbedingungen</a>
+      <a href="#">Datenschutz</a>
+      <a href="#">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+<!-- PANEL ADMINISTRADOR -->
+<div id="panelAdmin">
+  <div class="admin-modal">
+    <button class="cerrar" onclick="cerrarAdmin()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub)">✕</button>
+    <h2>⚙️ Administrator-Panel <span class="admin-badge">ADMIN</span></h2>
+    <p style="color:var(--sub);font-size:13px;margin-bottom:0">Vollständige Kontrolle über Gruppen und Paginierung · Gruppen🇩🇪</p>
+
+    <div class="admin-tabs">
+      <button class="admin-tab activo" onclick="adminTab('agregar')">➕ Gruppe hinzufügen</button>
+      <button class="admin-tab" onclick="adminTab('gestionar')">📋 Gruppen verwalten</button>
+      <button class="admin-tab" onclick="adminTab('solicitudes')" id="tabSolicitudes">🕐 Anfragen</button>
+      <button class="admin-tab" onclick="adminTab('chats')">💬 Chats</button>
+    </div>
+
+    <!-- TAB: AGREGAR -->
+    <div class="admin-seccion activa" id="adminAgregar">
+      <div class="admin-form-grid">
+        <div class="admin-campo">
+          <label>Gruppenname *</label>
+          <input type="text" id="adNombre" placeholder="z. B. Fitness Deutschland">
+        </div>
+        <div class="admin-campo">
+          <label>Kategorie *</label>
+          <select id="adCategoria" onchange="adminActualizar18()">
+            <option value="" disabled selected>Auswählen</option>
+          </select>
+        </div>
+        <div class="admin-campo">
+          <label>Plattform *</label>
+          <select id="adPlataforma">
+            <option value="WhatsApp">WhatsApp</option>
+            <option value="Telegram">Telegram</option>
+          </select>
+        </div>
+        <div class="admin-campo">
+          <label>Mitglieder</label>
+          <input type="number" id="adMiembros" placeholder="z. B. 250" min="0">
+        </div>
+        <div class="admin-campo admin-full">
+          <label>Einladungslink *</label>
+          <input type="url" id="adLink" placeholder="https://chat.whatsapp.com/...">
+        </div>
+        <div class="admin-campo admin-full">
+          <label>Bild (optionale URL)</label>
+          <input type="url" id="adImagen" placeholder="https://...">
+        </div>
+        <div class="admin-campo">
+          <label>Feste Seite (optional)</label>
+          <input type="number" id="adPagina" placeholder="z. B. 1" min="1">
+          <span style="font-size:11px;color:var(--sub);margin-top:3px">Erzwingt das Erscheinen auf dieser Seite</span>
+        </div>
+        <div class="admin-campo">
+          <label>Basispopularität (Favoriten)</label>
+          <input type="number" id="adFavoritos" placeholder="z. B. 50" min="0">
+        </div>
+      </div>
+      <div class="campo-checkbox" id="adminCaja18" style="display:none">
+        <input type="checkbox" id="adConfirma18">
+        <label for="adConfirma18">Ich bestätige, dass diese Gruppe für Personen über 18 Jahre geeignet ist.</label>
+      </div>
+      <p class="error-campo" id="errorAdmin" style="margin-top:4px"></p>
+      <button class="btn-principal" style="margin-top:8px" onclick="adminPublicar()">Gruppe veröffentlichen</button>
+    </div>
+
+    <!-- TAB: GESTIONAR -->
+    <div class="admin-seccion" id="adminGestionar">
+      <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Bearbeite die Seite, auf der jede Gruppe erscheint, oder lösche sie. Änderungen werden beim Klicken auf <b>Speichern</b> übernommen.</p>
+      <div class="admin-tabla-wrap">
+        <table class="admin-tabla" id="adminTabla">
+          <thead><tr>
+            <th>Gruppe</th><th>Kat.</th><th>Plattform</th><th>Feste Seite</th><th>Aktionen</th>
+          </tr></thead>
+          <tbody id="adminTablaBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB: SOLICITUDES -->
+    <div class="admin-seccion" id="adminSolicitudes">
+      <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Von Benutzern eingereichte Gruppen, die deine Genehmigung benötigen.</p>
+      <div class="admin-tabla-wrap" id="adminSolicitudesWrap">
+        <table class="admin-tabla">
+          <thead><tr>
+            <th>Gruppe</th><th>Kat.</th><th>Plattform</th><th>Benutzer</th><th>Status</th><th>Aktionen</th>
+          </tr></thead>
+          <tbody id="adminSolicitudesBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB: CHATS -->
+    <div class="admin-seccion" id="adminChats">
+      <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Kommuniziere mit Benutzern über ihre Anfragen.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;gap:10px;align-items:center">
+          <label style="font-size:13px;font-weight:700;color:var(--sub)">Gespräch mit:</label>
+          <select id="adminChatSelect" onchange="adminCambiarChat()" style="flex:1;padding:8px 10px;border-radius:8px;border:1.5px solid var(--borde);font-size:13px;outline:none;background:#fafbfa;color:var(--texto)">
+            <option value="">Benutzer auswählen...</option>
+          </select>
+        </div>
+        <div id="adminChatMensajes" style="background:#f7f9f8;border-radius:12px;padding:12px;min-height:180px;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;border:1px solid var(--borde)"></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label class="btn-galeria" title="Enviar imagen" style="flex:0 0 auto">
+            <input type="file" id="adminChatImgInput" accept="image/*" style="display:none" onchange="adminEnviarImagen(this)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </label>
+          <input type="text" id="adminChatInput" placeholder="Antwort schreiben..." onkeydown="if(event.key==='Enter')adminEnviarMensaje()"
+            style="flex:1;padding:10px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:13.5px;outline:none;background:#fafbfa">
+          <button onclick="adminEnviarMensaje()" style="padding:10px 18px;border-radius:9px;border:none;background:var(--verde);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer">Senden</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /admin-modal -->
+</div><!-- /panelAdmin -->
+
+<div id="toast"></div>
+
+<!-- NOTIFICACIÓN PUSH -->
+<div id="notifPush">
+  <button class="notif-close" onclick="cerrarNotif()">✕</button>
+  <div class="notif-ico" id="notifIco">💬</div>
+  <div class="notif-body">
+    <strong id="notifTitulo">Neue Nachricht</strong>
+    <span id="notifTexto"></span>
+  </div>
+</div>
+
+<!-- BOTÓN FLOTANTE CHAT -->
+<button id="chatFlotante" onclick="toggleChat()" title="Chat con soporte">
+  💬
+  <span id="chatBadge">0</span>
+</button>
+
+<!-- PANEL CHAT -->
+<div id="panelChat">
+  <div class="chat-header">
+    <div class="avatar-admin">👑</div>
+    <div class="chat-header-info">
+      <strong id="chatNombreHeader">Support-Team</strong>
+      <span id="chatSubHeader">Support</span>
+    </div>
+    <button onclick="toggleChat()">✕</button>
+  </div>
+  <!-- Selector de conversación (solo admin) -->
+  <div class="chat-conv-sel" id="chatConvSel" style="display:none">
+    <span style="color:var(--sub);white-space:nowrap">Chat von:</span>
+    <select id="chatConvSelect" onchange="cambiarConversacion()">
+      <option value="">Benutzer auswählen...</option>
+    </select>
+  </div>
+  <div class="chat-mensajes" id="chatMensajes"></div>
+  <div class="chat-input-row">
+    <label class="btn-galeria" title="Enviar imagen">
+      <input type="file" id="chatImgInput" accept="image/*" style="display:none" onchange="enviarImagen(this)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </label>
+    <input type="text" id="chatInput" placeholder="Nachricht schreiben..." onkeydown="if(event.key==='Enter')enviarMensaje()">
+    <button onclick="enviarMensaje()">➤</button>
+  </div>
+</div>
+
+<!-- MODAL DE INICIO DE SESIÓN / REGISTRO -->
+<div class="overlay" id="overlayAuth">
+  <div class="modal">
+    <button class="cerrar" onclick="cerrarAuth()">✕</button>
+    <div class="tabs-auth">
+      <button id="tabLogin" class="activo" onclick="cambiarTab('login')">Anmelden</button>
+      <button id="tabRegistro" onclick="cambiarTab('registro')">Konto erstellen</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="vistaLogin">
+      <h2>Willkommen zurück</h2>
+      <p class="sub">Melde dich an, um deine Lieblingsgruppen zu speichern.</p>
+      <div class="campo">
+        <label>E-Mail-Adresse</label>
+        <input type="email" id="loginCorreo" placeholder="deine@email.de">
+      </div>
+      <div class="campo">
+        <label>Passwort</label>
+        <input type="password" id="loginPass" placeholder="••••••••">
+      </div>
+      <p class="error-campo" id="errorLogin"></p>
+      <button class="btn-principal" onclick="iniciarSesion()">Anmelden</button>
+      <div class="divisor">oder</div>
+      <button class="btn-google" onclick="googleSimulado()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
+        Mit Google fortfahren
+      </button>
+      <p class="pie-auth">Noch kein Konto? <a onclick="cambiarTab('registro')">Jetzt registrieren</a></p>
+    </div>
+
+    <!-- REGISTRO -->
+    <div id="vistaRegistro" style="display:none">
+      <h2>Konto erstellen</h2>
+      <p class="sub">Tritt bei und speichere die Gruppen, die dich interessieren.</p>
+      <div class="campo">
+        <label>Name</label>
+        <input type="text" id="regNombre" placeholder="Dein Name">
+      </div>
+      <div class="campo">
+        <label>E-Mail-Adresse</label>
+        <input type="email" id="regCorreo" placeholder="deine@email.de">
+      </div>
+      <div class="campo">
+        <label>Passwort</label>
+        <input type="password" id="regPass" placeholder="Mindestens 6 Zeichen">
+      </div>
+      <p class="error-campo" id="errorRegistro"></p>
+      <button class="btn-principal" onclick="registrar()">Konto erstellen</button>
+      <div class="divisor">oder</div>
+      <button class="btn-google" onclick="googleSimulado()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
+        Mit Google fortfahren
+      </button>
+      <p class="pie-auth">Bereits ein Konto? <a onclick="cambiarTab('login')">Jetzt anmelden</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE VERIFICACIÓN DE EDAD (categoría +18) -->
+<div class="overlay" id="overlayEdad">
+  <div class="modal modal-edad">
+    <span class="e">🔒</span>
+    <h2>Inhalt nur für Erwachsene</h2>
+    <p class="sub">Diese Kategorie richtet sich ausschließlich an Personen über 18 Jahre. Bestätigst du dein Alter, um fortzufahren?</p>
+    <div class="acciones-edad">
+      <button class="no" onclick="rechazarEdad()">Nein, zurück</button>
+      <button class="si" onclick="confirmarEdad()">Ja, ich bin über 18</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL — AÑADIR GRUPO -->
+<div class="overlay" id="overlayAgregar">
+  <div class="modal modal-grande">
+    <button class="cerrar" onclick="cerrarAgregar()">✕</button>
+    <h2>Deine Gruppe hinzufügen</h2>
+    <p class="sub">Teile deine WhatsApp- oder Telegram-Community mit Tausenden von Menschen.</p>
+
+    <div class="plataforma-toggle">
+      <div class="opcion-plataforma activa w" id="optWhatsApp" onclick="elegirPlataformaForm('WhatsApp')">
+        <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></span><span class="nombre">WhatsApp</span>
+      </div>
+      <div class="opcion-plataforma t" id="optTelegram" onclick="elegirPlataformaForm('Telegram')">
+        <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="#229ED9"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></span><span class="nombre">Telegram</span>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>Gruppenname</label>
+      <input type="text" id="agNombre" placeholder="z. B. Deutsche Entwickler">
+    </div>
+
+    <div class="campo">
+      <label>Kategorie</label>
+      <select id="agCategoria" onchange="actualizarCategoriaForm()">
+        <option value="" disabled selected>Kategorie auswählen</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label>Einladungslink</label>
+      <input type="url" id="agLink" placeholder="https://chat.whatsapp.com/...">
+      <span class="ayuda">Füge den Einladungslink genau so ein, wie ihn WhatsApp oder Telegram erstellt.</span>
+    </div>
+
+    <div class="campo">
+      <label>Gruppenbeschreibung</label>
+      <textarea id="agDescripcion" placeholder="Beschreibe kurz, worum es in deiner Gruppe geht, welche Regeln gelten und welche Mitglieder ihr sucht …" rows="3" style="padding:11px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:14px;outline:none;background:#fafbfa;resize:vertical;transition:border-color .18s;font-family:inherit;line-height:1.5;width:100%;box-sizing:border-box" onfocus="this.style.borderColor='var(--verde)'" onblur="this.style.borderColor='var(--borde)'"></textarea>
+    </div>
+
+    <div class="campo-checkbox" id="cajaConfirma18" style="display:none">
+      <input type="checkbox" id="agConfirma18">
+      <label for="agConfirma18">Ich bestätige, dass diese Gruppe für Personen über 18 Jahre ist und die Regeln von WhatsApp/Telegram einhält.</label>
+    </div>
+
+    <p class="error-campo" id="errorAgregar"></p>
+    <button class="btn-principal" onclick="publicarGrupo()">Anfrage senden</button>
+    <p style="font-size:12px;color:var(--sub);text-align:center;margin-top:8px">Deine Gruppe wird vom Administrator geprüft, bevor sie auf der Seite erscheint.</p>
+  </div>
+</div>
+
+
+<script>
+const categorias=[
+  {nombre:"Todos",icono:"✨"},
+  {nombre:"+18",icono:"🔞"},
+  {nombre:"Singles",icono:"💘"},
+  {nombre:"Gaming",icono:"🎮"},
+  {nombre:"Programación",icono:"💻"},
+  {nombre:"Música",icono:"🎵"},
+  {nombre:"Viajes",icono:"🌍"},
+  {nombre:"Estudio",icono:"📚"},
+  {nombre:"Empleo",icono:"💼"}
+];
+
+// German display names for categories
+const categoriaLabel={
+  "Todos":"Alle","Singles":"Singles","Gaming":"Gaming",
+  "Programación":"Programmierung","Música":"Musik",
+  "Viajes":"Reisen","Estudio":"Lernen","Empleo":"Jobs","+18":"+18"
+};
+
+const baseGrupos=[
+  {nombre:"Gamers Unidos",     img:"https://picsum.photos/600/340?1", plataforma:"WhatsApp", categoria:"Gaming",        miembros:312, link:"https://chat.whatsapp.com/", favoritosBase:18},
+  {nombre:"DevTalk Latam",     img:"https://picsum.photos/600/340?2", plataforma:"Telegram",  categoria:"Programación",  miembros:540, link:"https://t.me/", favoritosBase:34},
+  {nombre:"Melómanos Club",    img:"https://picsum.photos/600/340?3", plataforma:"WhatsApp", categoria:"Música",        miembros:198, link:"https://chat.whatsapp.com/", favoritosBase:9},
+  {nombre:"Mochileros PE",     img:"https://picsum.photos/600/340?4", plataforma:"Telegram",  categoria:"Viajes",        miembros:267, link:"https://t.me/", favoritosBase:15},
+  {nombre:"Estudio Activo",    img:"https://picsum.photos/600/340?5", plataforma:"WhatsApp", categoria:"Estudio",       miembros:421, link:"https://chat.whatsapp.com/", favoritosBase:27},
+  {nombre:"Bolsa de Empleo",   img:"https://picsum.photos/600/340?6", plataforma:"Telegram",  categoria:"Empleo",        miembros:689, link:"https://t.me/", favoritosBase:41},
+  {nombre:"Solteros Conecta",  img:"https://picsum.photos/600/340?7", plataforma:"WhatsApp", categoria:"Singles",       miembros:455, link:"https://chat.whatsapp.com/", favoritosBase:22},
+  {nombre:"Zona +18",          img:"https://picsum.photos/600/340?8",  plataforma:"Telegram",  categoria:"+18", miembros:733, link:"https://t.me/", favoritosBase:30},
+  {nombre:"Adultos Nocturnos", img:"https://picsum.photos/600/340?9",  plataforma:"WhatsApp", categoria:"+18", miembros:612, link:"https://chat.whatsapp.com/", favoritosBase:25},
+  {nombre:"Placer Sin Límites",img:"https://picsum.photos/600/340?10", plataforma:"Telegram",  categoria:"+18", miembros:880, link:"https://t.me/", favoritosBase:37},
+  {nombre:"Noche Salvaje",     img:"https://picsum.photos/600/340?11", plataforma:"WhatsApp", categoria:"+18", miembros:540, link:"https://chat.whatsapp.com/", favoritosBase:19},
+  {nombre:"Secretos de Pareja",img:"https://picsum.photos/600/340?12", plataforma:"Telegram",  categoria:"+18", miembros:415, link:"https://t.me/", favoritosBase:28},
+  {nombre:"Mundo Sensual",     img:"https://picsum.photos/600/340?13", plataforma:"WhatsApp", categoria:"+18", miembros:690, link:"https://chat.whatsapp.com/", favoritosBase:42},
+  {nombre:"Club Nocturno VIP", img:"https://picsum.photos/600/340?14", plataforma:"Telegram",  categoria:"+18", miembros:320, link:"https://t.me/", favoritosBase:16},
+  {nombre:"Pasiones Latinas",  img:"https://picsum.photos/600/340?15", plataforma:"WhatsApp", categoria:"+18", miembros:770, link:"https://chat.whatsapp.com/", favoritosBase:33},
+  {nombre:"Deseos Ocultos",    img:"https://picsum.photos/600/340?16", plataforma:"Telegram",  categoria:"+18", miembros:505, link:"https://t.me/", favoritosBase:21},
+  {nombre:"Fuego y Pasión",    img:"https://picsum.photos/600/340?17", plataforma:"WhatsApp", categoria:"+18", miembros:430, link:"https://chat.whatsapp.com/", favoritosBase:14},
+  {nombre:"Aventura Adulta",   img:"https://picsum.photos/600/340?18", plataforma:"Telegram",  categoria:"+18", miembros:960, link:"https://t.me/", favoritosBase:48},
+  {nombre:"Solo Mayores",      img:"https://picsum.photos/600/340?19", plataforma:"WhatsApp", categoria:"+18", miembros:370, link:"https://chat.whatsapp.com/", favoritosBase:12},
+  {nombre:"Tentaciones",       img:"https://picsum.photos/600/340?20", plataforma:"Telegram",  categoria:"+18", miembros:645, link:"https://t.me/", favoritosBase:29},
+  {nombre:"Citas Express",     img:"https://picsum.photos/600/340?21", plataforma:"WhatsApp", categoria:"+18", miembros:290, link:"https://chat.whatsapp.com/", favoritosBase:11},
+  {nombre:"Sin Censura",       img:"https://picsum.photos/600/340?22", plataforma:"Telegram",  categoria:"+18", miembros:1100,link:"https://t.me/", favoritosBase:55},
+  {nombre:"Encuentros Reales", img:"https://picsum.photos/600/340?23", plataforma:"WhatsApp", categoria:"+18", miembros:480, link:"https://chat.whatsapp.com/", favoritosBase:20},
+  {nombre:"Maduros y Atrevidos",img:"https://picsum.photos/600/340?24",plataforma:"Telegram",  categoria:"+18", miembros:390, link:"https://t.me/", favoritosBase:17},
+  {nombre:"Amantes Digitales", img:"https://picsum.photos/600/340?25", plataforma:"WhatsApp", categoria:"+18", miembros:720, link:"https://chat.whatsapp.com/", favoritosBase:36},
+  {nombre:"Seducción Latina",  img:"https://picsum.photos/600/340?26", plataforma:"Telegram",  categoria:"+18", miembros:560, link:"https://t.me/", favoritosBase:24},
+  {nombre:"Privado y Exclusivo",img:"https://picsum.photos/600/340?27",plataforma:"WhatsApp", categoria:"+18", miembros:310, link:"https://chat.whatsapp.com/", favoritosBase:13},
+  {nombre:"Vip Nocturno",      img:"https://picsum.photos/600/340?28", plataforma:"Telegram",  categoria:"+18", miembros:830, link:"https://t.me/", favoritosBase:40},
+  {nombre:"Entre Adultos",     img:"https://picsum.photos/600/340?29", plataforma:"WhatsApp", categoria:"+18", miembros:475, link:"https://chat.whatsapp.com/", favoritosBase:22},
+  {nombre:"Rumba Caliente",    img:"https://picsum.photos/600/340?30", plataforma:"Telegram",  categoria:"+18", miembros:615, link:"https://t.me/", favoritosBase:31},
+  {nombre:"Confesiones Íntimas",img:"https://picsum.photos/600/340?31",plataforma:"WhatsApp", categoria:"+18", miembros:355, link:"https://chat.whatsapp.com/", favoritosBase:15},
+  {nombre:"Solteros Atrevidos",img:"https://picsum.photos/600/340?32", plataforma:"Telegram",  categoria:"+18", miembros:990, link:"https://t.me/", favoritosBase:50},
+  {nombre:"La Guarida",        img:"https://picsum.photos/600/340?33", plataforma:"WhatsApp", categoria:"+18", miembros:420, link:"https://chat.whatsapp.com/", favoritosBase:18},
+  {nombre:"Candela Pura",      img:"https://picsum.photos/600/340?34", plataforma:"Telegram",  categoria:"+18", miembros:700, link:"https://t.me/", favoritosBase:35},
+  {nombre:"Noches de Infarto", img:"https://picsum.photos/600/340?35", plataforma:"WhatsApp", categoria:"+18", miembros:530, link:"https://chat.whatsapp.com/", favoritosBase:26},
+  {nombre:"Instinto Natural",  img:"https://picsum.photos/600/340?36", plataforma:"Telegram",  categoria:"+18", miembros:440, link:"https://t.me/", favoritosBase:19},
+  {nombre:"Adrenalina Adulta", img:"https://picsum.photos/600/340?37", plataforma:"WhatsApp", categoria:"+18", miembros:660, link:"https://chat.whatsapp.com/", favoritosBase:32},
+  {nombre:"Magia y Fuego",     img:"https://picsum.photos/600/340?38", plataforma:"Telegram",  categoria:"+18", miembros:510, link:"https://t.me/", favoritosBase:23},
+  {nombre:"Los Sin Límite",    img:"https://picsum.photos/600/340?39", plataforma:"WhatsApp", categoria:"+18", miembros:375, link:"https://chat.whatsapp.com/", favoritosBase:16},
+  {nombre:"Élite Adulta",      img:"https://picsum.photos/600/340?40", plataforma:"Telegram",  categoria:"+18", miembros:870, link:"https://t.me/", favoritosBase:44},
+  {nombre:"Química Peligrosa", img:"https://picsum.photos/600/340?41", plataforma:"WhatsApp", categoria:"+18", miembros:490, link:"https://chat.whatsapp.com/", favoritosBase:21},
+  {nombre:"Más de 18 Solo",    img:"https://picsum.photos/600/340?42", plataforma:"Telegram",  categoria:"+18", miembros:340, link:"https://t.me/", favoritosBase:14},
+  {nombre:"Zona Prohibida",    img:"https://picsum.photos/600/340?43", plataforma:"WhatsApp", categoria:"+18", miembros:925, link:"https://chat.whatsapp.com/", favoritosBase:46}
+];
+
+/* Los grupos que los usuarios añaden desde el formulario se
+   guardan en localStorage y se combinan con los de arriba.
+   Así la lista crece y la paginación se recalcula sola. */
+function obtenerGruposGuardados(){
+  return JSON.parse(localStorage.getItem("grupohub_grupos_usuario")||"[]");
+}
+function guardarGrupoUsuario(g){
+  const lista=obtenerGruposGuardados();
+  lista.push(g);
+  localStorage.setItem("grupohub_grupos_usuario",JSON.stringify(lista));
+}
+const grupos=[...baseGrupos,...obtenerGruposGuardados()];
+
+const GRUPOS_POR_PAGINA=6;
+let paginaActual=1;
+
+const grid=document.getElementById("grid");
+const catRow=document.getElementById("catRow");
+const resultadoInfo=document.getElementById("resultadoInfo");
+let categoriaActiva="Todos";
+let favoritos=new Set(JSON.parse(localStorage.getItem("grupohub_favoritos")||"[]"));
+
+function guardarFavoritos(){
+  localStorage.setItem("grupohub_favoritos",JSON.stringify([...favoritos]));
+}
+
+/* Conteo de "favoritismo" — cada vez que alguien marca la estrella
+   suma un punto a ese grupo; al quitarla, resta uno. Esto decide
+   el orden de las tarjetas: más estrellas = mejor posición = más
+   probable que aparezca en la página 1 de su categoría. */
+let ajustesFavoritos=JSON.parse(localStorage.getItem("grupohub_ajustes_favoritos")||"{}");
+function guardarAjustes(){
+  localStorage.setItem("grupohub_ajustes_favoritos",JSON.stringify(ajustesFavoritos));
+}
+function totalFavoritos(g){
+  return g.favoritosBase+(ajustesFavoritos[g.nombre]||0);
+}
+
+function pintarCategorias(){
+  catRow.innerHTML="";
+  categorias.forEach(c=>{
+    const activo=c.nombre===categoriaActiva?"activo":"";
+    catRow.innerHTML+=`<div class="chip ${activo}" onclick="elegirCategoria('${c.nombre}')"><span class="ico">${c.icono}</span>${categoriaLabel[c.nombre]||c.nombre}</div>`;
+  });
+}
+
+function elegirCategoria(nombre){
+  if(nombre==="+18" && sessionStorage.getItem("grupohub_edad_ok")!=="1"){
+    document.getElementById("overlayEdad").classList.add("abierto");
+    return;
+  }
+  categoriaActiva=nombre;
+  paginaActual=1;
+  pintarCategorias();
+  filtrar();
+}
+
+function confirmarEdad(){
+  sessionStorage.setItem("grupohub_edad_ok","1");
+  document.getElementById("overlayEdad").classList.remove("abierto");
+  categoriaActiva="+18";
+  paginaActual=1;
+  pintarCategorias();
+  filtrar();
+}
+
+function rechazarEdad(){
+  document.getElementById("overlayEdad").classList.remove("abierto");
+}
+
+/* =========================================================
+   AÑADIR GRUPO
+   ========================================================= */
+let plataformaForm="WhatsApp";
+
+function poblarSelectCategorias(){
+  const sel=document.getElementById("agCategoria");
+  categorias.filter(c=>c.nombre!=="Todos").forEach(c=>{
+    sel.innerHTML+=`<option value="${c.nombre}">${c.icono} ${categoriaLabel[c.nombre]||c.nombre}</option>`;
+  });
+}
+
+function abrirAgregar(){
+  if(!obtenerSesion()){
+    mostrarToast("Bitte anmelden, um eine Gruppe hinzuzufügen","🔒");
+    abrirAuth("login");
+    return;
+  }
+  document.getElementById("overlayAgregar").classList.add("abierto");
+}
+function cerrarAgregar(){
+  document.getElementById("overlayAgregar").classList.remove("abierto");
+  document.getElementById("errorAgregar").textContent="";
+}
+
+function elegirPlataformaForm(p){
+  plataformaForm=p;
+  document.getElementById("optWhatsApp").classList.toggle("activa",p==="WhatsApp");
+  document.getElementById("optTelegram").classList.toggle("activa",p==="Telegram");
+  document.getElementById("agLink").placeholder=p==="WhatsApp"
+    ?"https://chat.whatsapp.com/..."
+    :"https://t.me/...";
+}
+
+function actualizarCategoriaForm(){
+  const esAdulto=document.getElementById("agCategoria").value==="+18";
+  document.getElementById("cajaConfirma18").style.display=esAdulto?"flex":"none";
+}
+
+function publicarGrupo(){
+  const nombre=document.getElementById("agNombre").value.trim();
+  const categoria=document.getElementById("agCategoria").value;
+  const link=document.getElementById("agLink").value.trim();
+  const descripcion=document.getElementById("agDescripcion").value.trim();
+  const err=document.getElementById("errorAgregar");
+
+  if(!nombre||!categoria||!link){err.textContent="Bitte Name, Kategorie und Link ausfüllen.";return}
+  if(!/^https?:\/\//i.test(link)){err.textContent="Der Link muss mit http:// oder https:// beginnen.";return}
+  if(grupos.some(g=>g.nombre.toLowerCase()===nombre.toLowerCase())){err.textContent="Eine Gruppe mit diesem Namen existiert bereits.";return}
+  if(categoria==="+18" && !document.getElementById("agConfirma18").checked){
+    err.textContent="Du musst bestätigen, dass die Gruppe für Personen über 18 Jahre geeignet ist.";
+    return;
+  }
+
+  const user=obtenerSesion();
+  const solicitud={
+    id:Date.now().toString(),
+    nombre,categoria,plataforma:plataformaForm,link,descripcion,
+    img:`https://picsum.photos/600/340?random=${Date.now()}`,
+    miembros:0,favoritosBase:0,
+    estado:"pendiente",
+    usuarioCorreo:user.correo,
+    usuarioNombre:user.nombre,
+    fecha:new Date().toISOString()
+  };
+
+  const solis=obtenerSolicitudes();
+  solis.push(solicitud);
+  guardarSolicitudes(solis);
+
+  const msgSistema={
+    de:"sistema",
+    texto:`📋 Nueva solicitud de grupo:\n*${nombre}* (${categoria} · ${plataformaForm})${descripcion?'\n'+descripcion:''}`,
+    hora:horaActual(),
+    solicitudId:solicitud.id
+  };
+  agregarMensajeChat(user.correo, msgSistema);
+
+  const convAdmin=obtenerConversacion(user.correo);
+  if(convAdmin.length<=1){
+    const msgAdmin={de:"admin",texto:`Hallo ${user.nombre}! Wir haben deine Anfrage für die Gruppe *${nombre}* erhalten. Wir prüfen sie bald. 👋`,hora:horaActual()};
+    agregarMensajeChat(user.correo, msgAdmin);
+  }
+
+  err.textContent="";
+  cerrarAgregar();
+  document.getElementById("agNombre").value="";
+  document.getElementById("agCategoria").value="";
+  document.getElementById("agLink").value="";
+  document.getElementById("agDescripcion").value="";
+  document.getElementById("cajaConfirma18").style.display="none";
+  elegirPlataformaForm("WhatsApp");
+
+  actualizarBadgeChat();
+  mostrarNotif("📤","Anfrage gesendet","Der Admin prüft deine Gruppe bald.");
+  mostrarToast(`Anfrage gesendet. Der Admin prüft sie bald!`,"📤");
+
+  setTimeout(()=>{
+    if(!document.getElementById("panelChat").classList.contains("abierto")){
+      toggleChat();
+    }
+  }, 900);
+}
+
+function reiniciar(){
+  buscar.value="";
+  categoriaActiva="Todos";
+  paginaActual=1;
+  pintarCategorias();
+  filtrar();
+}
+
+function pintar(arr){
+  if(arr.length===0){
+    grid.innerHTML=`<div class="vacio"><span class="e">🔍</span>Keine Gruppen mit dieser Suche gefunden.<br>Probiere ein anderes Wort oder eine andere Kategorie.</div>`;
+    resultadoInfo.textContent="";
+    document.getElementById("paginacion").innerHTML="";
+    return;
+  }
+
+  /* Ordenamiento:
+     1. Los grupos con página fija se ubican en su página exacta.
+     2. El resto se ordena por popularidad (favoritos).          */
+  const pf=obtenerPaginasFijas();
+  const conPagFija=arr.filter(g=>pf[g.nombre]);
+  const sinPagFija=[...arr].filter(g=>!pf[g.nombre]).sort((a,b)=>totalFavoritos(b)-totalFavoritos(a));
+
+  // Construye el array de todas las páginas (slots)
+  const totalPaginas=Math.max(1,Math.ceil(arr.length/GRUPOS_POR_PAGINA));
+  const slots=Array.from({length:totalPaginas},()=>[]);
+
+  // Primero coloca los de página fija en su slot
+  conPagFija.forEach(g=>{
+    const pag=Math.min(pf[g.nombre],totalPaginas)-1;
+    slots[pag].push(g);
+  });
+
+  // Rellena el resto en orden de popularidad
+  let ptrLibre=0;
+  sinPagFija.forEach(g=>{
+    while(ptrLibre<totalPaginas && slots[ptrLibre].length>=GRUPOS_POR_PAGINA) ptrLibre++;
+    if(ptrLibre<totalPaginas) slots[ptrLibre].push(g);
+  });
+
+  if(paginaActual>totalPaginas) paginaActual=totalPaginas;
+  const visibles=slots[paginaActual-1]||[];
+
+  resultadoInfo.textContent=`${arr.length} Gruppe${arr.length===1?"":"n"} verfügbar · Seite ${paginaActual} von ${totalPaginas}`;
+
+  grid.innerHTML=visibles.map(g=>{
+    const claseBtn=g.plataforma==="WhatsApp"?"w":"t";
+    const icoPlat=g.plataforma==="WhatsApp"
+      ?`<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>`
+      :`<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>`;
+    const esFav=favoritos.has(g.nombre);
+    const bloqueado=!puedeVotar(g.nombre);
+    return `
+    <div class="card">
+      <div class="img-wrap">
+        <img src="${g.img}" alt="${g.nombre}" loading="lazy">
+        <span class="plataforma-badge ${claseBtn}"><span class="circ">${icoPlat}</span>${g.plataforma}</span>
+      </div>
+      <div class="card-body">
+        <span class="tag ${g.categoria==='+18'?'plus18':''}">${categorias.find(c=>c.nombre===g.categoria)?.icono||""} ${categoriaLabel[g.categoria]||g.categoria}</span>
+        <h3>${g.nombre}</h3>
+        <div class="meta">👥 ${g.miembros.toLocaleString("de-DE")} Mitglieder</div>
+        <div class="acciones">
+          <a class="btn-unirse ${claseBtn}" target="_blank" rel="noopener" href="${g.link}">
+            Gruppe beitreten <span class="flecha">→</span>
+          </a>
+          <button class="btn-fav ${esFav?'activo':''} ${bloqueado?'fav-bloqueado':''}"
+            onclick="alternarFavorito(this,'${g.nombre}')"
+            aria-label="${bloqueado?'Heute bereits abgestimmt':'Als Favorit speichern'}"
+            title="${bloqueado?'Du kannst in '+tiempoRestante(g.nombre)+' wieder abstimmen':'Als Favorit markieren'}">
+            <span class="fav-ico">${esFav?'⭐':'☆'}</span>
+            <span class="fav-num">${totalFavoritos(g)}</span>
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+
+  pintarPaginacion(totalPaginas);
+}
+
+function pintarPaginacion(totalPaginas){
+  const cont=document.getElementById("paginacion");
+  if(totalPaginas<=1){cont.innerHTML="";return}
+  let botones=`<button class="pag-btn" ${paginaActual===1?"disabled":""} onclick="irPagina(${paginaActual-1})">‹</button>`;
+  for(let i=1;i<=totalPaginas;i++){
+    botones+=`<button class="pag-btn ${i===paginaActual?'activo':''}" onclick="irPagina(${i})">${i}</button>`;
+  }
+  botones+=`<button class="pag-btn" ${paginaActual===totalPaginas?"disabled":""} onclick="irPagina(${paginaActual+1})">›</button>`;
+  cont.innerHTML=botones;
+}
+
+function irPagina(n){
+  paginaActual=n;
+  filtrar();
+  grid.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* =========================================================
+   LÍMITE DE FAVORITOS — máximo 1 voto por grupo cada 24 horas
+   Se guarda en localStorage la fecha del último voto de cada grupo.
+   ========================================================= */
+function obtenerVotosFav(){
+  return JSON.parse(localStorage.getItem("grupohub_votos_fav")||"{}");
+}
+function guardarVotosFav(obj){
+  localStorage.setItem("grupohub_votos_fav",JSON.stringify(obj));
+}
+function puedeVotar(nombre){
+  const votos=obtenerVotosFav();
+  if(!votos[nombre]) return true;
+  const diff=Date.now()-votos[nombre];
+  return diff>24*60*60*1000; // 24 horas en ms
+}
+function tiempoRestante(nombre){
+  const votos=obtenerVotosFav();
+  if(!votos[nombre]) return "";
+  const restMs=24*60*60*1000-(Date.now()-votos[nombre]);
+  if(restMs<=0) return "";
+  const h=Math.floor(restMs/3600000);
+  const m=Math.floor((restMs%3600000)/60000);
+  return `${h}h ${m}m`;
+}
+
+function alternarFavorito(btn,nombre){
+  if(!puedeVotar(nombre)){
+    const resta=tiempoRestante(nombre);
+    mostrarToast(`Heute bereits abgestimmt · Wieder in ${resta}`,"⏳");
+    return;
+  }
+  const votos=obtenerVotosFav();
+  if(favoritos.has(nombre)){
+    favoritos.delete(nombre);
+    ajustesFavoritos[nombre]=(ajustesFavoritos[nombre]||0)-1;
+    delete votos[nombre];
+    mostrarToast(`Aus Favoriten entfernt · ${nombre}`,"➖");
+  }else{
+    favoritos.add(nombre);
+    ajustesFavoritos[nombre]=(ajustesFavoritos[nombre]||0)+1;
+    votos[nombre]=Date.now();
+    mostrarToast(`+1 Favoritenbonus · ${nombre}`,"⭐");
+  }
+  guardarVotosFav(votos);
+  btn.classList.add("pulso");
+  guardarFavoritos();
+  guardarAjustes();
+  filtrar();
+}
+
+let toastTimer;
+function mostrarToast(msg,emoji="✅"){
+  const t=document.getElementById("toast");
+  t.innerHTML=`<span>${emoji}</span> ${msg}`;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"),2200);
+}
+
+function suscribirNews(){
+  const input=document.getElementById("newsCorreo");
+  const correo=input.value.trim();
+  if(!correo||!correo.includes("@")){
+    mostrarToast("Bitte eine gültige E-Mail-Adresse eingeben","⚠️");
+    return;
+  }
+  mostrarToast("Fertig! Wir benachrichtigen dich über neue Gruppen","📩");
+  input.value="";
+}
+
+function buscarCambio(){
+  paginaActual=1;
+  filtrar();
+}
+
+function filtrar(){
+  const q=buscar.value.toLowerCase();
+  const filtrados=grupos.filter(g=>{
+    const coincideTexto=g.nombre.toLowerCase().includes(q)||g.plataforma.toLowerCase().includes(q);
+    const coincideCategoria=categoriaActiva==="Todos"||g.categoria===categoriaActiva;
+    return coincideTexto&&coincideCategoria;
+  });
+  pintar(filtrados);
+}
+
+function modo(){
+  document.body.classList.toggle('dark');
+  localStorage.setItem("grupohub_modo",document.body.classList.contains('dark')?"oscuro":"claro");
+}
+
+if(localStorage.getItem("grupohub_modo")==="oscuro"){
+  document.body.classList.add('dark');
+}
+
+/* =========================================================
+   AUTENTICACIÓN + ADMINISTRADOR
+   El correo cristhianzh1994@gmail.com con la contraseña
+   2772274032 tiene acceso completo de administrador.
+   ========================================================= */
+const ADMIN_CORREO="cristhianzh1994@gmail.com";
+const ADMIN_PASS="2772274032";
+
+function esAdmin(user){
+  return user&&user.correo===ADMIN_CORREO&&user.esAdmin===true;
+}
+
+function obtenerUsuarios(){
+  return JSON.parse(localStorage.getItem("grupohub_usuarios")||"[]");
+}
+function guardarUsuarios(lista){
+  localStorage.setItem("grupohub_usuarios",JSON.stringify(lista));
+}
+function obtenerSesion(){
+  return JSON.parse(localStorage.getItem("grupohub_sesion")||"null");
+}
+function guardarSesion(user){
+  localStorage.setItem("grupohub_sesion",JSON.stringify(user));
+  pintarSesion();
+}
+
+function abrirAuth(tab){
+  document.getElementById("overlayAuth").classList.add("abierto");
+  cambiarTab(tab||"login");
+}
+function cerrarAuth(){
+  document.getElementById("overlayAuth").classList.remove("abierto");
+  document.getElementById("errorLogin").textContent="";
+  document.getElementById("errorRegistro").textContent="";
+}
+function cambiarTab(tab){
+  const esLogin=tab==="login";
+  document.getElementById("tabLogin").classList.toggle("activo",esLogin);
+  document.getElementById("tabRegistro").classList.toggle("activo",!esLogin);
+  document.getElementById("vistaLogin").style.display=esLogin?"block":"none";
+  document.getElementById("vistaRegistro").style.display=esLogin?"none":"block";
+}
+
+function registrar(){
+  const nombre=document.getElementById("regNombre").value.trim();
+  const correo=document.getElementById("regCorreo").value.trim().toLowerCase();
+  const pass=document.getElementById("regPass").value;
+  const err=document.getElementById("errorRegistro");
+  if(!nombre||!correo||!pass){err.textContent="Bitte alle Felder ausfüllen.";return}
+  if(pass.length<6){err.textContent="Das Passwort muss mindestens 6 Zeichen haben.";return}
+  if(correo===ADMIN_CORREO){err.textContent="Diese E-Mail-Adresse ist reserviert.";return}
+  const usuarios=obtenerUsuarios();
+  if(usuarios.some(u=>u.correo===correo)){err.textContent="Ein Konto mit dieser E-Mail-Adresse existiert bereits.";return}
+  usuarios.push({nombre,correo,pass});
+  guardarUsuarios(usuarios);
+  guardarSesion({nombre,correo,metodo:"correo"});
+  err.textContent="";
+  cerrarAuth();
+  mostrarToast(`Willkommen, ${nombre}!`,"🎉");
+}
+
+function iniciarSesion(){
+  const correo=document.getElementById("loginCorreo").value.trim().toLowerCase();
+  const pass=document.getElementById("loginPass").value;
+  const err=document.getElementById("errorLogin");
+
+  // Login de administrador
+  if(correo===ADMIN_CORREO && pass===ADMIN_PASS){
+    guardarSesion({nombre:"Cristhian (Admin)",correo:ADMIN_CORREO,metodo:"correo",esAdmin:true});
+    err.textContent="";
+    cerrarAuth();
+    mostrarToast("Willkommen, Administrator! 👑","🛠️");
+    return;
+  }
+
+  const usuario=obtenerUsuarios().find(u=>u.correo===correo&&u.pass===pass);
+  if(!usuario){err.textContent="E-Mail-Adresse oder Passwort falsch.";return}
+  guardarSesion({nombre:usuario.nombre,correo:usuario.correo,metodo:"correo"});
+  err.textContent="";
+  cerrarAuth();
+  mostrarToast(`Hallo wieder, ${usuario.nombre}`,"👋");
+}
+
+function googleSimulado(){
+  guardarSesion({nombre:"Google-Nutzer",correo:"usuario@gmail.com",metodo:"google"});
+  cerrarAuth();
+  mostrarToast("Mit Google angemeldet","🔵");
+}
+
+function cerrarSesion(){
+  localStorage.removeItem("grupohub_sesion");
+  pintarSesion();
+  mostrarToast("Abgemeldet","👋");
+}
+
+function alternarMenuUsuario(){
+  document.getElementById("menuUsuario")?.classList.toggle("abierto");
+}
+
+function pintarSesion(){
+  const zona=document.getElementById("zonaSesion");
+  const user=obtenerSesion();
+  if(!user){
+    zona.innerHTML=`<button class="btn-sesion" onclick="abrirAuth('login')">Anmelden</button>`;
+    document.getElementById("chatFlotante").classList.remove("visible");
+    return;
+  }
+  document.getElementById("chatFlotante").classList.add("visible");
+  const inicial=user.nombre.trim().charAt(0).toUpperCase();
+  const adminBtn=esAdmin(user)
+    ?`<button onclick="abrirAdmin();document.getElementById('menuUsuario').classList.remove('abierto')" style="color:#d97706;font-weight:700">⚙️ Admin-Panel</button>`
+    :"";
+  zona.innerHTML=`
+    <div class="chip-usuario" onclick="alternarMenuUsuario()">
+      <div class="avatar" style="${esAdmin(user)?'background:#fef3c7;color:#d97706':''}">${esAdmin(user)?'👑':inicial}</div>
+      <span>${user.nombre.split(" ")[0]}</span>
+      <div class="menu-usuario" id="menuUsuario">
+        ${adminBtn}
+        <button onclick="cerrarSesion()">Abmelden</button>
+      </div>
+    </div>`;
+}
+
+/* =========================================================
+   PANEL ADMINISTRADOR — funciones
+   ========================================================= */
+/* Página fija: permite al admin anclar un grupo a una página concreta.
+   Se guarda como propiedad pagFija en el objeto del grupo.          */
+function obtenerPaginasFijas(){
+  return JSON.parse(localStorage.getItem("grupohub_paginas_fijas")||"{}");
+}
+function guardarPaginasFijas(obj){
+  localStorage.setItem("grupohub_paginas_fijas",JSON.stringify(obj));
+}
+
+function abrirAdmin(){
+  if(!esAdmin(obtenerSesion())){mostrarToast("Zugriff verweigert","🚫");return}
+  poblarSelectAdmin();
+  adminTab("agregar");
+  document.getElementById("panelAdmin").classList.add("abierto");
+}
+function cerrarAdmin(){
+  document.getElementById("panelAdmin").classList.remove("abierto");
+}
+
+function adminTab(tab){
+  const tabs=["agregar","gestionar","solicitudes","chats"];
+  document.querySelectorAll(".admin-tab").forEach((b,i)=>{
+    b.classList.toggle("activo",tabs[i]===tab);
+  });
+  tabs.forEach(t=>{
+    const el=document.getElementById("admin"+t.charAt(0).toUpperCase()+t.slice(1));
+    if(el) el.classList.toggle("activa",t===tab);
+  });
+  if(tab==="gestionar") renderAdminTabla();
+  if(tab==="solicitudes") renderAdminSolicitudes();
+  if(tab==="chats") renderAdminChats();
+}
+
+function poblarSelectAdmin(){
+  const sel=document.getElementById("adCategoria");
+  sel.innerHTML=`<option value="" disabled selected>Selecciona</option>`;
+  categorias.filter(c=>c.nombre!=="Todos").forEach(c=>{
+    sel.innerHTML+=`<option value="${c.nombre}">${c.icono} ${categoriaLabel[c.nombre]||c.nombre}</option>`;
+  });
+}
+
+function adminActualizar18(){
+  const es18=document.getElementById("adCategoria").value==="+18";
+  document.getElementById("adminCaja18").style.display=es18?"flex":"none";
+}
+
+function adminPublicar(){
+  const nombre=document.getElementById("adNombre").value.trim();
+  const categoria=document.getElementById("adCategoria").value;
+  const plataforma=document.getElementById("adPlataforma").value;
+  const link=document.getElementById("adLink").value.trim();
+  const imagen=document.getElementById("adImagen").value.trim();
+  const miembrosTxt=document.getElementById("adMiembros").value.trim();
+  const favTxt=document.getElementById("adFavoritos").value.trim();
+  const paginaTxt=document.getElementById("adPagina").value.trim();
+  const err=document.getElementById("errorAdmin");
+
+  if(!nombre||!categoria||!link){err.textContent="Name, Kategorie und Link sind erforderlich.";return}
+  if(!/^https?:\/\//i.test(link)){err.textContent="Der Link muss mit https:// beginnen.";return}
+  if(grupos.some(g=>g.nombre.toLowerCase()===nombre.toLowerCase())){err.textContent="Eine Gruppe mit diesem Namen existiert bereits.";return}
+  if(categoria==="+18"&&!document.getElementById("adConfirma18").checked){
+    err.textContent="Bitte bestätige, dass es sich um +18-Inhalte handelt.";return;
+  }
+
+  const miembros=miembrosTxt?Math.max(0,parseInt(miembrosTxt)||0):0;
+  const favoritosBase=favTxt?Math.max(0,parseInt(favTxt)||0):0;
+  const nuevoGrupo={
+    nombre,categoria,plataforma,link,miembros,favoritosBase,
+    img:imagen||`https://picsum.photos/600/340?random=${Date.now()}`
+  };
+
+  // Página fija
+  if(paginaTxt){
+    const pag=Math.max(1,parseInt(paginaTxt)||1);
+    const pf=obtenerPaginasFijas();
+    pf[nombre]=pag;
+    guardarPaginasFijas(pf);
+    nuevoGrupo.pagFija=pag;
+  }
+
+  grupos.push(nuevoGrupo);
+  guardarGrupoUsuario(nuevoGrupo);
+
+  err.textContent="";
+  ["adNombre","adLink","adImagen","adMiembros","adFavoritos","adPagina"].forEach(id=>{
+    document.getElementById(id).value="";
+  });
+  document.getElementById("adCategoria").value="";
+  document.getElementById("adminCaja18").style.display="none";
+
+  buscar.value="";categoriaActiva="Todos";paginaActual=1;
+  pintarCategorias();filtrar();
+  mostrarToast(`✅ "${nombre}" publicado`,"🎉");
+}
+
+function renderAdminTabla(){
+  const pf=obtenerPaginasFijas();
+  const body=document.getElementById("adminTablaBody");
+  body.innerHTML=grupos.map((g,i)=>`
+    <tr>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.nombre}">${g.nombre}</td>
+      <td>${g.categoria}</td>
+      <td>${g.plataforma}</td>
+      <td>
+        <input type="number" min="1" value="${pf[g.nombre]||''}" placeholder="Auto"
+          id="pf_${i}" style="width:60px">
+      </td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-admin-sm save" onclick="adminGuardarPagina(${i},'${g.nombre}')">Speichern</button>
+        <button class="btn-admin-sm del" onclick="adminEliminar(${i},'${g.nombre}')">Löschen</button>
+      </td>
+    </tr>`).join("");
+}
+
+function adminGuardarPagina(i,nombre){
+  const val=document.getElementById(`pf_${i}`).value.trim();
+  const pf=obtenerPaginasFijas();
+  if(val){
+    pf[nombre]=Math.max(1,parseInt(val)||1);
+    const g=grupos.find(x=>x.nombre===nombre);
+    if(g) g.pagFija=pf[nombre];
+  }else{
+    delete pf[nombre];
+    const g=grupos.find(x=>x.nombre===nombre);
+    if(g) delete g.pagFija;
+  }
+  guardarPaginasFijas(pf);
+  mostrarToast(`Seite gespeichert für „${nombre}"`,"📌");
+  filtrar();
+}
+
+function adminEliminar(i,nombre){
+  if(!confirm(`Gruppe „${nombre}" löschen?`)) return;
+  grupos.splice(i,1);
+  // también borrarlo de localStorage si fue añadido por usuario
+  const guardados=obtenerGruposGuardados().filter(g=>g.nombre!==nombre);
+  localStorage.setItem("grupohub_grupos_usuario",JSON.stringify(guardados));
+  const pf=obtenerPaginasFijas();
+  delete pf[nombre];
+  guardarPaginasFijas(pf);
+  mostrarToast(`„${nombre}" gelöscht`,"🗑️");
+  renderAdminTabla();
+  filtrar();
+}
+
+document.addEventListener("click",(e)=>{
+  const chip=document.querySelector(".chip-usuario");
+  if(chip && !chip.contains(e.target)){
+    document.getElementById("menuUsuario")?.classList.remove("abierto");
+  }
+  // Cerrar panel admin al hacer click en el fondo
+  const pa=document.getElementById("panelAdmin");
+  if(pa&&pa.classList.contains("abierto")&&e.target===pa){
+    cerrarAdmin();
+  }
+});
+
+// Cargar páginas fijas en los grupos al iniciar
+(function aplicarPaginasFijas(){
+  const pf=obtenerPaginasFijas();
+  grupos.forEach(g=>{if(pf[g.nombre]) g.pagFija=pf[g.nombre]});
+})();
+
+pintarSesion();
+pintarCategorias();
+poblarSelectCategorias();
+pintar(grupos);
+
+/* =========================================================
+   SISTEMA DE SOLICITUDES Y CHAT
+   ========================================================= */
+function obtenerSolicitudes(){
+  return JSON.parse(localStorage.getItem("grupohub_solicitudes")||"[]");
+}
+function guardarSolicitudes(lista){
+  localStorage.setItem("grupohub_solicitudes",JSON.stringify(lista));
+}
+
+function horaActual(){
+  return new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"});
+}
+
+/* --- CHAT --- */
+function obtenerConversacion(correo){
+  const todas=JSON.parse(localStorage.getItem("grupohub_chats")||"{}");
+  return todas[correo]||[];
+}
+function guardarConversacion(correo, msgs){
+  const todas=JSON.parse(localStorage.getItem("grupohub_chats")||"{}");
+  todas[correo]=msgs;
+  localStorage.setItem("grupohub_chats",JSON.stringify(todas));
+}
+function agregarMensajeChat(correo, msg){
+  const msgs=obtenerConversacion(correo);
+  msgs.push(msg);
+  guardarConversacion(correo, msgs);
+}
+
+function renderMensajes(msgs, contenedor, esAdminView){
+  contenedor.innerHTML="";
+  if(msgs.length===0){
+    contenedor.innerHTML=`<div style="text-align:center;color:var(--sub);font-size:13px;margin:auto">Sin mensajes aún.</div>`;
+    return;
+  }
+  msgs.forEach(m=>{
+    if(m.de==="sistema"){
+      const soli=obtenerSolicitudes().find(s=>s.id===m.solicitudId);
+      const estadoHtml=soli?`<span class="estado-solicitud ${soli.estado}">${soli.estado==="pendiente"?"⏳ Pendiente":soli.estado==="aprobado"?"✅ Aprobado":"❌ Rechazado"}</span>`:"";
+      const btnHtml=esAdminView&&soli&&soli.estado==="pendiente"
+        ?`<div class="btns"><button class="aprobar" onclick="adminAprobarSolicitud('${soli.id}')">✅ Aprobar</button><button class="rechazar" onclick="adminRechazarSolicitud('${soli.id}')">❌ Rechazar</button></div>`
+        :"";
+      contenedor.innerHTML+=`<div class="chat-solicitud">
+        <strong>📋 Solicitud de grupo</strong>
+        ${m.texto.replace(/\*(.*?)\*/g,"<b>$1</b>").replace(/\n/g,"<br>")}
+        ${estadoHtml}
+        ${btnHtml}
+        <span class="hora" style="font-size:10px;color:var(--sub);display:block;margin-top:4px">${m.hora}</span>
+      </div>`;
+    } else if(m.tipo==="imagen"){
+      const claseAlign=m.de==="admin"?"admin":"usuario";
+      contenedor.innerHTML+=`<div class="chat-burbuja ${claseAlign}">
+        <img class="chat-img" src="${m.src}" alt="imagen" onclick="this.requestFullscreen&&this.requestFullscreen()">
+        <span class="hora">${m.hora}</span>
+      </div>`;
+    } else {
+      const claseAlign=m.de==="admin"?"admin":"usuario";
+      contenedor.innerHTML+=`<div class="chat-burbuja ${claseAlign}">${m.texto.replace(/\n/g,"<br>")}<span class="hora">${m.hora}</span></div>`;
+    }
+  });
+  contenedor.scrollTop=contenedor.scrollHeight;
+}
+
+/* --- BOTÓN FLOTANTE Y PANEL CHAT USUARIO --- */
+let chatAbierto=false;
+
+function toggleChat(){
+  const user=obtenerSesion();
+  if(!user){
+    mostrarToast("Inicia sesión para usar el chat","🔒");
+    abrirAuth("login");
+    return;
+  }
+  chatAbierto=!chatAbierto;
+  const panel=document.getElementById("panelChat");
+  panel.classList.toggle("abierto",chatAbierto);
+
+  if(chatAbierto){
+    // Configurar según rol
+    if(esAdmin(user)){
+      document.getElementById("chatNombreHeader").textContent="Loresmitt (Telegram)";
+      document.getElementById("chatSubHeader").textContent="Soporte · Admin";
+      document.getElementById("chatConvSel").style.display="flex";
+      poblarSelectChat();
+      // Mostrar primer usuario si hay
+      const todas=JSON.parse(localStorage.getItem("grupohub_chats")||"{}");
+      const correos=Object.keys(todas);
+      if(correos.length>0){
+        document.getElementById("chatConvSelect").value=correos[0];
+        cambiarConversacion();
+      }
+    } else {
+      document.getElementById("chatNombreHeader").textContent="Loresmitt (Telegram)";
+      document.getElementById("chatSubHeader").textContent="Soporte";
+      document.getElementById("chatConvSel").style.display="none";
+      renderMensajes(obtenerConversacion(user.correo), document.getElementById("chatMensajes"), false);
+    }
+    // Limpiar badge
+    document.getElementById("chatBadge").classList.remove("visible");
+  }
+}
+
+function poblarSelectChat(){
+  const sel=document.getElementById("chatConvSelect");
+  const todas=JSON.parse(localStorage.getItem("grupohub_chats")||"{}");
+  const correos=Object.keys(todas);
+  sel.innerHTML=`<option value="">Selecciona usuario...</option>`;
+  correos.forEach(correo=>{
+    const soli=obtenerSolicitudes().find(s=>s.usuarioCorreo===correo);
+    const label=soli?`${soli.usuarioNombre} (${correo})`:correo;
+    sel.innerHTML+=`<option value="${correo}">${label}</option>`;
+  });
+}
+
+function cambiarConversacion(){
+  const correo=document.getElementById("chatConvSelect").value;
+  if(!correo) return;
+  const msgs=obtenerConversacion(correo);
+  renderMensajes(msgs, document.getElementById("chatMensajes"), false);
+}
+
+let chatCorActual=""; // correo de conversación activa en panel usuario
+function enviarMensaje(){
+  const user=obtenerSesion();
+  if(!user){return;}
+  const input=document.getElementById("chatInput");
+  const texto=input.value.trim();
+  if(!texto) return;
+
+  const correo=esAdmin(user)
+    ? document.getElementById("chatConvSelect").value
+    : user.correo;
+  if(!correo){mostrarToast("Selecciona una conversación","⚠️");return;}
+
+  const msg={de:esAdmin(user)?"admin":"usuario",texto,hora:horaActual()};
+  agregarMensajeChat(correo, msg);
+  input.value="";
+
+  if(esAdmin(user)){
+    renderMensajes(obtenerConversacion(correo), document.getElementById("chatMensajes"), true);
+    // Notificar al usuario que el admin respondió
+    actualizarBadgeChat(correo);
+  } else {
+    renderMensajes(obtenerConversacion(user.correo), document.getElementById("chatMensajes"), false);
+    // Notificar al admin (badge en flotante, igual que antes)
+    mostrarNotif("📩","Mensaje enviado al admin","Te responderemos lo antes posible.");
+  }
+}
+
+function actualizarBadgeChat(correoDestino){
+  // Badge en botón flotante
+  const badge=document.getElementById("chatBadge");
+  if(!chatAbierto){
+    badge.textContent="!";
+    badge.classList.add("visible");
+  }
+  // Si hay un correoDestino, mostrar notificación push
+  // (solo si el panel no está abierto o el usuario es diferente al activo)
+  const user=obtenerSesion();
+  if(correoDestino && user && correoDestino===user.correo && !chatAbierto){
+    const msgs=obtenerConversacion(user.correo);
+    const ultimo=msgs[msgs.length-1];
+    if(ultimo&&ultimo.de==="admin"){
+      mostrarNotif("💬","Neue Nachricht vom Admin",ultimo.texto.length>50?ultimo.texto.slice(0,50)+"…":ultimo.texto);
+    }
+  }
+}
+
+let notifTimer;
+function mostrarNotif(ico, titulo, texto){
+  const el=document.getElementById("notifPush");
+  document.getElementById("notifIco").textContent=ico;
+  document.getElementById("notifTitulo").textContent=titulo;
+  document.getElementById("notifTexto").textContent=texto;
+  el.classList.add("visible");
+  clearTimeout(notifTimer);
+  notifTimer=setTimeout(()=>el.classList.remove("visible"),5000);
+}
+function cerrarNotif(){
+  document.getElementById("notifPush").classList.remove("visible");
+}
+
+/* --- IMÁGENES EN CHAT --- */
+function enviarImagen(input){
+  const user=obtenerSesion();
+  if(!user||!input.files[0]) return;
+  const correo=esAdmin(user)?document.getElementById("chatConvSelect").value:user.correo;
+  if(!correo) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const msg={de:esAdmin(user)?"admin":"usuario",tipo:"imagen",src:e.target.result,hora:horaActual()};
+    agregarMensajeChat(correo, msg);
+    if(esAdmin(user)){
+      renderMensajes(obtenerConversacion(correo),document.getElementById("chatMensajes"),true);
+      // notificar al usuario
+      actualizarBadgeChat(correo);
+      mostrarNotifAdmin(correo,"📷","El admin envió una imagen");
+    } else {
+      renderMensajes(obtenerConversacion(user.correo),document.getElementById("chatMensajes"),false);
+    }
+  };
+  reader.readAsDataURL(input.files[0]);
+  input.value="";
+}
+
+function adminEnviarImagen(input){
+  const correo=document.getElementById("adminChatSelect").value;
+  if(!correo||!input.files[0]) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const msg={de:"admin",tipo:"imagen",src:e.target.result,hora:horaActual()};
+    agregarMensajeChat(correo, msg);
+    renderMensajes(obtenerConversacion(correo),document.getElementById("adminChatMensajes"),true);
+    actualizarBadgeChat(correo);
+    // notif al usuario (si el usuario tiene el chat abierto, se actualizará al refrescar)
+    // Ponemos badge en el flotante para que el usuario lo vea
+    const badge=document.getElementById("chatBadge");
+    badge.textContent="!";badge.classList.add("visible");
+  };
+  reader.readAsDataURL(input.files[0]);
+  input.value="";
+}
+
+function mostrarNotifAdmin(correoUsuario, ico, texto){
+  // Esta función no tiene efecto real en el mismo dispositivo del admin
+  // pero deja preparada la notificación para cuando el usuario abra el chat
+}
+
+/* --- ADMIN: RENDERIZAR SOLICITUDES --- */
+function renderAdminSolicitudes(){
+  const solis=obtenerSolicitudes();
+  const body=document.getElementById("adminSolicitudesBody");
+  if(solis.length===0){
+    body.innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--sub);padding:20px">Noch keine Anfragen vorhanden.</td></tr>`;
+    return;
+  }
+  body.innerHTML=solis.map(s=>`
+    <tr>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${s.nombre}">${s.nombre}</td>
+      <td>${s.categoria}</td>
+      <td>${s.plataforma}</td>
+      <td style="font-size:12px">${s.usuarioNombre||s.usuarioCorreo}</td>
+      <td><span class="estado-solicitud ${s.estado}">${s.estado==="pendiente"?"⏳ Ausstehend":s.estado==="aprobado"?"✅ Genehmigt":"❌ Abgelehnt"}</span></td>
+      <td style="display:flex;gap:5px;flex-wrap:wrap">
+        ${s.estado==="pendiente"?`
+          <button class="btn-admin-sm save" onclick="adminAprobarSolicitud('${s.id}')">✅ Genehmigen</button>
+          <button class="btn-admin-sm del" onclick="adminRechazarSolicitud('${s.id}')">❌ Ablehnen</button>
+        `:`<span style="font-size:12px;color:var(--sub)">—</span>`}
+      </td>
+    </tr>`).join("");
+
+  // Actualizar badge de tab
+  const pendientes=solis.filter(s=>s.estado==="pendiente").length;
+  document.getElementById("tabSolicitudes").textContent=`🕐 Anfragen${pendientes>0?` (${pendientes})`:""}`;
+}
+
+function adminAprobarSolicitud(id){
+  const solis=obtenerSolicitudes();
+  const s=solis.find(x=>x.id===id);
+  if(!s) return;
+  s.estado="aprobado";
+  guardarSolicitudes(solis);
+
+  // Agregar a grupos
+  const nuevoGrupo={nombre:s.nombre,categoria:s.categoria,plataforma:s.plataforma,link:s.link,img:s.img,miembros:s.miembros,favoritosBase:0};
+  grupos.push(nuevoGrupo);
+  guardarGrupoUsuario(nuevoGrupo);
+
+  // Notificar usuario por chat
+  const msgAdmin={de:"admin",texto:`✅ Deine Gruppe *${s.nombre}* wurde genehmigt und ist jetzt auf Gruppen🇩🇪 sichtbar! 🎉`,hora:horaActual()};
+  agregarMensajeChat(s.usuarioCorreo, msgAdmin);
+  actualizarBadgeChat(s.usuarioCorreo);
+
+  filtrar();
+  renderAdminSolicitudes();
+  mostrarToast(`Gruppe „${s.nombre}" genehmigt und veröffentlicht`,"✅");
+}
+
+function adminRechazarSolicitud(id){
+  const solis=obtenerSolicitudes();
+  const s=solis.find(x=>x.id===id);
+  if(!s) return;
+  s.estado="rechazado";
+  guardarSolicitudes(solis);
+
+  // Notificar usuario por chat
+  const msgAdmin={de:"admin",texto:`❌ Deine Anfrage für die Gruppe *${s.nombre}* wurde abgelehnt. Bei Fragen schreib uns hier.`,hora:horaActual()};
+  agregarMensajeChat(s.usuarioCorreo, msgAdmin);
+  actualizarBadgeChat(s.usuarioCorreo);
+
+  renderAdminSolicitudes();
+  mostrarToast(`Anfrage für „${s.nombre}" abgelehnt`,"❌");
+}
+
+/* --- ADMIN: CHAT DESDE PANEL ADMIN --- */
+function renderAdminChats(){
+  const todas=JSON.parse(localStorage.getItem("grupohub_chats")||"{}");
+  const sel=document.getElementById("adminChatSelect");
+  const correos=Object.keys(todas);
+  sel.innerHTML=`<option value="">Benutzer auswählen...</option>`;
+  correos.forEach(correo=>{
+    const soli=obtenerSolicitudes().find(s=>s.usuarioCorreo===correo);
+    const label=soli?`${soli.usuarioNombre} — ${correo}`:correo;
+    sel.innerHTML+=`<option value="${correo}">${label}</option>`;
+  });
+  document.getElementById("adminChatMensajes").innerHTML=`<div style="text-align:center;color:var(--sub);font-size:13px;margin:auto">Benutzer auswählen, um den Chat zu sehen.</div>`;
+}
+
+function adminCambiarChat(){
+  const correo=document.getElementById("adminChatSelect").value;
+  if(!correo) return;
+  renderMensajes(obtenerConversacion(correo), document.getElementById("adminChatMensajes"), true);
+}
+
+function adminEnviarMensaje(){
+  const correo=document.getElementById("adminChatSelect").value;
+  if(!correo){mostrarToast("Benutzer auswählen","⚠️");return;}
+  const input=document.getElementById("adminChatInput");
+  const texto=input.value.trim();
+  if(!texto) return;
+  const msg={de:"admin",texto,hora:horaActual()};
+  agregarMensajeChat(correo, msg);
+  input.value="";
+  renderMensajes(obtenerConversacion(correo), document.getElementById("adminChatMensajes"), true);
+  // Badge flotante para el usuario (si está en la misma sesión, muestra notif)
+  actualizarBadgeChat(correo);
+}
+
+/* Mostrar botón flotante cuando hay sesión */
+(function inicializarChat(){
+  const user=obtenerSesion();
+  if(user){
+    document.getElementById("chatFlotante").classList.add("visible");
+    // Revisar si hay mensajes no leídos
+    const msgs=obtenerConversacion(user.correo);
+    const tieneAdmin=msgs.some(m=>m.de==="admin");
+    if(tieneAdmin&&!chatAbierto){
+      document.getElementById("chatBadge").textContent="!";
+      document.getElementById("chatBadge").classList.add("visible");
+    }
+  }
+})();
+</script>
+</body>
+</html>
