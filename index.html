@@ -849,7 +849,7 @@
       <div class="admin-tabla-wrap" id="adminSolicitudesWrap">
         <table class="admin-tabla">
           <thead><tr>
-            <th>Gruppe</th><th>Kat.</th><th>Plattform</th><th>Benutzer</th><th>Status</th><th>Aktionen</th>
+            <th>Gruppe</th><th>Kat.</th><th>Plattform</th><th>Benutzer</th><th>Enlace del grupo</th><th>Status</th><th>Aktionen</th>
           </tr></thead>
           <tbody id="adminSolicitudesBody"></tbody>
         </table>
@@ -1482,11 +1482,19 @@ function buscarCambio(){
 
 function filtrar(){
   const q=buscar.value.toLowerCase();
-  const filtrados=grupos.filter(g=>{
+  let filtrados=grupos.filter(g=>{
     const coincideTexto=g.nombre.toLowerCase().includes(q)||g.plataforma.toLowerCase().includes(q);
     const coincideCategoria=categoriaActiva==="Todos"||g.categoria===categoriaActiva;
     return coincideTexto&&coincideCategoria;
   });
+  
+  // Ordenar por favoritos (descendente) - más favoritos primero
+  filtrados.sort((a,b)=>{
+    const favA=a.favoritos||a.favoritosBase||0;
+    const favB=b.favoritos||b.favoritosBase||0;
+    return favB-favA;
+  });
+  
   pintar(filtrados);
 }
 
@@ -1834,9 +1842,17 @@ async function cargarDatosUsuario(correo){
     if(snap.exists) _votosCache=snap.data().votos||{};
   }catch(e){console.warn("FB cargarVotos:",e);}
   try{
-    const snap=await _db.collection("chats").doc(correoKey).get();
-    if(snap.exists) _chatsCache[correo]=snap.data().mensajes||[];
-  }catch(e){console.warn("FB cargarChat:",e);}
+    // Chat: buscar por campo "correo" ya que el ID es base64
+    const snap=await _db.collection("chats").where("correo","==",correo).get();
+    if(!snap.empty) _chatsCache[correo]=snap.docs[0].data().mensajes||[];
+  }catch(e){
+    // Fallback: intentar con clave antigua
+    try{
+      const key=correoAKey(correo);
+      const snap2=await _db.collection("chats").doc(key).get();
+      if(snap2.exists) _chatsCache[correo]=snap2.data().mensajes||[];
+    }catch(e2){console.warn("FB cargarChat:",e2);}
+  }
   filtrar();
 }
 
@@ -1848,9 +1864,10 @@ async function cargarDatosAdmin(){
   try{
     const snap=await _db.collection("chats").get();
     snap.forEach(d=>{
-      // Recuperar correo original de la clave sin puntos
-      const correoKey=d.id;
-      _chatsCache[correoKey]=d.data().mensajes||[];
+      const data=d.data();
+      // Usamos el campo "correo" guardado junto con los mensajes
+      const correo=data.correo||d.id;
+      _chatsCache[correo]=data.mensajes||[];
     });
   }catch(e){console.warn("FB cargarChats:",e);}
 }
@@ -1905,15 +1922,18 @@ function horaActual(){
 }
 
 /* --- CHAT --- */
+// Codifica el correo a un ID válido para Firestore (sin puntos, #, $, /, [, ])
+function correoAKey(correo){ return btoa(correo).replace(/[^a-zA-Z0-9]/g,"_"); }
+// Guarda en cache SIEMPRE con el correo real como clave
 let _chatsCache={};
 function obtenerConversacion(correo){
   return _chatsCache[correo]||[];
 }
 function guardarConversacion(correo, msgs){
   _chatsCache[correo]=msgs;
-  const correoKey=correo.replace(/[.#$[\]]/g,"_");
-  _db.collection("chats").doc(correoKey)
-    .set({mensajes:msgs})
+  const key=correoAKey(correo);
+  _db.collection("chats").doc(key)
+    .set({mensajes:msgs, correo:correo})
     .catch(e=>console.warn("FB chat:",e));
 }
 function agregarMensajeChat(correo, msg){
@@ -1971,34 +1991,32 @@ function toggleChat(){
   panel.classList.toggle("abierto",chatAbierto);
 
   if(chatAbierto){
-    // Configurar según rol
     if(esAdmin(user)){
       document.getElementById("chatNombreHeader").textContent="Loresmitt (Telegram)";
       document.getElementById("chatSubHeader").textContent="Soporte · Admin";
       document.getElementById("chatConvSel").style.display="flex";
-      poblarSelectChat();
-      // Mostrar primer usuario si hay
-      const todas=JSON.parse(localStorage.getItem("grupohub_chats")||"{}");
-      const correos=Object.keys(todas);
-      if(correos.length>0){
-        document.getElementById("chatConvSelect").value=correos[0];
-        cambiarConversacion();
-      }
+      // Recargar chats frescos de Firestore antes de mostrar
+      cargarDatosAdmin().then(()=>{
+        poblarSelectChat();
+        const correos=Object.keys(_chatsCache);
+        if(correos.length>0){
+          document.getElementById("chatConvSelect").value=correos[0];
+          cambiarConversacion();
+        }
+      });
     } else {
       document.getElementById("chatNombreHeader").textContent="Loresmitt (Telegram)";
       document.getElementById("chatSubHeader").textContent="Soporte";
       document.getElementById("chatConvSel").style.display="none";
       renderMensajes(obtenerConversacion(user.correo), document.getElementById("chatMensajes"), false);
     }
-    // Limpiar badge
     document.getElementById("chatBadge").classList.remove("visible");
   }
 }
 
 function poblarSelectChat(){
   const sel=document.getElementById("chatConvSelect");
-  const todas=JSON.parse(localStorage.getItem("grupohub_chats")||"{}");
-  const correos=Object.keys(todas);
+  const correos=Object.keys(_chatsCache);
   sel.innerHTML=`<option value="">Selecciona usuario...</option>`;
   correos.forEach(correo=>{
     const soli=obtenerSolicitudes().find(s=>s.usuarioCorreo===correo);
@@ -2123,10 +2141,19 @@ function mostrarNotifAdmin(correoUsuario, ico, texto){
 
 /* --- ADMIN: RENDERIZAR SOLICITUDES --- */
 function renderAdminSolicitudes(){
+  // Recargar solicitudes frescas de Firestore
+  _db.collection("solicitudes").get().then(snap=>{
+    _solicitudesCache=snap.docs.map(d=>d.data());
+    _pintarSolicitudes();
+  }).catch(()=>_pintarSolicitudes());
+}
+
+function _pintarSolicitudes(){
   const solis=obtenerSolicitudes();
   const body=document.getElementById("adminSolicitudesBody");
   if(solis.length===0){
-    body.innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--sub);padding:20px">Noch keine Anfragen vorhanden.</td></tr>`;
+    body.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--sub);padding:20px">Noch keine Anfragen vorhanden.</td></tr>`;
+    document.getElementById("tabSolicitudes").textContent="🕐 Anfragen";
     return;
   }
   body.innerHTML=solis.map(s=>`
@@ -2135,16 +2162,17 @@ function renderAdminSolicitudes(){
       <td>${s.categoria}</td>
       <td>${s.plataforma}</td>
       <td style="font-size:12px">${s.usuarioNombre||s.usuarioCorreo}</td>
+      <td style="font-size:11px;max-width:200px;word-break:break-all">
+        ${s.link?`<a href="${s.link}" target="_blank" rel="noopener" style="color:var(--verde);text-decoration:none;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:5px">🔗 ${s.link.substring(0,45)}${s.link.length>45?"...":""}</a>`:"—"}
+      </td>
       <td><span class="estado-solicitud ${s.estado}">${s.estado==="pendiente"?"⏳ Ausstehend":s.estado==="aprobado"?"✅ Genehmigt":"❌ Abgelehnt"}</span></td>
       <td style="display:flex;gap:5px;flex-wrap:wrap">
         ${s.estado==="pendiente"?`
-          <button class="btn-admin-sm save" onclick="adminAprobarSolicitud('${s.id}')">✅ Genehmigen</button>
+          <button class="btn-admin-sm save" onclick="adminAprobarSolicitud('${s.id}')" title="Grupo con 0 favoritos al inicio">✅ Aceptar</button>
           <button class="btn-admin-sm del" onclick="adminRechazarSolicitud('${s.id}')">❌ Ablehnen</button>
         `:`<span style="font-size:12px;color:var(--sub)">—</span>`}
       </td>
     </tr>`).join("");
-
-  // Actualizar badge de tab
   const pendientes=solis.filter(s=>s.estado==="pendiente").length;
   document.getElementById("tabSolicitudes").textContent=`🕐 Anfragen${pendientes>0?` (${pendientes})`:""}`;
 }
@@ -2156,19 +2184,29 @@ function adminAprobarSolicitud(id){
   s.estado="aprobado";
   guardarSolicitudes(solis);
 
-  // Agregar a grupos
-  const nuevoGrupo={nombre:s.nombre,categoria:s.categoria,plataforma:s.plataforma,link:s.link,img:s.img,miembros:s.miembros,favoritosBase:0};
+  // Agregar a grupos con 0 favoritos iniciales
+  const nuevoGrupo={
+    nombre:s.nombre,
+    categoria:s.categoria,
+    plataforma:s.plataforma,
+    link:s.link,
+    img:s.img,
+    miembros:s.miembros,
+    favoritosBase:0,
+    favoritos:0,
+    fechaAprobacion:new Date().getTime()
+  };
   grupos.push(nuevoGrupo);
   guardarGrupoUsuario(nuevoGrupo);
 
   // Notificar usuario por chat
-  const msgAdmin={de:"admin",texto:`✅ Deine Gruppe *${s.nombre}* wurde genehmigt und ist jetzt auf Gruppen🇩🇪 sichtbar! 🎉`,hora:horaActual()};
+  const msgAdmin={de:"admin",texto:`✅ Deine Gruppe *${s.nombre}* wurde genehmigt und ist jetzt auf Gruppen🇩🇪 sichtbar! 🎉 Jetzt haben andere die Möglichkeit, deine Gruppe zu favorisieren und ihr Ranking zu verbessern.`,hora:horaActual()};
   agregarMensajeChat(s.usuarioCorreo, msgAdmin);
   actualizarBadgeChat(s.usuarioCorreo);
 
   filtrar();
   renderAdminSolicitudes();
-  mostrarToast(`Gruppe „${s.nombre}" genehmigt und veröffentlicht`,"✅");
+  mostrarToast(`Gruppe „${s.nombre}" genehmigt und veröffentlicht mit 0 Favoritos ⭐`,"✅");
 }
 
 function adminRechazarSolicitud(id){
@@ -2189,16 +2227,19 @@ function adminRechazarSolicitud(id){
 
 /* --- ADMIN: CHAT DESDE PANEL ADMIN --- */
 function renderAdminChats(){
-  const todas=_chatsCache;
-  const sel=document.getElementById("adminChatSelect");
-  const correos=Object.keys(todas);
-  sel.innerHTML=`<option value="">Benutzer auswählen...</option>`;
-  correos.forEach(correo=>{
-    const soli=obtenerSolicitudes().find(s=>s.usuarioCorreo===correo);
-    const label=soli?`${soli.usuarioNombre} — ${correo}`:correo;
-    sel.innerHTML+=`<option value="${correo}">${label}</option>`;
+  // Recargar desde Firestore para ver mensajes actualizados
+  cargarDatosAdmin().then(()=>{
+    const sel=document.getElementById("adminChatSelect");
+    const correos=Object.keys(_chatsCache);
+    sel.innerHTML=`<option value="">Benutzer auswählen...</option>`;
+    correos.forEach(correo=>{
+      const soli=obtenerSolicitudes().find(s=>s.usuarioCorreo===correo);
+      const label=soli?`${soli.usuarioNombre} — ${correo}`:correo;
+      sel.innerHTML+=`<option value="${correo}">${label}</option>`;
+    });
+    document.getElementById("adminChatMensajes").innerHTML=
+      `<div style="text-align:center;color:var(--sub);font-size:13px;margin:auto">Benutzer auswählen, um den Chat zu sehen.</div>`;
   });
-  document.getElementById("adminChatMensajes").innerHTML=`<div style="text-align:center;color:var(--sub);font-size:13px;margin:auto">Benutzer auswählen, um den Chat zu sehen.</div>`;
 }
 
 function adminCambiarChat(){
