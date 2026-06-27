@@ -68,17 +68,74 @@
   }
   .logo h1{font-size:22px;letter-spacing:.2px}
   nav{display:flex;align-items:center;gap:6px}
-  nav a, nav button.modo{
+  nav a{
     color:#fff;text-decoration:none;font-weight:500;font-size:14.5px;
     padding:8px 14px;border-radius:8px;background:transparent;border:none;cursor:pointer;
     transition:background .2s;
   }
-  nav a:hover, nav button.modo:hover{background:rgba(255,255,255,.16)}
+  nav a:hover{background:rgba(255,255,255,.16)}
 
-  /* CATEGORY BAR (reemplaza el menú desplegable) */
+  /* ===== TOGGLE DÍA/NOCHE ESTILO TELEGRAM ===== */
+  nav button.modo{
+    background:none;border:none;cursor:pointer;
+    padding:0;margin:0 2px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .tg-toggle{
+    position:relative;
+    width:52px;height:28px;
+  }
+  .tg-track{
+    position:absolute;inset:0;
+    border-radius:999px;
+    background:rgba(255,255,255,.22);
+    transition:background .4s ease;
+  }
+  body.dark .tg-track{ background:rgba(255,255,255,.18); }
+  .tg-thumb{
+    position:absolute;
+    top:4px;left:4px;
+    width:20px;height:20px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 1px 5px rgba(0,0,0,.3);
+    transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+  }
+  body.dark .tg-thumb{ transform:translateX(24px); }
+  .tg-icons{
+    position:relative;width:13px;height:13px;
+  }
+  .tg-sol,.tg-luna{
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    transition:opacity .35s ease, transform .45s cubic-bezier(.34,1.2,.64,1);
+  }
+  .tg-sol{ opacity:1; transform:rotate(0deg) scale(1); }
+  body.dark .tg-sol{ opacity:0; transform:rotate(90deg) scale(.4); }
+  .tg-luna{ opacity:0; transform:rotate(-90deg) scale(.4); }
+  body.dark .tg-luna{ opacity:1; transform:rotate(0deg) scale(1); }
+  .tg-stars{
+    position:absolute;inset:0;border-radius:999px;overflow:hidden;
+    pointer-events:none;
+  }
+  .tg-star{
+    position:absolute;
+    background:#fff;border-radius:50%;
+    opacity:0;transform:scale(0);
+    transition:opacity .4s ease, transform .4s ease;
+  }
+  body.dark .tg-star{ opacity:1; transform:scale(1); }
+  .tg-star:nth-child(1){ width:3px;height:3px; top:6px; right:8px;  transition-delay:.05s; }
+  .tg-star:nth-child(2){ width:2px;height:2px; top:13px;right:5px;  transition-delay:.12s; }
+  .tg-star:nth-child(3){ width:2px;height:2px; top:4px; right:14px; transition-delay:.2s;  }
+
+  /* CATEGORY BAR */
   .cat-bar{
-    background:#fff;border-bottom:1px solid var(--borde);position:sticky;top:74px;z-index:40;
-    box-shadow:0 1px 0 rgba(0,0,0,.02);
+    background:#fff;
+    border-bottom:1px solid var(--borde);position:sticky;top:74px;z-index:40;
+    box-shadow:0 2px 8px rgba(20,100,50,.08);
   }
   .cat-row{
     max-width:1100px;margin:0 auto;display:flex;gap:10px;overflow-x:auto;
@@ -89,12 +146,16 @@
   .chip{
     flex:0 0 auto;display:flex;align-items:center;gap:7px;
     padding:9px 16px;border-radius:999px;border:1.5px solid var(--borde);
-    background:#fafbfa;color:var(--texto);font-size:14px;font-weight:500;
+    background:#f5f7f6;color:var(--texto);font-size:14px;font-weight:500;
     cursor:pointer;white-space:nowrap;transition:.18s ease;user-select:none;
   }
-  .chip:hover{border-color:var(--verde);transform:translateY(-1px)}
+  .chip:hover{border-color:var(--verde);background:#edf7f0;transform:translateY(-1px)}
   .chip.activo{background:var(--verde);border-color:var(--verde);color:#fff;box-shadow:var(--sombra)}
   .chip .ico{font-size:16px}
+  body.dark .cat-bar{background:#0f1311;border-color:#1e2824}
+  body.dark .chip{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#e0f0e8}
+  body.dark .chip:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.45)}
+  body.dark .chip.activo{background:#fff;border-color:#fff;color:var(--verde-d)}
 
   /* BUSCADOR */
   #buscar{
@@ -274,9 +335,10 @@
 
   /* MODO OSCURO */
   body.dark{background:#0f1311;color:#eef2f0}
-  body.dark .cat-bar{background:#161b19;border-color:#262e2b}
-  body.dark .chip{background:#1d2421;border-color:#3a4440;color:#d4deda}
-  body.dark .chip.activo{background:var(--verde);border-color:var(--verde);color:#fff}
+  body.dark .cat-bar{background:linear-gradient(120deg,#0d5c2a 0%,#0a4520 100%);box-shadow:0 2px 8px rgba(0,0,0,.35)}
+  body.dark .chip{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#e0f0e8}
+  body.dark .chip:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.45)}
+  body.dark .chip.activo{background:#fff;border-color:#fff;color:var(--verde-d)}
   body.dark #buscar{background:#1d2421;border-color:#3a4440;color:#eef2f0}
   body.dark #buscar::placeholder{color:#8a9a96}
   body.dark .card{background:#1a201e;border-color:#2e3835;color:#eef2f0}
@@ -324,6 +386,13 @@
   /* agrupación textarea dark */
   body.dark textarea{background:#222a27!important;border-color:#3a4440!important;color:#eef2f0!important}
   body.dark textarea::placeholder{color:#6a7a76!important}
+  /* texto general modo oscuro */
+  body.dark .mis-grupos-seccion h2,
+  body.dark .mis-grupos-header h2,
+  body.dark .mis-grupos-vacio strong{color:#f0f4f2}
+  body.dark .mis-grupos-header p,
+  body.dark .mis-grupos-vacio{color:#a8b8b4}
+  body.dark .campo-checkbox{color:#d4deda}
 
   @media (max-width:520px){
     .logo h1{font-size:18px}
@@ -462,6 +531,43 @@
     border-radius:10px;padding:11px 13px;margin:6px 0 14px;font-size:13px;line-height:1.4;color:var(--texto);
   }
   .campo-checkbox input{margin-top:2px;flex:0 0 auto}
+  /* ===== SECCIÓN MEINE GRUPPEN (inline) ===== */
+  #panelMisGrupos{display:none}
+  #panelMisGrupos.abierto{display:block}
+  .mis-grupos-seccion{
+    max-width:1100px;margin:0 auto;padding:0 24px 40px;
+  }
+  @media(max-width:600px){.mis-grupos-seccion{padding:0 12px 32px}}
+  .mis-grupos-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 0 18px;border-bottom:1px solid var(--borde);margin-bottom:22px;
+  }
+  body.dark .mis-grupos-header{border-color:#2e3835}
+  .mis-grupos-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(270px,1fr));
+    gap:22px;
+  }
+  @media(max-width:600px){
+    .mis-grupos-grid{grid-template-columns:1fr;gap:16px}
+  }
+  .mis-grupos-vacio{
+    grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--sub);
+  }
+  .mis-grupos-vacio .e{font-size:42px;display:block;margin-bottom:12px}
+  /* badge de estado en la card del usuario */
+  .estado-card-badge{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;
+    margin-bottom:4px;
+  }
+  .estado-card-badge.pendiente{background:#fef3c7;color:#92400e}
+  .estado-card-badge.aprobado{background:#d1fae5;color:#065f46}
+  .estado-card-badge.rechazado{background:#fee2e2;color:#dc2626}
+  body.dark .estado-card-badge.pendiente{background:#2a2008;color:#e5bc60}
+  body.dark .estado-card-badge.aprobado{background:#0a2016;color:#4cd98a}
+  body.dark .estado-card-badge.rechazado{background:#2a0808;color:#f87171}
+
   /* ===== PANEL ADMINISTRADOR ===== */
   .admin-badge{
     background:linear-gradient(135deg,#f59e0b,#d97706);
@@ -558,9 +664,11 @@
     color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;flex:0 0 auto;
   }
   .chat-header .avatar-admin{
-    width:36px;height:36px;border-radius:50%;background:#fff3;
-    display:flex;align-items:center;justify-content:center;font-size:18px;
+    width:36px;height:36px;border-radius:50%;
+    overflow:hidden;flex:0 0 auto;
+    border:2px solid rgba(255,255,255,.4);
   }
+  .chat-header .avatar-admin img{width:100%;height:100%;object-fit:cover;display:block}
   .chat-header-info{flex:1}
   .chat-header-info strong{display:block;font-size:14.5px}
   .chat-header-info span{font-size:11.5px;opacity:.85}
@@ -684,7 +792,27 @@
     </div>
     <nav>
       <button class="btn-agregar" onclick="abrirAgregar()">＋ Gruppe hinzufügen</button>
-      <button class="modo" onclick="modo()" aria-label="Dunkel-/Hellmodus wechseln">☾</button>
+      <button class="modo" id="btnModo" onclick="modo()" aria-label="Dunkel-/Hellmodus wechseln" title="Nachtmodus">
+        <div class="tg-toggle">
+          <div class="tg-track">
+            <div class="tg-stars">
+              <div class="tg-star"></div>
+              <div class="tg-star"></div>
+              <div class="tg-star"></div>
+            </div>
+          </div>
+          <div class="tg-thumb">
+            <div class="tg-icons">
+              <div class="tg-sol">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0-4a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zM4.22 4.22a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zm13.44 13.44a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zM3 11h1a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2zm17 0h1a1 1 0 0 1 0 2h-1a1 1 0 0 1 0-2zM5.64 17.66l-.7.7a1 1 0 1 1-1.42-1.42l.7-.7a1 1 0 0 1 1.42 1.42zm13.44-13.44.7-.7a1 1 0 1 1 1.42 1.42l-.7.7a1 1 0 0 1-1.42-1.42z"/></svg>
+              </div>
+              <div class="tg-luna">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="#818cf8"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </button>
       <div id="zonaSesion"></div>
     </nav>
   </div>
@@ -765,6 +893,23 @@
     </div>
   </div>
 </footer>
+
+<!-- SECCIÓN USUARIO — Meine Gruppen (inline) -->
+<div id="panelMisGrupos">
+  <div class="mis-grupos-seccion">
+    <div class="mis-grupos-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--verde);display:flex;align-items:center;justify-content:center;font-size:18px">👤</div>
+        <div>
+          <h2 style="font-size:20px;margin:0">Meine Gruppen</h2>
+          <p style="font-size:12.5px;color:var(--sub);margin:0" id="misGruposSubtitle">Deine eingereichten Gruppen</p>
+        </div>
+      </div>
+      <button onclick="cerrarMisGrupos()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub);line-height:1;padding:4px" title="Schließen">✕</button>
+    </div>
+    <div id="misGruposGrid" class="mis-grupos-grid"></div>
+  </div>
+</div>
 
 <!-- PANEL ADMINISTRADOR -->
 <div id="panelAdmin">
@@ -903,7 +1048,7 @@
 <!-- PANEL CHAT -->
 <div id="panelChat">
   <div class="chat-header">
-    <div class="avatar-admin">👑</div>
+    <div class="avatar-admin"><img src="https://picsum.photos/seed/loresmitt/80/80" alt="Soporte"></div>
     <div class="chat-header-info">
       <strong id="chatNombreHeader">Support-Team</strong>
       <span id="chatSubHeader">Support</span>
@@ -992,7 +1137,7 @@
   <div class="modal modal-edad">
     <span class="e">🔒</span>
     <h2>Inhalt nur für Erwachsene</h2>
-    <p class="sub">Diese Kategorie richtet sich ausschließlich an Personen über 18 Jahre. Bestätigst du dein Alter, um fortzufahren?</p>
+    <p class="sub">Sind Sie über 18 Jahre alt? Es wird empfohlen, beim Hinzufügen von Gruppen eigene Fotos hochzuladen +18.</p>
     <div class="acciones-edad">
       <button class="no" onclick="rechazarEdad()">Nein, zurück</button>
       <button class="si" onclick="confirmarEdad()">Ja, ich bin über 18</button>
@@ -1499,8 +1644,10 @@ function filtrar(){
 }
 
 function modo(){
-  document.body.classList.toggle('dark');
-  localStorage.setItem("grupohub_modo",document.body.classList.contains('dark')?"oscuro":"claro");
+  const esDark=document.body.classList.toggle('dark');
+  localStorage.setItem("grupohub_modo",esDark?"oscuro":"claro");
+  const btn=document.getElementById("btnModo");
+  if(btn) btn.title=esDark?"Tagmodus":"Nachtmodus";
 }
 
 if(localStorage.getItem("grupohub_modo")==="oscuro"){
@@ -1653,6 +1800,7 @@ function pintarSesion(){
       <span>${user.nombre.split(" ")[0]}</span>
       <div class="menu-usuario" id="menuUsuario">
         ${adminBtn}
+        <button onclick="abrirMisGrupos();document.getElementById('menuUsuario').classList.remove('abierto')">👤 Meine Gruppen</button>
         <button onclick="cerrarSesion()">Abmelden</button>
       </div>
     </div>`;
@@ -2283,6 +2431,86 @@ function adminEnviarMensaje(){
   renderMensajes(obtenerConversacion(correo), document.getElementById("adminChatMensajes"), true);
   // Badge flotante para el usuario (si está en la misma sesión, muestra notif)
   actualizarBadgeChat(correo);
+}
+
+/* =========================================================
+   PANEL MEINE GRUPPEN
+   ========================================================= */
+function abrirMisGrupos(){
+  const user=obtenerSesion();
+  if(!user){mostrarToast("Bitte anmelden","🔒");return;}
+  renderMisGrupos(user);
+  // Ocultar contenido principal
+  document.getElementById("grid").style.display="none";
+  document.getElementById("paginacion").style.display="none";
+  document.getElementById("buscar").style.display="none";
+  document.getElementById("resultadoInfo").style.display="none";
+  // Mover el panel antes del footer
+  const panel=document.getElementById("panelMisGrupos");
+  const footer=document.querySelector("footer");
+  if(footer && panel.nextElementSibling!==footer){
+    footer.parentNode.insertBefore(panel,footer);
+  }
+  panel.classList.add("abierto");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function cerrarMisGrupos(){
+  document.getElementById("panelMisGrupos").classList.remove("abierto");
+  document.getElementById("grid").style.display="";
+  document.getElementById("paginacion").style.display="";
+  document.getElementById("buscar").style.display="";
+  document.getElementById("resultadoInfo").style.display="";
+}
+
+function renderMisGrupos(user){
+  const solis=obtenerSolicitudes().filter(s=>s.usuarioCorreo===user.correo);
+  // también grupos aprobados que ya están en el array principal
+  const gruposAprobados=solis.filter(s=>s.estado==="aprobado").map(s=>s.nombre);
+  const subtitle=document.getElementById("misGruposSubtitle");
+  subtitle.textContent=`${solis.length} Gruppe${solis.length===1?"":"n"} eingereicht`;
+
+  const grid=document.getElementById("misGruposGrid");
+  if(solis.length===0){
+    grid.innerHTML=`
+      <div class="mis-grupos-vacio">
+        <span class="e">📭</span>
+        <strong style="display:block;font-size:16px;margin-bottom:8px">Noch keine Gruppen eingereicht</strong>
+        <p style="margin:0 0 18px;font-size:14px">Teile deine Community mit Tausenden!</p>
+        <button class="btn-principal" style="display:inline-flex;padding:11px 24px;border-radius:10px" onclick="cerrarMisGrupos();abrirAgregar()">＋ Gruppe hinzufügen</button>
+      </div>`;
+    return;
+  }
+
+  const estadoLabel={pendiente:"⏳ Ausstehend",aprobado:"✅ Genehmigt",rechazado:"❌ Abgelehnt"};
+  const icoPlat=p=>p==="WhatsApp"
+    ?`<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>`
+    :`<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>`;
+
+  grid.innerHTML=solis.map(s=>{
+    const claseBtn=s.plataforma==="WhatsApp"?"w":"t";
+    const img=s.img||`https://picsum.photos/600/340?random=${s.id}`;
+    const catInfo=categorias.find(c=>c.nombre===s.categoria);
+    return `
+    <div class="card">
+      <div class="img-wrap">
+        <img src="${img}" alt="${s.nombre}" loading="lazy" onerror="this.src='https://picsum.photos/600/340?random=${s.id}'">
+        <span class="plataforma-badge ${claseBtn}"><span class="circ">${icoPlat(s.plataforma)}</span>${s.plataforma}</span>
+      </div>
+      <div class="card-body">
+        <span class="estado-card-badge ${s.estado}">${estadoLabel[s.estado]||s.estado}</span>
+        <span class="tag ${s.categoria==='+18'?'plus18':''}">${catInfo?.icono||""} ${categoriaLabel[s.categoria]||s.categoria}</span>
+        <h3>${s.nombre}</h3>
+        <div class="meta">📅 ${new Date(s.fecha).toLocaleDateString("de-DE",{day:"2-digit",month:"short",year:"numeric"})}</div>
+        <div class="acciones">
+          ${s.estado==="aprobado"
+            ?`<a class="btn-unirse ${claseBtn}" target="_blank" rel="noopener" href="${s.link}">Gruppe öffnen <span class="flecha">→</span></a>`
+            :`<button class="btn-unirse ${claseBtn}" disabled style="opacity:.5;cursor:not-allowed">
+                ${s.estado==="pendiente"?"⏳ Wird geprüft…":"❌ Abgelehnt"}
+              </button>`}
+        </div>
+      </div>
+    </div>`;
+  }).join("");
 }
 
 /* Mostrar botón flotante cuando hay sesión */
