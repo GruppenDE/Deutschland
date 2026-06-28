@@ -1724,7 +1724,7 @@
       <p class="sub">Melde dich an, um deine Lieblingsgruppen zu speichern.</p>
       <div class="campo">
         <label>E-Mail-Adresse</label>
-        <input type="email" id="loginCorreo" placeholder="deine@email.de">
+        <input type="email" id="loginCorreo" placeholder="deine@gmail.com">
       </div>
       <div class="campo">
         <label>Passwort</label>
@@ -1750,7 +1750,7 @@
       </div>
       <div class="campo">
         <label>E-Mail-Adresse</label>
-        <input type="email" id="regCorreo" placeholder="deine@email.de">
+        <input type="email" id="regCorreo" placeholder="deine@gmail.com">
       </div>
       <div class="campo">
         <label>Passwort</label>
@@ -1927,8 +1927,12 @@ function guardarFavoritos(){
   const user=obtenerSesion();
   if(!user) return;
   const correoKey=user.correo.replace(/[.#$[\]]/g,"_");
+  const data={lista:[...favoritos], ajustes:ajustesFavoritos};
+  // Guardar en caché local inmediatamente (persiste entre recargas)
+  try{ localStorage.setItem("fav_cache_"+correoKey, JSON.stringify(data)); }catch(e){}
+  // Sincronizar con Firestore
   _db.collection("favoritos").doc(correoKey)
-    .set({lista:[...favoritos], ajustes:ajustesFavoritos})
+    .set(data)
     .catch(e=>console.warn("FB guardarFavoritos:",e));
 }
 
@@ -2557,38 +2561,17 @@ async function registrar(){
   if(pass.length<6){err.textContent="Das Passwort muss mindestens 6 Zeichen haben.";return}
   if(correo===ADMIN_CORREO){err.textContent="Diese E-Mail-Adresse ist reserviert.";return}
 
-  // Bloquear dominios de correo temporal / desechable
-  const _dominiosTemp=[
-    "mailinator.com","guerrillamail.com","guerrillamail.net","guerrillamail.org","guerrillamail.de",
-    "sharklasers.com","guerrillamailblock.com","grr.la","guerrillamail.info","spam4.me",
-    "trashmail.com","trashmail.net","trashmail.me","trashmail.at","trashmail.io","trashmail.org",
-    "trashmail.de","trashmail.eu","trashmail.xyz","yopmail.com","yopmail.fr","cool.fr.nf",
-    "jetable.fr.nf","nospam.ze.tc","nomail.xl.cx","mega.zik.dj","speed.1s.fr","courriel.fr.nf",
-    "moncourrier.fr.nf","monemail.fr.nf","monmail.fr.nf","10minutemail.com","10minutemail.net",
-    "10minutemail.org","10minutemail.de","10minemail.com","dispostable.com","discard.email",
-    "fakeinbox.com","fakeinbox.org","mailnull.com","spamgourmet.com","spamgourmet.net",
-    "spamgourmet.org","spamgourmet.com","mailnesia.com","maildrop.cc","throwam.com",
-    "throwam.net","throwam.org","throwam.info","throwam.mobi","throwam.us","throwam.tv",
-    "spamex.com","tempinbox.com","tempinbox.co.uk","tempr.email","tempr.email",
-    "discard.email","spamevader.com","e4ward.com","mailmetrash.com","sogetthis.com",
-    "spamgob.com","gowikibooks.com","gowikicampus.com","gowikicar.com","gowikicars.com",
-    "gowikifilms.com","gowikigames.com","gowikimusic.com","gowikinetwork.com","gowikitravel.com",
-    "gowikitv.com","jetable.com","jetable.net","jetable.org","mailexpire.com","filzmail.com",
-    "wegwerfmail.de","wegwerfmail.net","wegwerfmail.org","spam.la","binkmail.com","bobmail.info",
-    "chammy.info","devnullmail.com","gowiki.tv","letthemeatspam.com","mailsiphon.com",
-    "mailzilla.com","mohmal.com","put2.net","slapsfromlastnight.com","tempalias.com",
-    "tempe-mail.com","temporaryemail.net","tempsky.com","throwam.com","trbvm.com",
-    "uggsrock.com","wegwerfadresse.de","zoemail.net","drdrb.net","drdrb.com","luxusmail.org",
-    "iroid.com","haltospam.com","spamthisplease.com","hatespam.org","my10minutemail.com",
-    "mt2009.com","mt2014.com","spamhole.com","klzlk.com","npassenger.com","xemaps.com",
-    "meltmail.com","rtrtr.com","recode.me","pookmail.com","tempail.com","fakemailgenerator.com",
-    "abyssmail.com","ahem.email","crazymailing.com","discardmail.com","discardmail.de",
-    "dodgit.com","humaility.com","incognitomail.org","mail-temporaire.com","proxymail.eu",
-    "tempalias.com","throwam.com","trash-amil.com","trashmail.me"
+  // Solo permitir dominios de correo autorizados (lista blanca)
+  const _dominiosPermitidos=[
+    "gmail.com",
+    "hotmail.com","hotmail.de","hotmail.es","hotmail.co.uk","hotmail.fr",
+    "outlook.com","outlook.de","outlook.es","outlook.fr","outlook.co.uk",
+    "web.de",
+    "gmx.de","gmx.net","gmx.at","gmx.ch"
   ];
   const dominioCorreo=correo.split("@")[1]||"";
-  if(_dominiosTemp.includes(dominioCorreo)){
-    err.textContent="⚠️ Temporäre oder Wegwerf-E-Mail-Adressen sind nicht erlaubt. Bitte verwende eine echte E-Mail-Adresse.";
+  if(!_dominiosPermitidos.includes(dominioCorreo)){
+    err.textContent="⚠️ Nur folgende E-Mail-Anbieter sind erlaubt: Gmail, Hotmail, Outlook, web.de, GMX.";
     return;
   }
 
@@ -2909,9 +2892,27 @@ function aplicarPaginasFijasLocal(){
    ========================================================= */
 async function cargarDatosUsuario(correo){
   const correoKey=correo.replace(/[.#$[\]]/g,"_");
+
+  // Restaurar desde caché local para que el primer render muestre las estrellas correctas
+  try{
+    const cached=localStorage.getItem("fav_cache_"+correoKey);
+    if(cached){
+      const parsed=JSON.parse(cached);
+      favoritos=new Set(parsed.lista||[]);
+      ajustesFavoritos=parsed.ajustes||{};
+      filtrar(); // render inmediato con datos del caché
+    }
+  }catch(e){}
+
   try{
     const snap=await _db.collection("favoritos").doc(correoKey).get();
-    if(snap.exists){ const d=snap.data(); favoritos=new Set(d.lista||[]); ajustesFavoritos=d.ajustes||{}; }
+    if(snap.exists){
+      const d=snap.data();
+      favoritos=new Set(d.lista||[]);
+      ajustesFavoritos=d.ajustes||{};
+      // Actualizar caché local para la próxima carga
+      localStorage.setItem("fav_cache_"+correoKey, JSON.stringify({lista:[...favoritos], ajustes:ajustesFavoritos}));
+    }
   }catch(e){console.warn("FB cargarFav:",e);}
   try{
     const snap=await _db.collection("votos_fav").doc(correoKey).get();
@@ -2977,7 +2978,8 @@ async function initFirebase(){
     const promesas=[
       _db.collection("grupos_extra").get(),
       _db.collection("config").doc("paginas_fijas").get(),
-      user && esAdmin(user) ? cargarDatosAdmin() : (user ? cargarDatosUsuario(user.correo) : Promise.resolve())
+      user ? cargarDatosUsuario(user.correo) : Promise.resolve(),
+      user && esAdmin(user) ? cargarDatosAdmin() : Promise.resolve()
     ];
     const [gruposSnap, pfSnap] = await Promise.all(promesas);
 
