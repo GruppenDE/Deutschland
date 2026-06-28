@@ -1249,6 +1249,9 @@
   <button class="drawer-item" id="drawerBtnSesion" onclick="cerrarDrawer()">
     <span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> <span id="drawerSesionLabel">Anmelden</span>
   </button>
+  <button class="drawer-item" id="drawerBtnAdmin" style="display:none;color:#ffd9a0" onclick="abrirAdmin();cerrarDrawer()">
+    <span class="d-ico">⚙️</span> <span>Admin-Panel</span>
+  </button>
   <button class="drawer-item" id="drawerBtnMisGrupos" style="display:none" onclick="abrirMisGrupos();cerrarDrawer()">
     <span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span> <span>Meine Gruppen</span>
   </button>
@@ -3488,15 +3491,18 @@ function _sincDrawerSesion(){
   const user=typeof obtenerSesion==="function"?obtenerSesion():null;
   const label=document.getElementById("drawerSesionLabel");
   const misGruposBtn=document.getElementById("drawerBtnMisGrupos");
+  const adminBtn=document.getElementById("drawerBtnAdmin");
   const btnSesion=document.getElementById("drawerBtnSesion");
   const t=_traducciones[_idiomaActual]||_traducciones["de"];
   if(user){
     if(label) label.textContent=t.abmelden+" ("+((user.nombre||user.correo)||"")+")";
     if(misGruposBtn) misGruposBtn.style.display="flex";
+    if(adminBtn) adminBtn.style.display=(typeof esAdmin==="function"&&esAdmin(user))?"flex":"none";
     if(btnSesion) btnSesion.onclick=()=>{if(typeof cerrarSesion==="function")cerrarSesion();cerrarDrawer();};
   } else {
     if(label) label.textContent=t.anmelden;
     if(misGruposBtn) misGruposBtn.style.display="none";
+    if(adminBtn) adminBtn.style.display="none";
     if(btnSesion) btnSesion.onclick=()=>{abrirAuth("login");cerrarDrawer();};
   }
 }
