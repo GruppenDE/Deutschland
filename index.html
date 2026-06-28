@@ -1,0 +1,3716 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gruppen🇩🇪</title>
+
+<!-- ===== FIREBASE SDK v8 (compat — funciona con scripts normales) ===== -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyA3GpW1N7i9YNdw7KtZXx5VFgWyWoyoBYM",
+    authDomain: "gruppende-94f00.firebaseapp.com",
+    projectId: "gruppende-94f00",
+    storageBucket: "gruppende-94f00.firebasestorage.app",
+    messagingSenderId: "902209990512",
+    appId: "1:902209990512:web:eee7151f40ac41c70ba9b5",
+    measurementId: "G-WD6PVR87MR"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const _db  = firebase.firestore();
+  const _auth = firebase.auth();
+  const _googleProvider = new firebase.auth.GoogleAuthProvider();
+</script>
+<!-- ===== /FIREBASE SDK ===== -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --verde:#1FAF55;
+    --verde-d:#168a42;
+    --tele:#229ED9;
+    --tele-d:#1a7eae;
+    --oro:#F5A623;
+    --bg:#f3f5f4;
+    --card:#ffffff;
+    --texto:#1c2422;
+    --sub:#6b7674;
+    --borde:#e7ebe9;
+    --radio:16px;
+    --sombra:0 4px 16px rgba(20,30,28,.07);
+    --sombra-hov:0 10px 28px rgba(20,30,28,.14);
+  }
+  *{box-sizing:border-box}
+  body{
+    font-family:'Inter',Arial,sans-serif;
+    margin:0;background:var(--bg);color:var(--texto);
+    -webkit-font-smoothing:antialiased;
+    transition:background .25s,color .25s;
+  }
+  h1,h2,h3{font-family:'Poppins',Arial,sans-serif;margin:0}
+
+  /* HEADER */
+  header{
+    background:linear-gradient(120deg,var(--verde) 0%,var(--verde-d) 100%);
+    color:#fff;padding:0 24px;position:sticky;top:0;z-index:50;
+    box-shadow:0 2px 16px rgba(0,0,0,.15);
+    height:64px;
+  }
+  .header-row{
+    display:flex;align-items:center;justify-content:space-between;
+    max-width:1100px;margin:0 auto;height:100%;gap:16px;
+  }
+
+  /* LOGO */
+  .logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .logo .mark{
+    width:36px;height:36px;border-radius:10px;background:#ffffff22;
+    display:flex;align-items:center;justify-content:center;
+    border:1.5px solid rgba(255,255,255,.25);
+  }
+  .logo h1{font-size:21px;letter-spacing:.2px;font-weight:800}
+
+  /* UTILS: modo + idioma */
+  .header-utils{
+    display:flex;align-items:center;gap:4px;
+    background:rgba(255,255,255,.12);
+    border:1.5px solid rgba(255,255,255,.2);
+    border-radius:12px;padding:4px 6px;
+    backdrop-filter:blur(6px);
+    flex-shrink:0;
+  }
+  .util-btn{
+    background:none;border:none;cursor:pointer;
+    padding:4px 6px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .18s;
+  }
+  .util-btn:hover{background:rgba(255,255,255,.18)}
+  .util-sep{
+    width:1px;height:22px;background:rgba(255,255,255,.25);
+    flex-shrink:0;margin:0 2px;
+  }
+
+  /* NAV: solo Agregar + Sesión */
+  nav{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+  /* Botón Agregar — pill blanco con shimmer */
+  .btn-agregar{
+    display:flex;align-items:center;gap:7px;
+    padding:0 18px;height:38px;border-radius:999px;
+    background:#fff;color:var(--verde-d);
+    border:none;cursor:pointer;
+    font-weight:700;font-size:14px;letter-spacing:.1px;
+    position:relative;overflow:hidden;
+    box-shadow:0 2px 10px rgba(0,0,0,.15);
+    transition:transform .18s, box-shadow .18s, background .18s;
+    white-space:nowrap;
+  }
+  .btn-agregar svg{flex-shrink:0;color:var(--verde-d)}
+  .btn-agregar::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.55) 50%,transparent 60%);
+    transform:translateX(-100%);transition:transform .55s ease;
+  }
+  .btn-agregar:hover::after{transform:translateX(100%)}
+  .btn-agregar:hover{
+    transform:translateY(-1px);
+    box-shadow:0 5px 18px rgba(0,0,0,.22);
+    background:#f0fdf4;
+  }
+  .btn-agregar:active{transform:translateY(0);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+
+  /* Zona sesión — estilo ghost pill */
+  #zonaSesion a,
+  #zonaSesion > button:not(.btn-avatar){
+    display:inline-flex;align-items:center;gap:7px;
+    padding:0 16px;height:38px;border-radius:999px;
+    border:1.5px solid rgba(255,255,255,.5);
+    background:transparent;color:#fff;
+    font-weight:600;font-size:14px;cursor:pointer;
+    text-decoration:none;white-space:nowrap;
+    transition:background .18s, border-color .18s, transform .15s;
+  }
+  #zonaSesion a:hover,
+  #zonaSesion > button:not(.btn-avatar):hover{
+    background:rgba(255,255,255,.18);
+    border-color:rgba(255,255,255,.85);
+    transform:translateY(-1px);
+  }
+
+  /* Avatar de usuario cuando ya está logueado */
+  .btn-avatar{
+    width:36px;height:36px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.6);
+    background:rgba(255,255,255,.15);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:15px;font-weight:700;color:#fff;
+    transition:border-color .18s, transform .15s;
+    overflow:hidden;
+  }
+  .btn-avatar:hover{border-color:#fff;transform:scale(1.07)}
+
+  /* lang-btn sin código de texto */
+  .lang-btn{padding:4px 5px!important}
+  .lang-btn .lang-flag{font-size:20px;line-height:1}
+  .lang-btn .lang-chevron{font-size:9px;opacity:.7;transition:transform .22s;margin-left:1px}
+  .lang-selector.open .lang-chevron{transform:rotate(180deg)}
+
+  /* Responsive móvil */
+  @media(max-width:700px){
+    header{padding:0 14px;height:58px}
+    .logo h1{font-size:18px}
+    .logo .mark{width:32px;height:32px}
+    nav{display:none!important}
+    .header-utils{display:none!important}
+    .btn-hamburger{display:flex!important}
+    .nav-drawer{display:flex!important}
+    .nav-overlay{display:block!important}
+    .cat-bar{top:58px!important}
+  }
+  @media(min-width:701px){
+    .nav-drawer,.nav-overlay{display:none!important}
+    .btn-hamburger{display:none!important}
+  }
+
+  /* Botón hamburguesa */
+  .btn-hamburger{
+    display:none;
+    background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.28);
+    border-radius:10px;cursor:pointer;
+    flex-direction:column;justify-content:center;align-items:center;gap:5px;
+    width:40px;height:40px;flex-shrink:0;transition:.2s;padding:0;
+  }
+  .btn-hamburger:hover{background:rgba(255,255,255,.28)}
+  .btn-hamburger span{
+    display:block;width:18px;height:2px;background:#fff;border-radius:2px;
+    transition:transform .28s ease,opacity .2s ease;transform-origin:center;
+  }
+  .btn-hamburger.abierto span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+  .btn-hamburger.abierto span:nth-child(2){opacity:0;transform:scaleX(0)}
+  .btn-hamburger.abierto span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+  /* Drawer móvil */
+  .nav-drawer{
+    display:none;
+    position:fixed;top:0;right:0;bottom:0;
+    width:min(300px,88vw);
+    background:linear-gradient(160deg,#1d7a43 0%,var(--verde-d) 100%);
+    z-index:200;padding:72px 16px 30px;
+    flex-direction:column;gap:4px;
+    box-shadow:-8px 0 32px rgba(0,0,0,.28);
+    transform:translateX(100%);transition:transform .32s cubic-bezier(.22,1,.36,1);
+    overflow-y:auto;
+  }
+  .nav-drawer.abierto{transform:translateX(0)}
+  .nav-overlay{
+    display:none;position:fixed;inset:0;z-index:199;
+    background:rgba(0,0,0,.4);opacity:0;pointer-events:none;
+    transition:opacity .28s ease;backdrop-filter:blur(2px);
+  }
+  .nav-overlay.visible{opacity:1;pointer-events:auto}
+
+  .nav-drawer .drawer-seccion{
+    font-size:10.5px;font-weight:700;letter-spacing:1px;
+    color:rgba(255,255,255,.5);text-transform:uppercase;
+    padding:16px 10px 6px;margin-top:4px;
+    border-top:1px solid rgba(255,255,255,.1);
+  }
+  .nav-drawer .drawer-seccion:first-child{border-top:none;padding-top:0}
+  .nav-drawer .drawer-item{
+    display:flex;align-items:center;gap:12px;
+    padding:12px 14px;border-radius:12px;
+    background:transparent;border:none;cursor:pointer;
+    color:#fff;font-size:15px;font-weight:500;width:100%;text-align:left;
+    transition:background .18s;text-decoration:none;
+  }
+  .nav-drawer .drawer-item:hover{background:rgba(255,255,255,.14)}
+  .nav-drawer .drawer-item .d-ico{font-size:18px;width:24px;height:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
+  .drawer-controls{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 14px;background:rgba(255,255,255,.08);
+    border-radius:12px;border:1px solid rgba(255,255,255,.12);
+  }
+  .drawer-controls .dc-label{font-size:13px;color:rgba(255,255,255,.8);flex:1}
+  .drawer-lang-opts{display:flex;flex-direction:column;gap:3px;padding:4px 0}
+  .drawer-lang-opt{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 14px;border-radius:11px;border:none;
+    background:transparent;cursor:pointer;color:#fff;
+    font-size:14.5px;font-weight:500;width:100%;text-align:left;
+    transition:background .15s;
+  }
+  .drawer-lang-opt:hover{background:rgba(255,255,255,.14)}
+  .drawer-lang-opt.activa{background:rgba(255,255,255,.2);font-weight:700}
+  .drawer-lang-opt .dlf{font-size:21px;flex-shrink:0}
+  .drawer-lang-opt .dlcheck{margin-left:auto;opacity:0;color:rgba(255,255,255,.9);font-size:14px}
+  .drawer-lang-opt.activa .dlcheck{opacity:1}
+
+  /* ===== TOGGLE DÍA/NOCHE ESTILO TELEGRAM ===== */
+  nav button.modo{
+    background:none;border:none;cursor:pointer;
+    padding:0;margin:0 2px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .tg-toggle{
+    position:relative;
+    width:52px;height:28px;
+  }
+  .tg-track{
+    position:absolute;inset:0;
+    border-radius:999px;
+    background:rgba(255,255,255,.22);
+    transition:background .4s ease;
+  }
+  body.dark .tg-track{ background:rgba(255,255,255,.18); }
+  .tg-thumb{
+    position:absolute;
+    top:4px;left:4px;
+    width:20px;height:20px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 1px 5px rgba(0,0,0,.3);
+    transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+  }
+  body.dark .tg-thumb{ transform:translateX(24px); }
+  .tg-icons{
+    position:relative;width:13px;height:13px;
+  }
+  .tg-sol,.tg-luna{
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    transition:opacity .35s ease, transform .45s cubic-bezier(.34,1.2,.64,1);
+  }
+  .tg-sol{ opacity:1; transform:rotate(0deg) scale(1); }
+  body.dark .tg-sol{ opacity:0; transform:rotate(90deg) scale(.4); }
+  .tg-luna{ opacity:0; transform:rotate(-90deg) scale(.4); }
+  body.dark .tg-luna{ opacity:1; transform:rotate(0deg) scale(1); }
+  .tg-stars{
+    position:absolute;inset:0;border-radius:999px;overflow:hidden;
+    pointer-events:none;
+  }
+  .tg-star{
+    position:absolute;
+    background:#fff;border-radius:50%;
+    opacity:0;transform:scale(0);
+    transition:opacity .4s ease, transform .4s ease;
+  }
+  body.dark .tg-star{ opacity:1; transform:scale(1); }
+  .tg-star:nth-child(1){ width:3px;height:3px; top:6px; right:8px;  transition-delay:.05s; }
+  .tg-star:nth-child(2){ width:2px;height:2px; top:13px;right:5px;  transition-delay:.12s; }
+  .tg-star:nth-child(3){ width:2px;height:2px; top:4px; right:14px; transition-delay:.2s;  }
+
+  /* CATEGORY BAR */
+  .cat-bar{
+    background:#fff;
+    border-bottom:1px solid var(--borde);position:sticky;top:64px;z-index:40;
+    box-shadow:0 2px 8px rgba(20,100,50,.08);
+  }
+  .cat-row{
+    max-width:1100px;margin:0 auto;display:flex;gap:12px;overflow-x:auto;
+    padding:16px 20px;scrollbar-width:thin;
+  }
+  .cat-row::-webkit-scrollbar{height:5px}
+  .cat-row::-webkit-scrollbar-thumb{background:#ddd;border-radius:10px}
+  .chip{
+    flex:0 0 auto;display:flex;align-items:center;gap:9px;
+    padding:12px 20px;border-radius:999px;border:1.5px solid var(--borde);
+    background:#f5f7f6;color:var(--texto);font-size:15.5px;font-weight:500;
+    cursor:pointer;white-space:nowrap;transition:.18s ease;user-select:none;
+  }
+  .chip:hover{border-color:var(--verde);background:#edf7f0;transform:translateY(-1px)}
+  .chip.activo{background:var(--verde);border-color:var(--verde);color:#fff;box-shadow:var(--sombra)}
+  .chip .ico{font-size:18px}
+  body.dark .cat-bar{background:#0f1311;border-color:#1e2824}
+  body.dark .chip{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#e0f0e8}
+  body.dark .chip:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.45)}
+  body.dark .chip.activo{background:#fff;border-color:#fff;color:var(--verde-d)}
+
+  /* BUSCADOR */
+  #buscar{
+    width:min(560px,90%);padding:13px 18px;margin:18px auto 6px;display:block;
+    border:1.5px solid var(--borde);border-radius:12px;font-size:15px;outline:none;
+    background:#fff;box-shadow:var(--sombra);transition:border-color .2s;
+  }
+  @media (max-width:600px){
+    #buscar{width:calc(100% - 24px);margin:14px 12px 6px;font-size:14px}
+    .resultado-info{padding:0 12px}
+    .paginacion{padding:0 12px 40px}
+  }
+  #buscar:focus{border-color:var(--verde)}
+
+  .resultado-info{
+    text-align:center;color:var(--sub);font-size:13.5px;margin:4px 0 10px;
+  }
+
+  /* GRID / CARDS */
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
+    gap:22px;padding:10px 24px 40px;max-width:1100px;margin:0 auto;
+  }
+  @media (max-width:600px){
+    .grid{grid-template-columns:1fr;padding:10px 12px 40px;gap:16px}
+  }
+  .card{
+    background:var(--card);border-radius:var(--radio);box-shadow:var(--sombra);
+    overflow:hidden;display:flex;flex-direction:column;
+    transition:transform .22s ease, box-shadow .22s ease;border:1px solid var(--borde);
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:var(--sombra-hov)}
+
+  .img-wrap{position:relative;aspect-ratio:16/9;overflow:hidden;background:#e9ecea}
+  .img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
+  .card:hover .img-wrap img{transform:scale(1.06)}
+  .plataforma-badge{
+    position:absolute;top:10px;left:10px;display:flex;align-items:center;gap:5px;
+    padding:5px 10px 5px 6px;border-radius:999px;font-size:12px;font-weight:600;color:#fff;
+    backdrop-filter:blur(2px);
+  }
+  .plataforma-badge.w{background:rgba(31,175,85,.92)}
+  .plataforma-badge.t{background:rgba(34,158,217,.92)}
+  .plataforma-badge .circ{width:18px;height:18px;border-radius:50%;background:#fff2;display:flex;align-items:center;justify-content:center;font-size:11px}
+
+  .card-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .tag{
+    align-self:flex-start;font-size:11.5px;font-weight:600;color:var(--verde-d);
+    background:#1FAF551a;padding:3px 10px;border-radius:999px;
+  }
+  .card h3{font-size:17.5px;line-height:1.3}
+  .meta{color:var(--sub);font-size:13px;display:flex;align-items:center;gap:6px;margin-top:-2px}
+
+  .acciones{display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:10px}
+  .btn-unirse{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px 14px;border-radius:10px;color:#fff;text-decoration:none;
+    font-weight:600;font-size:14.5px;position:relative;overflow:hidden;
+    transition:transform .18s, box-shadow .18s;
+  }
+  .btn-unirse.w{background:linear-gradient(135deg,var(--verde),var(--verde-d))}
+  .btn-unirse.t{background:linear-gradient(135deg,var(--tele),var(--tele-d))}
+  .btn-unirse:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.18)}
+  .btn-unirse .flecha{transition:transform .18s}
+  .btn-unirse:hover .flecha{transform:translateX(3px)}
+
+  .btn-fav{
+    position:absolute;bottom:10px;right:10px;
+    width:auto;min-width:38px;height:34px;border-radius:999px;border:none;
+    background:rgba(0,0,0,.45);backdrop-filter:blur(4px);
+    cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;
+    gap:4px;padding:0 10px;transition:background .2s ease, transform .18s ease, box-shadow .2s ease;flex:0 0 auto;color:#fff;
+  }
+  .btn-fav .fav-num{font-size:12px;font-weight:700;color:rgba(255,255,255,.85);transition:color .2s}
+  .btn-fav.activo .fav-num{color:var(--oro)}
+
+  /* animación del número al sumar */
+  @keyframes numSube{
+    0%  {transform:translateY(0)   scale(1);   opacity:1}
+    30% {transform:translateY(-8px) scale(1.35); opacity:.4}
+    60% {transform:translateY(6px)  scale(.8);  opacity:0}
+    61% {transform:translateY(6px)  scale(.8);  opacity:0}
+    100%{transform:translateY(0)   scale(1);   opacity:1}
+  }
+  @keyframes numBaja{
+    0%  {transform:translateY(0)   scale(1);   opacity:1}
+    30% {transform:translateY(8px)  scale(1.35); opacity:.4}
+    60% {transform:translateY(-6px) scale(.8);  opacity:0}
+    61% {transform:translateY(-6px) scale(.8);  opacity:0}
+    100%{transform:translateY(0)   scale(1);   opacity:1}
+  }
+  .fav-num.anim-sube{animation:numSube .42s cubic-bezier(.22,1,.36,1) forwards}
+  .fav-num.anim-baja{animation:numBaja .42s cubic-bezier(.22,1,.36,1) forwards}
+
+  /* partícula +1 flotante */
+  .fav-particle{
+    position:absolute;bottom:44px;right:10px;
+    font-size:13px;font-weight:800;color:#fff;
+    text-shadow:0 0 8px rgba(255,215,0,.9),0 0 2px #000;
+    pointer-events:none;z-index:10;
+    animation:particleUp .65s ease forwards;
+  }
+  @keyframes particleUp{
+    0%  {opacity:1;transform:translateY(0) scale(1)}
+    70% {opacity:1;transform:translateY(-24px) scale(1.15)}
+    100%{opacity:0;transform:translateY(-36px) scale(.8)}
+  }
+  .btn-fav:hover{
+    background:rgba(255,255,255,.28);
+    box-shadow:0 0 14px 4px rgba(255,255,255,.55);
+    transform:scale(1.1);
+  }
+  .btn-fav:active{
+    background:rgba(255,255,255,.55);
+    box-shadow:0 0 22px 8px rgba(255,255,255,.8);
+    transform:scale(1.18);
+  }
+  .btn-fav.activo{background:rgba(245,166,35,.25);border:1.5px solid var(--oro)}
+  .btn-fav.activo:hover{
+    background:rgba(255,255,255,.28);
+    box-shadow:0 0 14px 4px rgba(255,255,255,.55);
+  }
+  .btn-fav.pulso{animation:pulso .35s ease}
+  @keyframes pulso{0%{transform:scale(1)}45%{transform:scale(1.3)}100%{transform:scale(1)}}
+  .btn-fav.fav-bloqueado{opacity:.6;cursor:not-allowed}
+  .btn-fav.fav-bloqueado:hover{transform:none;box-shadow:none;background:rgba(0,0,0,.45)}
+
+/* ===== SPLASH SCREEN ===== */
+  #splash{
+    position:fixed;inset:0;z-index:9999;
+    background:linear-gradient(135deg,#1a6b3a 0%,#1FAF55 50%,#168a42 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    transition:opacity .5s ease, transform .5s ease;
+  }
+  #splash.oculto{opacity:0;pointer-events:none;transform:scale(1.04)}
+
+  .splash-logo{
+    display:flex;align-items:center;gap:14px;
+    opacity:0;transform:translateY(24px);
+    animation:splashLogo .6s cubic-bezier(.22,1,.36,1) .3s forwards;
+  }
+  .splash-icon{
+    width:56px;height:56px;border-radius:16px;
+    background:rgba(255,255,255,.2);
+    display:flex;align-items:center;justify-content:center;font-size:28px;
+    box-shadow:0 4px 20px rgba(0,0,0,.2);
+  }
+  .splash-titulo{
+    font-family:'Poppins',Arial,sans-serif;
+    font-size:38px;font-weight:800;color:#fff;
+    letter-spacing:-.5px;line-height:1;
+  }
+  .splash-titulo span{opacity:.85}
+
+  .splash-tagline{
+    font-family:'Inter',Arial,sans-serif;
+    font-size:14px;color:rgba(255,255,255,.75);
+    letter-spacing:.8px;text-transform:uppercase;font-weight:500;
+    opacity:0;
+    animation:splashFade .5s ease .9s forwards;
+  }
+
+  .splash-bar-wrap{
+    width:160px;height:3px;border-radius:999px;
+    background:rgba(255,255,255,.2);overflow:hidden;
+    opacity:0;animation:splashFade .4s ease 1s forwards;
+  }
+  .splash-bar{
+    height:100%;border-radius:999px;background:#fff;width:0;
+    animation:splashProgress 1.1s cubic-bezier(.4,0,.2,1) 1s forwards;
+  }
+
+  @keyframes splashLogo{
+    to{opacity:1;transform:translateY(0)}
+  }
+  @keyframes splashFade{
+    to{opacity:1}
+  }
+  @keyframes splashProgress{
+    to{width:100%}
+  }
+  @keyframes cardEntrada{
+    from{opacity:0;transform:translateY(18px)}
+    to  {opacity:1;transform:translateY(0)}
+  }
+  .grid.animando .card{
+    opacity:0;
+    animation:cardEntrada .38s ease forwards;
+  }
+  .grid.animando .card:nth-child(1){animation-delay:.00s}
+  .grid.animando .card:nth-child(2){animation-delay:.06s}
+  .grid.animando .card:nth-child(3){animation-delay:.12s}
+  .grid.animando .card:nth-child(4){animation-delay:.18s}
+  .grid.animando .card:nth-child(5){animation-delay:.24s}
+  .grid.animando .card:nth-child(6){animation-delay:.30s}
+  .paginacion{
+    display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap;
+    padding:0 24px 50px;max-width:1100px;margin:0 auto;
+  }
+  .pag-btn{
+    min-width:38px;height:38px;border-radius:9px;border:1.5px solid var(--borde);
+    background:#fff;color:var(--texto);font-weight:600;font-size:14px;cursor:pointer;
+    transition:.18s ease;
+  }
+  .pag-btn:hover:not(:disabled){border-color:var(--verde);transform:translateY(-1px)}
+  .pag-btn.activo{background:var(--verde);border-color:var(--verde);color:#fff;box-shadow:var(--sombra)}
+  .pag-btn:disabled{opacity:.4;cursor:not-allowed}
+  body.dark .pag-btn{background:#171c1a;border-color:#262e2b;color:#eef2f0}
+
+  /* TOAST */
+  #toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:#1c2422;color:#fff;padding:11px 20px;border-radius:10px;font-size:14px;
+    opacity:0;pointer-events:none;transition:.25s ease;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:99;
+    display:flex;align-items:center;gap:8px;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .vacio{text-align:center;color:var(--sub);padding:60px 20px;grid-column:1/-1}
+  .vacio .e{font-size:38px;display:block;margin-bottom:10px}
+
+  /* FOOTER PROFESIONAL */
+  footer{background:#121614;color:#9aa6a2;font-size:13.8px}
+  .footer-top{
+    max-width:1100px;margin:0 auto;padding:48px 24px 32px;
+    display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:32px;
+  }
+  .footer-marca .logo{margin-bottom:12px}
+  .footer-marca .mark{background:#1FAF551f}
+  .footer-marca p{color:#7d8985;line-height:1.6;max-width:280px;margin-top:10px}
+  .footer-redes{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .footer-redes a{
+    width:38px;height:38px;border-radius:9px;background:#1c2220;display:flex;
+    align-items:center;justify-content:center;color:#cfd8d4;text-decoration:none;
+    font-size:15px;transition:.18s;
+  }
+  .footer-redes a:hover{color:#fff;transform:translateY(-2px)}
+  .footer-redes a[aria-label="WhatsApp"]:hover{background:#25D366}
+  .footer-redes a[aria-label="Telegram"]:hover{background:#229ED9}
+  .footer-redes a[aria-label="Facebook"]:hover{background:#1877F2}
+  .footer-redes a[aria-label="Instagram"]:hover{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)}
+  .footer-col h4{color:#fff;font-size:14.5px;margin-bottom:14px;letter-spacing:.3px}
+  .footer-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+  .footer-col a{color:#9aa6a2;text-decoration:none;transition:color .18s}
+  .footer-col a:hover{color:#fff}
+  .footer-bottom{
+    border-top:1px solid #202623;padding:18px 24px;max-width:1100px;margin:0 auto;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+    color:#6f7a76;font-size:12.8px;
+  }
+  .footer-bottom b{color:#cfd8d4}
+  .footer-legal{display:flex;gap:18px;flex-wrap:wrap}
+  .footer-legal a{color:#6f7a76;text-decoration:none}
+  .footer-legal a:hover{color:#cfd8d4}
+
+  @media (max-width:760px){
+    .footer-top{grid-template-columns:1fr 1fr;gap:28px 20px;padding:36px 16px 24px}
+    .footer-marca{grid-column:1/-1}
+    .footer-bottom{flex-direction:column;align-items:center;text-align:center;gap:8px;padding:16px}
+    .footer-legal{justify-content:center}
+  }
+  @media (max-width:480px){
+    .footer-top{grid-template-columns:1fr;gap:24px;padding:28px 16px 20px}
+  }
+
+  /* BANNER AÑADIR GRUPO */
+  .banner-agregar{
+    max-width:1100px;margin:18px auto 6px;padding:0 24px;
+  }
+  .banner-agregar-inner{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    background:linear-gradient(120deg,var(--verde) 0%,var(--verde-d) 100%);
+    border-radius:14px;padding:16px 22px;box-shadow:0 4px 16px rgba(31,175,85,.25);
+  }
+  .banner-agregar-texto{color:#fff}
+  .banner-agregar-texto strong{display:block;font-family:'Poppins',Arial,sans-serif;font-size:16px;font-weight:700;margin-bottom:2px}
+  .banner-agregar-texto span{font-size:13px;opacity:.88}
+  .btn-agregar-banner{
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;
+    background:#fff;color:var(--verde-d);font-weight:700;font-size:14.5px;
+    padding:11px 20px;border-radius:10px;border:none;cursor:pointer;white-space:nowrap;
+    transition:transform .15s,box-shadow .15s;box-shadow:0 2px 8px rgba(0,0,0,.12);
+  }
+  .btn-agregar-banner:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.18)}
+  .btn-agregar-banner .plus{font-size:18px;line-height:1}
+  @media (max-width:540px){
+    .banner-agregar{padding:0 12px;margin:14px auto 4px}
+    .banner-agregar-inner{flex-direction:column;align-items:flex-start;gap:12px;padding:14px 16px}
+    .btn-agregar-banner{width:100%;justify-content:center}
+  }
+
+  /* MODO OSCURO */
+  body.dark{background:#0f1311;color:#eef2f0}
+  body.dark .cat-bar{background:linear-gradient(120deg,#0d5c2a 0%,#0a4520 100%);box-shadow:0 2px 8px rgba(0,0,0,.35)}
+  body.dark .chip{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#e0f0e8}
+  body.dark .chip:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.45)}
+  body.dark .chip.activo{background:#fff;border-color:#fff;color:var(--verde-d)}
+  body.dark #buscar{background:#1d2421;border-color:#3a4440;color:#eef2f0}
+  body.dark #buscar::placeholder{color:#8a9a96}
+  body.dark .card{background:#1a201e;border-color:#2e3835;color:#eef2f0}
+  body.dark .card h3{color:#f0f4f2}
+  body.dark .card .meta{color:#a8b8b4}
+  body.dark .btn-fav.activo .fav-num{color:var(--oro)}
+  body.dark .resultado-info{color:#a0aaa6}
+  body.dark .tag{background:#1FAF5526;color:#5dd68c}
+  body.dark .banner-agregar-inner{box-shadow:0 4px 16px rgba(31,175,85,.35)}
+  body.dark .vacio{color:#8a9a96}
+  /* pagination dark */
+  body.dark .pag-btn{background:#1a201e;border-color:#2e3835;color:#d4deda}
+  body.dark .pag-btn:hover:not(:disabled){border-color:var(--verde);color:#fff}
+  body.dark .pag-btn.activo{background:var(--verde);border-color:var(--verde);color:#fff}
+  /* modales dark */
+  body.dark .modal{background:#1a201e;color:#eef2f0}
+  body.dark .modal h2{color:#f0f4f2}
+  body.dark .modal .sub{color:#a8b8b4}
+  body.dark .campo label{color:#b0bfbb}
+  body.dark .campo input{background:#222a27;border-color:#3a4440;color:#eef2f0}
+  body.dark .campo input::placeholder{color:#6a7a76}
+  body.dark .btn-google{background:#222a27;border-color:#3a4440;color:#eef2f0}
+  body.dark .pie-auth{color:#a8b8b4}
+  body.dark .divisor{color:#8a9a96}
+  body.dark .divisor::before,.dark .divisor::after{background:#2e3835}
+  /* menu usuario dark */
+  body.dark .menu-usuario{background:#1a201e;color:#eef2f0;border:1px solid #2e3835}
+  body.dark .menu-usuario button{color:#eef2f0}
+  body.dark .menu-usuario button:hover{background:#222a27}
+  /* admin dark */
+  body.dark .admin-modal{background:#1a201e;color:#eef2f0}
+  body.dark .admin-modal h2{color:#f0f4f2}
+  body.dark .admin-campo label{color:#b0bfbb}
+  body.dark .admin-tabla th{background:#222a27;color:#c8d8d4}
+  body.dark .admin-tabla td{color:#d4deda;border-color:#2e3835}
+  body.dark .admin-tabla tr:hover{background:#1d2421}
+  /* solicitudes dark */
+  body.dark .estado-solicitud.pendiente{background:#2a2008;color:#e5bc60}
+  body.dark .estado-solicitud.aprobado{background:#0a2016;color:#4cd98a}
+  body.dark .estado-solicitud.rechazado{background:#2a0808;color:#f87171}
+  /* chat burbuja dark */
+  body.dark .chat-burbuja.admin{background:#222a27;color:#eef2f0}
+  /* agrupación textarea dark */
+  body.dark textarea{background:#222a27!important;border-color:#3a4440!important;color:#eef2f0!important}
+  body.dark textarea::placeholder{color:#6a7a76!important}
+  /* texto general modo oscuro */
+  body.dark .mis-grupos-seccion h2,
+  body.dark .mis-grupos-header h2,
+  body.dark .mis-grupos-vacio strong{color:#f0f4f2}
+  body.dark .mis-grupos-header p,
+  body.dark .mis-grupos-vacio{color:#a8b8b4}
+  body.dark .campo-checkbox{color:#d4deda}
+
+  @media (max-width:520px){
+    .logo h1{font-size:18px}
+    nav a, nav button.modo{padding:7px 9px;font-size:13px}
+    .btn-agregar{display:none} /* se oculta del header en móvil, queda el banner */
+    .header-row{gap:6px}
+  }
+
+  /* NAV — sesión */
+  .btn-sesion{
+    color:#fff;background:rgba(255,255,255,.16);font-weight:600;
+    padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:14.5px;
+    transition:background .2s;
+  }
+  .btn-sesion:hover{background:rgba(255,255,255,.28)}
+  .chip-usuario{
+    display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.16);
+    padding:5px 12px 5px 6px;border-radius:999px;cursor:pointer;position:relative;
+  }
+  .chip-usuario .avatar{
+    width:28px;height:28px;border-radius:50%;background:#fff;color:var(--verde-d);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;
+  }
+  .chip-usuario span{font-size:14px;font-weight:600}
+  .menu-usuario{
+    position:absolute;top:42px;right:0;background:#fff;color:var(--texto);
+    border-radius:10px;box-shadow:var(--sombra-hov);min-width:160px;overflow:hidden;
+    display:none;z-index:60;
+  }
+  .menu-usuario.abierto{display:block}
+  .menu-usuario button{
+    width:100%;text-align:left;background:none;border:none;padding:11px 14px;
+    font-size:14px;cursor:pointer;color:var(--texto);
+  }
+  .menu-usuario button:hover{background:#f4f5f4}
+
+  /* MODALES (login / registro / verificación de edad) */
+  .overlay{
+    position:fixed;inset:0;background:rgba(10,14,12,.55);display:flex;
+    align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;
+    transition:opacity .2s;padding:18px;
+  }
+  .overlay.abierto{opacity:1;pointer-events:auto}
+  .modal{
+    background:#fff;border-radius:18px;width:min(380px,100%);padding:28px 26px 26px;
+    box-shadow:0 20px 50px rgba(0,0,0,.25);transform:translateY(14px);transition:transform .22s;
+    position:relative;max-height:92vh;overflow:auto;
+  }
+  .overlay.abierto .modal{transform:translateY(0)}
+  body.dark .modal{background:#171c1a;color:#eef2f0}
+  .modal .cerrar{
+    position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;
+    cursor:pointer;color:var(--sub);
+  }
+  .modal h2{font-size:21px;margin-bottom:4px}
+  .modal .sub{color:var(--sub);font-size:13.5px;margin-bottom:18px}
+  .tabs-auth{display:flex;background:#f1f3f2;border-radius:10px;padding:4px;margin-bottom:18px}
+  body.dark .tabs-auth{background:#1d2421}
+  .tabs-auth button{
+    flex:1;padding:8px;border:none;background:none;border-radius:8px;font-weight:600;
+    font-size:13.5px;cursor:pointer;color:var(--sub);transition:.18s;
+  }
+  .tabs-auth button.activo{background:#fff;color:var(--verde-d);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  body.dark .tabs-auth button.activo{background:#171c1a;color:#fff}
+  .campo{margin-bottom:13px;display:flex;flex-direction:column;gap:5px}
+  .campo label{font-size:12.5px;font-weight:600;color:var(--sub)}
+  .campo input{
+    padding:11px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:14.5px;
+    outline:none;background:#fafbfa;transition:border-color .18s;
+  }
+  body.dark .campo input{background:#1d2421;border-color:#2a332f;color:#fff}
+  .campo input:focus{border-color:var(--verde)}
+  .btn-principal{
+    width:100%;padding:12px;border-radius:10px;border:none;color:#fff;font-weight:700;
+    font-size:14.5px;cursor:pointer;background:linear-gradient(135deg,var(--verde),var(--verde-d));
+    margin-top:6px;transition:transform .15s;
+  }
+  .btn-principal:hover{transform:translateY(-1px)}
+  .divisor{
+    display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--sub);font-size:12.5px;
+  }
+  .divisor::before,.divisor::after{content:"";flex:1;height:1px;background:var(--borde)}
+  .btn-google{
+    width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+    padding:11px;border-radius:10px;border:1.5px solid var(--borde);background:#fff;
+    font-weight:600;font-size:14px;cursor:pointer;color:var(--texto);transition:.18s;
+  }
+  .btn-google:hover{box-shadow:var(--sombra);transform:translateY(-1px)}
+  body.dark .btn-google{background:#1d2421;border-color:#2a332f;color:#fff}
+  .pie-auth{text-align:center;font-size:13px;color:var(--sub);margin-top:16px}
+  .pie-auth a{color:var(--verde-d);font-weight:600;cursor:pointer;text-decoration:none}
+  .error-campo{color:#d9534f;font-size:12.5px;margin-top:-6px;min-height:14px}
+
+  .modal-edad{text-align:center}
+  .modal-edad .e{font-size:42px;display:block;margin-bottom:8px}
+  .acciones-edad{display:flex;gap:10px;margin-top:18px}
+  .acciones-edad button{flex:1;padding:11px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;border:1.5px solid var(--borde)}
+  .acciones-edad .si{background:linear-gradient(135deg,var(--verde),var(--verde-d));color:#fff;border:none}
+  .acciones-edad .no{background:#fff;color:var(--texto)}
+  body.dark .acciones-edad .no{background:#1d2421;color:#fff}
+
+  .tag.plus18{color:#c2410c;background:#fb923c26}
+
+  /* BOTÓN "AÑADIR GRUPO" */
+  .btn-agregar{
+    background:#fff;color:var(--verde-d);font-weight:700;font-size:14px;
+    padding:8px 16px;border-radius:8px;border:none;cursor:pointer;
+    transition:transform .15s,box-shadow .15s;
+  }
+  .btn-agregar:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.18)}
+  @media (max-width:640px){.btn-agregar{padding:8px 11px;font-size:0}.btn-agregar::before{content:"＋";font-size:18px}}
+
+  /* MODAL — AÑADIR GRUPO */
+  .modal-grande{width:min(460px,100%)}
+  .plataforma-toggle{display:flex;gap:10px;margin-bottom:16px}
+  .opcion-plataforma{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;
+    padding:14px 10px;border-radius:12px;border:1.5px solid var(--borde);cursor:pointer;
+    background:#fafbfa;transition:.18s ease;
+  }
+  body.dark .opcion-plataforma{background:#1d2421;border-color:#2a332f}
+  .opcion-plataforma .ic{font-size:22px}
+  .opcion-plataforma span.nombre{font-size:13.5px;font-weight:600}
+  .opcion-plataforma.activa.w{border-color:var(--verde);background:#1FAF551a}
+  .opcion-plataforma.activa.t{border-color:var(--tele);background:#229ED91a}
+  .campo select{
+    padding:11px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:14.5px;
+    outline:none;background:#fafbfa;transition:border-color .18s;color:var(--texto);
+    appearance:none;
+  }
+  body.dark .campo select{background:#1d2421;border-color:#2a332f;color:#fff}
+  .campo select:focus{border-color:var(--verde)}
+  .campo .ayuda{font-size:11.5px;color:var(--sub);margin-top:-2px}
+  .campo-checkbox{
+    display:flex;align-items:flex-start;gap:9px;background:#fb923c14;border:1.5px solid #fb923c40;
+    border-radius:10px;padding:11px 13px;margin:6px 0 14px;font-size:13px;line-height:1.4;color:var(--texto);
+  }
+  .campo-checkbox input{margin-top:2px;flex:0 0 auto}
+  /* ===== SECCIÓN MEINE GRUPPEN (inline) ===== */
+  #panelMisGrupos{display:none}
+  #panelMisGrupos.abierto{display:block}
+  .mis-grupos-seccion{
+    max-width:1100px;margin:0 auto;padding:0 24px 40px;
+  }
+  @media(max-width:600px){.mis-grupos-seccion{padding:0 12px 32px}}
+  .mis-grupos-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 0 18px;border-bottom:1px solid var(--borde);margin-bottom:22px;
+  }
+  body.dark .mis-grupos-header{border-color:#2e3835}
+  .mis-grupos-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(270px,1fr));
+    gap:22px;
+  }
+  @media(max-width:600px){
+    .mis-grupos-grid{grid-template-columns:1fr;gap:16px}
+  }
+  .mis-grupos-vacio{
+    grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--sub);
+  }
+  .mis-grupos-vacio .e{font-size:42px;display:block;margin-bottom:12px}
+  /* badge de estado en la card del usuario */
+  .estado-card-badge{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;
+    margin-bottom:4px;
+  }
+  .estado-card-badge.pendiente{background:#fef3c7;color:#92400e}
+  .estado-card-badge.aprobado{background:#d1fae5;color:#065f46}
+  .estado-card-badge.rechazado{background:#fee2e2;color:#dc2626}
+  body.dark .estado-card-badge.pendiente{background:#2a2008;color:#e5bc60}
+  body.dark .estado-card-badge.aprobado{background:#0a2016;color:#4cd98a}
+  body.dark .estado-card-badge.rechazado{background:#2a0808;color:#f87171}
+
+  /* ===== PANEL ADMINISTRADOR ===== */
+  .admin-badge{
+    background:linear-gradient(135deg,#f59e0b,#d97706);
+    color:#fff;font-size:10px;font-weight:800;padding:2px 7px;
+    border-radius:999px;letter-spacing:.5px;text-transform:uppercase;
+  }
+  #panelAdmin{
+    display:none;position:fixed;inset:0;z-index:300;background:rgba(8,12,10,.6);
+    align-items:flex-start;justify-content:center;padding:20px 12px;overflow-y:auto;
+  }
+  #panelAdmin.abierto{display:flex}
+  .admin-modal{
+    background:#fff;border-radius:20px;width:min(680px,100%);
+    box-shadow:0 24px 60px rgba(0,0,0,.3);position:relative;
+    padding:28px 26px 26px;margin:auto;
+  }
+  body.dark .admin-modal{background:#171c1a;color:#eef2f0}
+  .admin-modal h2{font-size:20px;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+  .admin-tabs{display:flex;gap:6px;margin:18px 0 20px;flex-wrap:wrap}
+  .admin-tab{
+    padding:8px 18px;border-radius:8px;border:1.5px solid var(--borde);
+    background:#fafbfa;font-weight:600;font-size:13.5px;cursor:pointer;transition:.18s;
+  }
+  .admin-tab.activo{background:var(--verde);border-color:var(--verde);color:#fff}
+  body.dark .admin-tab{background:#1d2421;border-color:#2a332f;color:#cfd8d4}
+  .admin-seccion{display:none}
+  .admin-seccion.activa{display:block}
+
+  /* tabla grupos admin */
+  .admin-tabla{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+  .admin-tabla th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--borde);font-size:12px;color:var(--sub);font-weight:700;white-space:nowrap}
+  .admin-tabla td{padding:9px 10px;border-bottom:1px solid var(--borde);vertical-align:middle}
+  body.dark .admin-tabla th,.admin-tabla td{border-color:#262e2b}
+  .admin-tabla tr:hover td{background:#f7f9f8}
+  body.dark .admin-tabla tr:hover td{background:#1d2421}
+  .admin-tabla input[type=number]{width:56px;padding:4px 6px;border-radius:6px;border:1.5px solid var(--borde);font-size:12px;text-align:center}
+  .admin-tabla select{padding:4px 6px;border-radius:6px;border:1.5px solid var(--borde);font-size:12px}
+  .btn-admin-sm{
+    padding:5px 10px;border-radius:6px;border:none;font-size:12px;font-weight:700;
+    cursor:pointer;transition:.15s;
+  }
+  .btn-admin-sm.del{background:#fee2e2;color:#dc2626}
+  .btn-admin-sm.del:hover{background:#dc2626;color:#fff}
+  .btn-admin-sm.save{background:#d1fae5;color:#065f46}
+  .btn-admin-sm.save:hover{background:var(--verde);color:#fff}
+
+  /* form agregar desde admin */
+  .admin-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:500px){.admin-form-grid{grid-template-columns:1fr}}
+  .admin-campo{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+  .admin-campo label{font-size:12px;font-weight:700;color:var(--sub)}
+  .admin-campo input,.admin-campo select{
+    padding:9px 11px;border-radius:8px;border:1.5px solid var(--borde);
+    font-size:13.5px;outline:none;background:#fafbfa;
+  }
+  body.dark .admin-campo input,body.dark .admin-campo select{background:#1d2421;border-color:#2a332f;color:#fff}
+  .admin-campo input:focus,.admin-campo select:focus{border-color:var(--verde)}
+  .admin-full{grid-column:1/-1}
+  .admin-tabla-wrap{max-height:340px;overflow-y:auto;border-radius:10px;border:1px solid var(--borde)}
+  body.dark .admin-tabla-wrap{border-color:#262e2b}
+
+  /* ===== SISTEMA DE APROBACIÓN Y CHAT ===== */
+  /* Botón flotante de chat */
+  #chatFlotante{
+    position:fixed;bottom:28px;right:24px;z-index:500;
+    width:56px;height:56px;border-radius:50%;
+    background:linear-gradient(135deg,var(--verde),var(--verde-d));
+    border:none;cursor:pointer;box-shadow:0 4px 18px rgba(31,175,85,.45);
+    display:none;align-items:center;justify-content:center;font-size:22px;
+    transition:transform .18s,box-shadow .18s;
+  }
+  #chatFlotante:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(31,175,85,.55)}
+  #chatFlotante.visible{display:flex}
+  #chatBadge{
+    position:absolute;top:-3px;right:-3px;background:#ef4444;color:#fff;
+    font-size:10px;font-weight:800;width:18px;height:18px;border-radius:50%;
+    display:none;align-items:center;justify-content:center;
+  }
+  #chatBadge.visible{display:flex}
+
+  /* Panel de chat */
+  #panelChat{
+    position:fixed;bottom:96px;right:24px;z-index:499;width:340px;max-height:480px;
+    background:#fff;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.22);
+    display:none;flex-direction:column;overflow:hidden;border:1px solid var(--borde);
+  }
+  body.dark #panelChat{background:#171c1a;border-color:#262e2b}
+  #panelChat.abierto{display:flex}
+  @media(max-width:400px){
+    #panelChat{width:calc(100vw - 24px);right:12px;bottom:88px}
+  }
+  .chat-header{
+    background:linear-gradient(120deg,var(--verde),var(--verde-d));
+    color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;flex:0 0 auto;
+  }
+  .chat-header .avatar-admin{
+    width:36px;height:36px;border-radius:50%;
+    overflow:hidden;flex:0 0 auto;
+    border:2px solid rgba(255,255,255,.4);
+  }
+  .chat-header .avatar-admin img{width:100%;height:100%;object-fit:cover;display:block}
+  .chat-header-info{flex:1}
+  .chat-header-info strong{display:block;font-size:14.5px}
+  .chat-header-info span{font-size:11.5px;opacity:.85}
+  .chat-header button{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:4px}
+
+  .chat-mensajes{
+    flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:10px;
+    min-height:160px;max-height:280px;
+  }
+  .chat-burbuja{
+    max-width:78%;padding:9px 13px;border-radius:14px;font-size:13.5px;line-height:1.45;
+    word-break:break-word;
+  }
+  .chat-burbuja.admin{
+    align-self:flex-start;background:#f1f5f3;color:var(--texto);border-bottom-left-radius:4px;
+  }
+  body.dark .chat-burbuja.admin{background:#1d2421;color:#eef2f0}
+  .chat-burbuja.usuario{
+    align-self:flex-end;background:linear-gradient(135deg,var(--verde),var(--verde-d));color:#fff;
+    border-bottom-right-radius:4px;
+  }
+  .chat-burbuja .hora{display:block;font-size:10px;opacity:.6;margin-top:4px;text-align:right}
+  .chat-burbuja.admin .hora{text-align:left}
+  /* Ticks de visto estilo WhatsApp */
+  .msg-meta{display:inline-flex;align-items:center;gap:3px;float:right;margin-left:6px;margin-top:2px;vertical-align:bottom;line-height:1}
+  .msg-hora{font-size:10.5px;opacity:.7;white-space:nowrap}
+  .msg-ticks{display:inline-flex;align-items:center;margin-left:1px}
+  .msg-ticks svg{display:block}
+  /* tick simple = enviado */
+  .tick-enviado .tick-stroke{stroke:rgba(255,255,255,0.6)}
+  /* tick doble = entregado (blanco semitransparente) */
+  .tick-entregado .tick-stroke{stroke:rgba(255,255,255,0.6)}
+  /* tick visto = azul claro */
+  .tick-visto .tick-stroke{stroke:#53BDEB}
+  /* para burbujas del admin (fondo claro), ticks en gris oscuro */
+  .chat-burbuja.admin .tick-enviado .tick-stroke{stroke:rgba(0,0,0,0.35)}
+  .chat-burbuja.admin .tick-entregado .tick-stroke{stroke:rgba(0,0,0,0.35)}
+  .chat-burbuja.admin .tick-visto .tick-stroke{stroke:#53BDEB}
+
+  /* Solicitudes pendientes en chat */
+  .chat-solicitud{
+    background:#fef9ec;border:1.5px solid #fbbf24;border-radius:12px;
+    padding:10px 12px;font-size:13px;
+  }
+  body.dark .chat-solicitud{background:#2a2415;border-color:#d97706}
+  .chat-solicitud strong{display:block;font-size:13.5px;margin-bottom:4px}
+  .chat-solicitud .btns{display:flex;gap:6px;margin-top:8px}
+  .chat-solicitud .aprobar{
+    flex:1;padding:7px;border-radius:8px;border:none;
+    background:var(--verde);color:#fff;font-weight:700;font-size:12.5px;cursor:pointer;
+  }
+  .chat-solicitud .rechazar{
+    flex:1;padding:7px;border-radius:8px;border:none;
+    background:#fee2e2;color:#dc2626;font-weight:700;font-size:12.5px;cursor:pointer;
+  }
+  .chat-solicitud .aprobar:hover{background:var(--verde-d)}
+  .chat-solicitud .rechazar:hover{background:#dc2626;color:#fff}
+
+  .chat-input-row{
+    padding:10px 12px;border-top:1px solid var(--borde);
+    display:flex;gap:8px;align-items:center;flex:0 0 auto;
+  }
+  body.dark .chat-input-row{border-color:#262e2b}
+  .chat-input-row input{
+    flex:1;padding:9px 12px;border-radius:10px;border:1.5px solid var(--borde);
+    font-size:13.5px;outline:none;background:#fafbfa;
+  }
+  body.dark .chat-input-row input{background:#1d2421;border-color:#2a332f;color:#fff}
+  .chat-input-row input:focus{border-color:var(--verde)}
+  .chat-input-row button{
+    width:38px;height:38px;border-radius:10px;border:none;flex:0 0 auto;
+    background:var(--verde);color:#fff;font-size:18px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:.15s;
+  }
+  .chat-input-row button:hover{background:var(--verde-d)}
+
+  /* Botón galería */
+  .btn-galeria{
+    width:36px;height:36px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    border-radius:9px;cursor:pointer;color:var(--sub);transition:.18s;
+    border:1.5px solid var(--borde);background:#fafbfa;
+  }
+  body.dark .btn-galeria{background:#1d2421;border-color:#2a332f;color:#9aa6a2}
+  .btn-galeria:hover{border-color:var(--verde);color:var(--verde);background:#1FAF5514}
+  .chat-burbuja img.chat-img{
+    max-width:100%;border-radius:10px;display:block;margin-top:4px;cursor:pointer;
+  }
+
+  /* Notificación push estilo burbuja */
+  #notifPush{
+    position:fixed;bottom:100px;right:24px;z-index:600;
+    background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.2);
+    padding:12px 14px;max-width:260px;border:1px solid var(--borde);
+    display:none;animation:slideInNotif .3s ease;
+  }
+  body.dark #notifPush{background:#1d2421;border-color:#2a332f;color:#eef2f0}
+  @keyframes slideInNotif{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  #notifPush.visible{display:flex;gap:10px;align-items:flex-start}
+  .notif-ico{font-size:22px;flex:0 0 auto;line-height:1}
+  .notif-body strong{display:block;font-size:13px;font-weight:700;color:var(--texto);margin-bottom:2px}
+  body.dark .notif-body strong{color:#eef2f0}
+  .notif-body span{font-size:12px;color:var(--sub);line-height:1.4}
+  .notif-close{position:absolute;top:6px;right:8px;background:none;border:none;font-size:14px;cursor:pointer;color:var(--sub)}
+
+  /* ===== SELECTOR DE IDIOMA ===== */
+  .lang-selector{position:relative;display:flex;align-items:center}
+  .lang-btn{
+    background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);
+    color:#fff;border-radius:9px;cursor:pointer;
+    padding:6px 10px;display:flex;align-items:center;gap:6px;
+    font-size:14px;font-weight:600;transition:.2s;
+    white-space:nowrap;
+  }
+  .lang-btn:hover{background:rgba(255,255,255,.28)}
+  .lang-btn .lang-flag{font-size:18px;line-height:1}
+  .lang-btn .lang-chevron{
+    font-size:10px;opacity:.8;
+    transition:transform .25s;display:inline-block;
+  }
+  .lang-selector.open .lang-chevron{transform:rotate(180deg)}
+  .lang-dropdown{
+    position:absolute;top:calc(100% + 8px);right:0;
+    background:#fff;border-radius:13px;
+    box-shadow:0 10px 32px rgba(0,0,0,.18);
+    border:1px solid rgba(0,0,0,.08);
+    min-width:175px;overflow:hidden;z-index:200;
+    opacity:0;pointer-events:none;
+    transform:translateY(-8px) scale(.96);
+    transform-origin:top right;
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .lang-selector.open .lang-dropdown{
+    opacity:1;pointer-events:all;
+    transform:translateY(0) scale(1);
+  }
+  .lang-option{
+    display:flex;align-items:center;gap:10px;
+    padding:11px 16px;cursor:pointer;font-size:14px;font-weight:500;
+    color:#1c2422;transition:background .15s;
+  }
+  .lang-option:hover{background:#f0f7f3}
+  .lang-option.activa{background:#edf7f0;font-weight:700;color:var(--verde-d)}
+  .lang-option .lf{font-size:22px;line-height:1}
+  .lang-option .ln{flex:1}
+  .lang-option .lcheck{color:var(--verde);font-size:14px;opacity:0}
+  .lang-option.activa .lcheck{opacity:1}
+  body.dark .lang-dropdown{background:#1c2220;border-color:#2a332f}
+  body.dark .lang-option{color:#eef2f0}
+  body.dark .lang-option:hover{background:#252e2a}
+  body.dark .lang-option.activa{background:#1a2e22;color:#4ade80}
+
+  /* Spinner de traducción */
+  #langSpinner{
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+    background:rgba(0,0,0,.55);color:#fff;border-radius:14px;
+    padding:16px 26px;font-size:14px;font-weight:600;
+    display:none;align-items:center;gap:10px;z-index:9999;
+    backdrop-filter:blur(4px);
+  }
+  #langSpinner.visible{display:flex}
+  #langSpinner .spin{
+    width:18px;height:18px;border-radius:50%;
+    border:2.5px solid rgba(255,255,255,.3);
+    border-top-color:#fff;
+    animation:spin .75s linear infinite;
+  }
+
+  /* Selector de conversación (admin) */
+  .chat-conv-sel{
+    padding:10px 12px;border-bottom:1px solid var(--borde);font-size:13px;
+    display:flex;align-items:center;gap:8px;flex:0 0 auto;
+  }
+  body.dark .chat-conv-sel{border-color:#262e2b}
+  .chat-conv-sel select{
+    flex:1;padding:6px 10px;border-radius:8px;border:1.5px solid var(--borde);
+    font-size:13px;outline:none;background:#fafbfa;color:var(--texto);
+  }
+  body.dark .chat-conv-sel select{background:#1d2421;border-color:#2a332f;color:#fff}
+
+  /* Notificación de aprobación en solicitud */
+  .estado-solicitud{
+    font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;
+    display:inline-block;margin-top:4px;
+  }
+  .estado-solicitud.pendiente{background:#fef3c7;color:#92400e}
+  .estado-solicitud.aprobado{background:#d1fae5;color:#065f46}
+  .estado-solicitud.rechazado{background:#fee2e2;color:#dc2626}
+</style>
+</head>
+<body>
+
+<!-- ===== SPLASH SCREEN ===== -->
+<div id="splash">
+  <div class="splash-logo">
+    <div class="splash-icon">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+    </div>
+    <div class="splash-titulo">Gruppen<span>🇩🇪</span></div>
+  </div>
+  <p class="splash-tagline">Finde deine Community</p>
+  <div class="splash-bar-wrap">
+    <div class="splash-bar"></div>
+  </div>
+</div>
+  <header>
+  <div class="header-row">
+    <div class="logo" onclick="reiniciar();return false;" style="cursor:pointer;text-decoration:none" title="Zur Startseite">
+      <div class="mark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+      </div>
+      <h1>Gruppen🇩🇪</h1>
+    </div>
+    <!-- Controles flotantes: modo + idioma (fuera del nav) -->
+    <div class="header-utils">
+      <!-- Toggle día/noche -->
+      <button class="modo util-btn" id="btnModo" onclick="modo()" aria-label="Dunkel-/Hellmodus wechseln" title="Nachtmodus">
+        <div class="tg-toggle">
+          <div class="tg-track">
+            <div class="tg-stars">
+              <div class="tg-star"></div>
+              <div class="tg-star"></div>
+              <div class="tg-star"></div>
+            </div>
+          </div>
+          <div class="tg-thumb">
+            <div class="tg-icons">
+              <div class="tg-sol">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0-4a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zM4.22 4.22a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zm13.44 13.44a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zM3 11h1a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2zm17 0h1a1 1 0 0 1 0 2h-1a1 1 0 0 1 0-2zM5.64 17.66l-.7.7a1 1 0 1 1-1.42-1.42l.7-.7a1 1 0 0 1 1.42 1.42zm13.44-13.44.7-.7a1 1 0 1 1 1.42 1.42l-.7.7a1 1 0 0 1-1.42-1.42z"/></svg>
+              </div>
+              <div class="tg-luna">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="#818cf8"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </button>
+
+      <!-- Separador -->
+      <span class="util-sep"></span>
+
+      <!-- Selector de idioma -->
+      <div class="lang-selector" id="langSelector">
+        <button class="lang-btn util-btn" onclick="toggleLangMenu()" id="langBtnActual" title="Sprache / Language / Idioma">
+          <span class="lang-flag" id="langFlagActual">🇩🇪</span>
+          <span class="lang-chevron">▼</span>
+        </button>
+        <div class="lang-dropdown" id="langDropdown">
+          <div class="lang-option activa" onclick="cambiarIdioma('de','🇩🇪','DE')" id="langOpt-de">
+            <span class="lf">🇩🇪</span><span class="ln">Deutsch</span><span class="lcheck">✓</span>
+          </div>
+          <div class="lang-option" onclick="cambiarIdioma('en','🇺🇸','EN')" id="langOpt-en">
+            <span class="lf">🇺🇸</span><span class="ln">English (US)</span><span class="lcheck">✓</span>
+          </div>
+          <div class="lang-option" onclick="cambiarIdioma('en-GB','🇬🇧','EN')" id="langOpt-en-GB">
+            <span class="lf">🇬🇧</span><span class="ln">English (UK)</span><span class="lcheck">✓</span>
+          </div>
+          <div class="lang-option" onclick="cambiarIdioma('es','🇪🇸','ES')" id="langOpt-es">
+            <span class="lf">🇪🇸</span><span class="ln">Español</span><span class="lcheck">✓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAV principal: solo Agregar + Sesión -->
+    <nav>
+      <button class="btn-agregar" onclick="abrirAgregar()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span id="navBtnAgregarLabel">Gruppe hinzufügen</span>
+      </button>
+      <div id="zonaSesion"></div>
+    </nav>
+
+    <!-- Botón hamburguesa (solo móvil) -->
+    <button class="btn-hamburger" id="btnHamburger" onclick="toggleDrawer()" aria-label="Menü öffnen">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- Overlay fondo oscuro -->
+<div class="nav-overlay" id="navOverlay" onclick="cerrarDrawer()"></div>
+
+<!-- Drawer menú móvil -->
+<nav class="nav-drawer" id="navDrawer">
+  <div class="drawer-seccion" style="border-top:none;padding-top:0">Menü</div>
+
+  <button class="drawer-item" onclick="abrirAgregar();cerrarDrawer()">
+    <span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span> <span id="drawerBtnAgregar">Gruppe hinzufügen</span>
+  </button>
+  <button class="drawer-item" id="drawerBtnSesion" onclick="cerrarDrawer()">
+    <span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> <span id="drawerSesionLabel">Anmelden</span>
+  </button>
+  <button class="drawer-item" id="drawerBtnAdmin" style="display:none;color:#ffd9a0" onclick="abrirAdmin();cerrarDrawer()">
+    <span class="d-ico">⚙️</span> <span>Admin-Panel</span>
+  </button>
+  <button class="drawer-item" id="drawerBtnMisGrupos" style="display:none" onclick="abrirMisGrupos();cerrarDrawer()">
+    <span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span> <span>Meine Gruppen</span>
+  </button>
+
+  <div class="drawer-seccion">Darstellung</div>
+  <div class="drawer-controls">
+    <span class="dc-label" id="drawerModoLabel">Nachtmodus</span>
+    <button class="modo" id="btnModoDrawer" onclick="modo()" aria-label="Modus wechseln" title="Nachtmodus" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center">
+      <div class="tg-toggle">
+        <div class="tg-track">
+          <div class="tg-stars">
+            <div class="tg-star"></div><div class="tg-star"></div><div class="tg-star"></div>
+          </div>
+        </div>
+        <div class="tg-thumb">
+          <div class="tg-icons">
+            <div class="tg-sol"><svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0-4a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zM4.22 4.22a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zm13.44 13.44a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zM3 11h1a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2zm17 0h1a1 1 0 0 1 0 2h-1a1 1 0 0 1 0-2zM5.64 17.66l-.7.7a1 1 0 1 1-1.42-1.42l.7-.7a1 1 0 0 1 1.42 1.42zm13.44-13.44.7-.7a1 1 0 1 1 1.42 1.42l-.7.7a1 1 0 0 1-1.42-1.42z"/></svg></div>
+            <div class="tg-luna"><svg width="12" height="12" viewBox="0 0 24 24" fill="#818cf8"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </button>
+  </div>
+
+  <div class="drawer-seccion">Sprache / Language / Idioma</div>
+  <div class="drawer-lang-opts">
+    <button class="drawer-lang-opt activa" id="dLangOpt-de" onclick="cambiarIdioma('de','🇩🇪','DE');cerrarDrawer()">
+      <span class="dlf">🇩🇪</span><span>Deutsch</span><span class="dlcheck">✓</span>
+    </button>
+    <button class="drawer-lang-opt" id="dLangOpt-en" onclick="cambiarIdioma('en','🇺🇸','EN');cerrarDrawer()">
+      <span class="dlf">🇺🇸</span><span>English (US)</span><span class="dlcheck">✓</span>
+    </button>
+    <button class="drawer-lang-opt" id="dLangOpt-en-GB" onclick="cambiarIdioma('en-GB','🇬🇧','EN');cerrarDrawer()">
+      <span class="dlf">🇬🇧</span><span>English (UK)</span><span class="dlcheck">✓</span>
+    </button>
+    <button class="drawer-lang-opt" id="dLangOpt-es" onclick="cambiarIdioma('es','🇪🇸','ES');cerrarDrawer()">
+      <span class="dlf">🇪🇸</span><span>Español</span><span class="dlcheck">✓</span>
+    </button>
+  </div>
+</nav>
+
+<div class="cat-bar">
+  <div class="cat-row" id="catRow"></div>
+</div>
+
+<div class="banner-agregar">
+  <div class="banner-agregar-inner">
+    <div class="banner-agregar-texto">
+      <strong>Hast du eine tolle Gruppe?</strong>
+      <span>Teile sie mit Tausenden von Menschen auf Gruppen🇩🇪</span>
+    </div>
+    <button class="btn-agregar-banner" onclick="abrirAgregar()">
+      <span class="plus">＋</span> Gruppe hinzufügen
+    </button>
+  </div>
+</div>
+
+<input id="buscar" placeholder="Gruppen nach Name oder Plattform suchen …" onkeyup="buscarCambio()">
+<p class="resultado-info" id="resultadoInfo"></p>
+
+<div class="grid" id="grid"></div>
+<div class="paginacion" id="paginacion"></div>
+
+<footer>
+  <div class="footer-top">
+    <div class="footer-marca">
+      <div class="logo"><div class="mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="#1FAF55"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></div><h1 style="color:#fff;font-size:20px">Gruppen🇩🇪</h1></div>
+      <p>Das Verzeichnis für WhatsApp- und Telegram-Communitys – finde deine Community: Gamer, Entwickler, Reisende und vieles mehr, alles an einem Ort.</p>
+      <div class="footer-redes">
+        <a href="#" aria-label="WhatsApp" title="WhatsApp">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+        </a>
+        <a href="#" aria-label="Telegram" title="Telegram">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </a>
+        <a href="#" aria-label="Facebook" title="Facebook">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+        <a href="#" aria-label="Instagram" title="Instagram">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Erkunden</h4>
+      <ul>
+        <li><a href="" onclick="reiniciar();return false;">✨ Alle Gruppen</a></li>
+        <li><a href="#" onclick="elegirCategoria('Gaming');return false;">🎮 Gaming</a></li>
+        <li><a href="#" onclick="elegirCategoria('Programación');return false;">💻 Programmierung</a></li>
+        <li><a href="#" onclick="elegirCategoria('Música');return false;">🎵 Musik</a></li>
+        <li><a href="#" onclick="elegirCategoria('Viajes');return false;">🌍 Reisen</a></li>
+        <li><a href="#" onclick="elegirCategoria('Estudio');return false;">📚 Lernen</a></li>
+        <li><a href="#" onclick="elegirCategoria('Empleo');return false;">💼 Jobs</a></li>
+        <li><a href="#" onclick="elegirCategoria('Singles');return false;">💘 Singles</a></li>
+        <li><a href="#" onclick="elegirCategoria('+18');return false;">🔞 +18</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Hilfezentrum</a></li>
+        <li><a href="#">Gruppe melden</a></li>
+        <li><a href="#">Deine Community veröffentlichen</a></li>
+        <li><a href="#">Kontakt</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 <b>Gruppen🇩🇪</b>. Alle Rechte vorbehalten.</span>
+    <div class="footer-legal">
+      <a href="#">Nutzungsbedingungen</a>
+      <a href="#">Datenschutz</a>
+      <a href="#">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+<!-- SECCIÓN USUARIO — Meine Gruppen (inline) -->
+<div id="panelMisGrupos">
+  <div class="mis-grupos-seccion">
+    <div class="mis-grupos-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--verde);display:flex;align-items:center;justify-content:center;font-size:18px">👤</div>
+        <div>
+          <h2 style="font-size:20px;margin:0">Meine Gruppen</h2>
+          <p style="font-size:12.5px;color:var(--sub);margin:0" id="misGruposSubtitle">Deine eingereichten Gruppen</p>
+        </div>
+      </div>
+      <button onclick="cerrarMisGrupos()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub);line-height:1;padding:4px" title="Schließen">✕</button>
+    </div>
+    <div id="misGruposGrid" class="mis-grupos-grid"></div>
+  </div>
+</div>
+
+<!-- PANEL ADMINISTRADOR -->
+<div id="panelAdmin">
+  <div class="admin-modal">
+    <button class="cerrar" onclick="cerrarAdmin()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub)">✕</button>
+    <h2>⚙️ Administrator-Panel <span class="admin-badge">ADMIN</span></h2>
+    <p style="color:var(--sub);font-size:13px;margin-bottom:0">Vollständige Kontrolle über Gruppen und Paginierung · Gruppen🇩🇪</p>
+
+    <div class="admin-tabs">
+      <button class="admin-tab activo" onclick="adminTab('agregar')">➕ Gruppe hinzufügen</button>
+      <button class="admin-tab" onclick="adminTab('gestionar')">📋 Gruppen verwalten</button>
+      <button class="admin-tab" onclick="adminTab('solicitudes')" id="tabSolicitudes">🕐 Anfragen</button>
+      <button class="admin-tab" onclick="adminTab('chats')" id="tabChats">💬 Chats</button>
+    </div>
+
+    <!-- TAB: AGREGAR -->
+    <div class="admin-seccion activa" id="adminAgregar">
+      <div class="admin-form-grid">
+        <div class="admin-campo">
+          <label>Gruppenname *</label>
+          <input type="text" id="adNombre" placeholder="z. B. Fitness Deutschland">
+        </div>
+        <div class="admin-campo">
+          <label>Kategorie *</label>
+          <select id="adCategoria" onchange="adminActualizar18()">
+            <option value="" disabled selected>Auswählen</option>
+          </select>
+        </div>
+        <div class="admin-campo">
+          <label>Plattform *</label>
+          <select id="adPlataforma">
+            <option value="WhatsApp">WhatsApp</option>
+            <option value="Telegram">Telegram</option>
+          </select>
+        </div>
+        <div class="admin-campo">
+          <label>Mitglieder</label>
+          <input type="number" id="adMiembros" placeholder="z. B. 250" min="0">
+        </div>
+        <div class="admin-campo admin-full">
+          <label>Einladungslink *</label>
+          <input type="url" id="adLink" placeholder="https://chat.whatsapp.com/...">
+        </div>
+        <div class="admin-campo admin-full">
+          <label>Bild (Foto hochladen)</label>
+          <input type="file" id="adImagenFile" accept="image/*" onchange="adminImagenSeleccionada(event)">
+          <input type="hidden" id="adImagen">
+          <div id="adImagenPreviewWrap" style="display:none;margin-top:8px;align-items:center;gap:10px">
+            <img id="adImagenPreview" src="" alt="Vorschau" style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--borde)">
+            <button type="button" onclick="adminImagenQuitar()" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;text-decoration:underline">Entfernen</button>
+          </div>
+        </div>
+        <div class="admin-campo">
+          <label>Feste Seite (optional)</label>
+          <input type="number" id="adPagina" placeholder="z. B. 1" min="1">
+          <span style="font-size:11px;color:var(--sub);margin-top:3px">Erzwingt das Erscheinen auf dieser Seite</span>
+        </div>
+        <div class="admin-campo">
+          <label>Basispopularität (Favoriten)</label>
+          <input type="number" id="adFavoritos" placeholder="z. B. 50" min="0">
+        </div>
+      </div>
+      <div class="campo-checkbox" id="adminCaja18" style="display:none">
+        <input type="checkbox" id="adConfirma18">
+        <label for="adConfirma18">Ich bestätige, dass diese Gruppe für Personen über 18 Jahre geeignet ist.</label>
+      </div>
+      <p class="error-campo" id="errorAdmin" style="margin-top:4px"></p>
+      <button class="btn-principal" style="margin-top:8px" onclick="adminPublicar()">Gruppe veröffentlichen</button>
+    </div>
+
+    <!-- TAB: GESTIONAR -->
+    <div class="admin-seccion" id="adminGestionar">
+      <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Bearbeite die Seite, auf der jede Gruppe erscheint, oder lösche sie. Änderungen werden beim Klicken auf <b>Speichern</b> übernommen.</p>
+      <div class="admin-tabla-wrap">
+        <table class="admin-tabla" id="adminTabla">
+          <thead><tr>
+            <th>Gruppe</th><th>Kat.</th><th>Plattform</th><th>Feste Seite</th><th>Aktionen</th>
+          </tr></thead>
+          <tbody id="adminTablaBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB: SOLICITUDES -->
+    <div class="admin-seccion" id="adminSolicitudes">
+      <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Von Benutzern eingereichte Gruppen, die deine Genehmigung benötigen.</p>
+      <div class="admin-tabla-wrap" id="adminSolicitudesWrap">
+        <table class="admin-tabla">
+          <thead><tr>
+            <th>Gruppe</th><th>Kat.</th><th>Plattform</th><th>Benutzer</th><th>Enlace del grupo</th><th>Status</th><th>Aktionen</th>
+          </tr></thead>
+          <tbody id="adminSolicitudesBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB: CHATS -->
+    <div class="admin-seccion" id="adminChats">
+      <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Kommuniziere mit Benutzern über ihre Anfragen.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;gap:10px;align-items:center">
+          <label style="font-size:13px;font-weight:700;color:var(--sub)">Gespräch mit:</label>
+          <select id="adminChatSelect" onchange="adminCambiarChat()" style="flex:1;padding:8px 10px;border-radius:8px;border:1.5px solid var(--borde);font-size:13px;outline:none;background:#fafbfa;color:var(--texto)">
+            <option value="">Benutzer auswählen...</option>
+          </select>
+        </div>
+        <div id="adminChatMensajes" style="background:#f7f9f8;border-radius:12px;padding:12px;min-height:180px;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;border:1px solid var(--borde)"></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label class="btn-galeria" title="Enviar imagen" style="flex:0 0 auto">
+            <input type="file" id="adminChatImgInput" accept="image/*" style="display:none" onchange="adminEnviarImagen(this)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </label>
+          <input type="text" id="adminChatInput" placeholder="Antwort schreiben..." onkeydown="if(event.key==='Enter')adminEnviarMensaje()"
+            style="flex:1;padding:10px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:13.5px;outline:none;background:#fafbfa">
+          <button onclick="adminEnviarMensaje()" style="padding:10px 18px;border-radius:9px;border:none;background:var(--verde);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer">Senden</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /admin-modal -->
+</div><!-- /panelAdmin -->
+
+<div id="toast"></div>
+
+<!-- NOTIFICACIÓN PUSH -->
+<div id="notifPush">
+  <button class="notif-close" onclick="cerrarNotif()">✕</button>
+  <div class="notif-ico" id="notifIco">💬</div>
+  <div class="notif-body">
+    <strong id="notifTitulo">Neue Nachricht</strong>
+    <span id="notifTexto"></span>
+  </div>
+</div>
+
+<!-- BOTÓN FLOTANTE CHAT -->
+<button id="chatFlotante" onclick="toggleChat()" title="Chat con soporte">
+  💬
+  <span id="chatBadge">0</span>
+</button>
+
+<!-- PANEL CHAT -->
+<div id="panelChat">
+  <div class="chat-header">
+    <div class="avatar-admin"><img src="https://s67.erome.com/8391/25otK4Ph/KHyzTjkN.jpg?v=1782372656" alt="Support"></div>
+    <div class="chat-header-info">
+      <strong id="chatNombreHeader">Support-Team</strong>
+      <span id="chatSubHeader">Support</span>
+    </div>
+    <button onclick="toggleChat()">✕</button>
+  </div>
+  <!-- Selector de conversación (solo admin) -->
+  <div class="chat-conv-sel" id="chatConvSel" style="display:none">
+    <span style="color:var(--sub);white-space:nowrap">Chat von:</span>
+    <select id="chatConvSelect" onchange="cambiarConversacion()">
+      <option value="">Benutzer auswählen...</option>
+    </select>
+  </div>
+  <div class="chat-mensajes" id="chatMensajes"></div>
+  <div class="chat-input-row">
+    <label class="btn-galeria" title="Enviar imagen">
+      <input type="file" id="chatImgInput" accept="image/*" style="display:none" onchange="enviarImagen(this)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </label>
+    <input type="text" id="chatInput" placeholder="Nachricht schreiben..." onkeydown="if(event.key==='Enter')enviarMensaje()">
+    <button onclick="enviarMensaje()">➤</button>
+  </div>
+</div>
+
+<!-- MODAL DE INICIO DE SESIÓN / REGISTRO -->
+<div class="overlay" id="overlayAuth">
+  <div class="modal">
+    <button class="cerrar" onclick="cerrarAuth()">✕</button>
+    <div class="tabs-auth">
+      <button id="tabLogin" class="activo" onclick="cambiarTab('login')">Anmelden</button>
+      <button id="tabRegistro" onclick="cambiarTab('registro')">Konto erstellen</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="vistaLogin">
+      <h2>Willkommen zurück</h2>
+      <p class="sub">Melde dich an, um deine Lieblingsgruppen zu speichern.</p>
+      <div class="campo">
+        <label>E-Mail-Adresse</label>
+        <input type="email" id="loginCorreo" placeholder="deine@email.de">
+      </div>
+      <div class="campo">
+        <label>Passwort</label>
+        <input type="password" id="loginPass" placeholder="••••••••">
+      </div>
+      <p class="error-campo" id="errorLogin"></p>
+      <button class="btn-principal" onclick="iniciarSesion()">Anmelden</button>
+      <div class="divisor">oder</div>
+      <button class="btn-google" onclick="googleSignIn()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
+        Mit Google fortfahren
+      </button>
+      <p class="pie-auth">Noch kein Konto? <a onclick="cambiarTab('registro')">Jetzt registrieren</a></p>
+    </div>
+
+    <!-- REGISTRO -->
+    <div id="vistaRegistro" style="display:none">
+      <h2>Konto erstellen</h2>
+      <p class="sub">Tritt bei und speichere die Gruppen, die dich interessieren.</p>
+      <div class="campo">
+        <label>Name</label>
+        <input type="text" id="regNombre" placeholder="Dein Name">
+      </div>
+      <div class="campo">
+        <label>E-Mail-Adresse</label>
+        <input type="email" id="regCorreo" placeholder="deine@email.de">
+      </div>
+      <div class="campo">
+        <label>Passwort</label>
+        <input type="password" id="regPass" placeholder="Mindestens 6 Zeichen">
+      </div>
+      <p class="error-campo" id="errorRegistro"></p>
+      <button class="btn-principal" onclick="registrar()">Konto erstellen</button>
+      <div class="divisor">oder</div>
+      <button class="btn-google" onclick="googleSignIn()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
+        Mit Google fortfahren
+      </button>
+      <p class="pie-auth">Bereits ein Konto? <a onclick="cambiarTab('login')">Jetzt anmelden</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AVISO FOTO — todas las demás categorías -->
+<div class="overlay" id="overlayFotoAviso">
+  <div class="modal modal-edad">
+    <span class="e">📷</span>
+    <h2>Hinweis für deine Gruppe</h2>
+    <p class="sub">Es wird empfohlen, beim Hinzufügen Ihrer Gruppen eigene Fotos hochzuladen.</p>
+    <div class="acciones-edad">
+      <button class="no" onclick="cerrarFotoAviso()">Schließen</button>
+      <button class="si" onclick="confirmarFotoAviso()">Verstanden</button>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="overlayEdad">
+  <div class="modal modal-edad">
+    <span class="e">🔒</span>
+    <h2>Inhalt nur für Erwachsene</h2>
+    <p class="sub">Sind Sie über 18 Jahre alt? Es wird empfohlen, beim Hinzufügen von Gruppen eigene Fotos hochzuladen +18.</p>
+    <div class="acciones-edad">
+      <button class="no" onclick="rechazarEdad()">Nein, zurück</button>
+      <button class="si" onclick="confirmarEdad()">Ja, ich bin über 18</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL — AÑADIR GRUPO -->
+<div class="overlay" id="overlayAgregar">
+  <div class="modal modal-grande">
+    <button class="cerrar" onclick="cerrarAgregar()">✕</button>
+    <h2>Deine Gruppe hinzufügen</h2>
+    <p class="sub">Teile deine WhatsApp- oder Telegram-Community mit Tausenden von Menschen.</p>
+
+    <div class="plataforma-toggle">
+      <div class="opcion-plataforma activa w" id="optWhatsApp" onclick="elegirPlataformaForm('WhatsApp')">
+        <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></span><span class="nombre">WhatsApp</span>
+      </div>
+      <div class="opcion-plataforma t" id="optTelegram" onclick="elegirPlataformaForm('Telegram')">
+        <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="#229ED9"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></span><span class="nombre">Telegram</span>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>Gruppenname</label>
+      <input type="text" id="agNombre" placeholder="z. B. Deutsche Entwickler">
+    </div>
+
+    <div class="campo">
+      <label>Kategorie</label>
+      <select id="agCategoria" onchange="actualizarCategoriaForm()">
+        <option value="" disabled selected>Kategorie auswählen</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label>Einladungslink</label>
+      <input type="url" id="agLink" placeholder="https://chat.whatsapp.com/...">
+      <span class="ayuda" id="agLinkAyuda">Muss mit https://chat.whatsapp.com/ beginnen.</span>
+    </div>
+
+    <div class="campo">
+      <label>Gruppenbeschreibung</label>
+      <textarea id="agDescripcion" placeholder="Beschreibe kurz, worum es in deiner Gruppe geht, welche Regeln gelten und welche Mitglieder ihr sucht …" rows="3" style="padding:11px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:14px;outline:none;background:#fafbfa;resize:vertical;transition:border-color .18s;font-family:inherit;line-height:1.5;width:100%;box-sizing:border-box" onfocus="this.style.borderColor='var(--verde)'" onblur="this.style.borderColor='var(--borde)'"></textarea>
+    </div>
+
+    <div class="campo">
+      <label>Gruppenfoto hochladen</label>
+      <label id="agFotoLabel" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:11px 13px;border-radius:9px;border:1.5px dashed var(--borde);background:#fafbfa;transition:border-color .18s" onmouseenter="this.style.borderColor='var(--verde)'" onmouseleave="this.style.borderColor='var(--borde)'">
+        <input type="file" id="agFotoInput" accept="image/*" style="display:none" onchange="previsualizarFoto(this)">
+        <span id="agFotoIco" style="font-size:26px">📷</span>
+        <div>
+          <span id="agFotoTexto" style="font-size:14px;font-weight:600;color:var(--texto);display:block">Foto auswählen</span>
+          <span style="font-size:11.5px;color:var(--sub)">JPG, PNG oder GIF · max. 5 MB</span>
+        </div>
+        <img id="agFotoPreview" src="" alt="" style="display:none;width:56px;height:56px;object-fit:cover;border-radius:8px;margin-left:auto;border:1.5px solid var(--borde)">
+      </label>
+    </div>
+
+    <div class="campo-checkbox" id="cajaConfirma18" style="display:none">
+      <input type="checkbox" id="agConfirma18">
+      <label for="agConfirma18">Ich bestätige, dass diese Gruppe für Personen über 18 Jahre ist und die Regeln von WhatsApp/Telegram einhält.</label>
+    </div>
+
+    <p class="error-campo" id="errorAgregar"></p>
+    <button class="btn-principal" onclick="publicarGrupo()">Anfrage senden</button>
+    <p style="font-size:12px;color:var(--sub);text-align:center;margin-top:8px">Deine Gruppe wird vom Administrator geprüft, bevor sie auf der Seite erscheint.</p>
+  </div>
+</div>
+
+
+<script>
+const categorias=[
+  {nombre:"Todos",icono:"✨"},
+  {nombre:"+18",icono:"🔞"},
+  {nombre:"Singles",icono:"💘"},
+  {nombre:"Gaming",icono:"🎮"},
+  {nombre:"Programación",icono:"💻"},
+  {nombre:"Música",icono:"🎵"},
+  {nombre:"Viajes",icono:"🌍"},
+  {nombre:"Estudio",icono:"📚"},
+  {nombre:"Empleo",icono:"💼"}
+];
+
+// German display names for categories
+const categoriaLabel={
+  "Todos":"Alle","Singles":"Singles","Gaming":"Gaming",
+  "Programación":"Programmierung","Música":"Musik",
+  "Viajes":"Reisen","Estudio":"Lernen","Empleo":"Jobs","+18":"+18"
+};
+
+const baseGrupos=[
+  {nombre:"Gamers Unidos",     img:"https://picsum.photos/600/340?1", plataforma:"WhatsApp", categoria:"Gaming",        miembros:312, link:"https://chat.whatsapp.com/", favoritosBase:18},
+  {nombre:"DevTalk Latam",     img:"https://picsum.photos/600/340?2", plataforma:"Telegram",  categoria:"Programación",  miembros:540, link:"https://t.me/", favoritosBase:34},
+  {nombre:"Melómanos Club",    img:"https://picsum.photos/600/340?3", plataforma:"WhatsApp", categoria:"Música",        miembros:198, link:"https://chat.whatsapp.com/", favoritosBase:9},
+  {nombre:"Mochileros PE",     img:"https://picsum.photos/600/340?4", plataforma:"Telegram",  categoria:"Viajes",        miembros:267, link:"https://t.me/", favoritosBase:15},
+  {nombre:"Estudio Activo",    img:"https://picsum.photos/600/340?5", plataforma:"WhatsApp", categoria:"Estudio",       miembros:421, link:"https://chat.whatsapp.com/", favoritosBase:27},
+  {nombre:"Bolsa de Empleo",   img:"https://picsum.photos/600/340?6", plataforma:"Telegram",  categoria:"Empleo",        miembros:689, link:"https://t.me/", favoritosBase:41},
+  {nombre:"Solteros Conecta",  img:"https://picsum.photos/600/340?7", plataforma:"WhatsApp", categoria:"Singles",       miembros:455, link:"https://chat.whatsapp.com/", favoritosBase:22},
+  {nombre:"Zona +18",          img:"https://picsum.photos/600/340?8",  plataforma:"Telegram",  categoria:"+18", miembros:733, link:"https://t.me/", favoritosBase:30},
+  {nombre:"Adultos Nocturnos", img:"https://picsum.photos/600/340?9",  plataforma:"WhatsApp", categoria:"+18", miembros:612, link:"https://chat.whatsapp.com/", favoritosBase:25},
+  {nombre:"Placer Sin Límites",img:"https://picsum.photos/600/340?10", plataforma:"Telegram",  categoria:"+18", miembros:880, link:"https://t.me/", favoritosBase:37},
+  {nombre:"Noche Salvaje",     img:"https://picsum.photos/600/340?11", plataforma:"WhatsApp", categoria:"+18", miembros:540, link:"https://chat.whatsapp.com/", favoritosBase:19},
+  {nombre:"Secretos de Pareja",img:"https://picsum.photos/600/340?12", plataforma:"Telegram",  categoria:"+18", miembros:415, link:"https://t.me/", favoritosBase:28},
+  {nombre:"Mundo Sensual",     img:"https://picsum.photos/600/340?13", plataforma:"WhatsApp", categoria:"+18", miembros:690, link:"https://chat.whatsapp.com/", favoritosBase:42},
+  {nombre:"Club Nocturno VIP", img:"https://picsum.photos/600/340?14", plataforma:"Telegram",  categoria:"+18", miembros:320, link:"https://t.me/", favoritosBase:16},
+  {nombre:"Pasiones Latinas",  img:"https://picsum.photos/600/340?15", plataforma:"WhatsApp", categoria:"+18", miembros:770, link:"https://chat.whatsapp.com/", favoritosBase:33},
+  {nombre:"Deseos Ocultos",    img:"https://picsum.photos/600/340?16", plataforma:"Telegram",  categoria:"+18", miembros:505, link:"https://t.me/", favoritosBase:21},
+  {nombre:"Fuego y Pasión",    img:"https://picsum.photos/600/340?17", plataforma:"WhatsApp", categoria:"+18", miembros:430, link:"https://chat.whatsapp.com/", favoritosBase:14},
+  {nombre:"Aventura Adulta",   img:"https://picsum.photos/600/340?18", plataforma:"Telegram",  categoria:"+18", miembros:960, link:"https://t.me/", favoritosBase:48},
+  {nombre:"Solo Mayores",      img:"https://picsum.photos/600/340?19", plataforma:"WhatsApp", categoria:"+18", miembros:370, link:"https://chat.whatsapp.com/", favoritosBase:12},
+  {nombre:"Tentaciones",       img:"https://picsum.photos/600/340?20", plataforma:"Telegram",  categoria:"+18", miembros:645, link:"https://t.me/", favoritosBase:29},
+  {nombre:"Citas Express",     img:"https://picsum.photos/600/340?21", plataforma:"WhatsApp", categoria:"+18", miembros:290, link:"https://chat.whatsapp.com/", favoritosBase:11},
+  {nombre:"Sin Censura",       img:"https://picsum.photos/600/340?22", plataforma:"Telegram",  categoria:"+18", miembros:1100,link:"https://t.me/", favoritosBase:55},
+  {nombre:"Encuentros Reales", img:"https://picsum.photos/600/340?23", plataforma:"WhatsApp", categoria:"+18", miembros:480, link:"https://chat.whatsapp.com/", favoritosBase:20},
+  {nombre:"Maduros y Atrevidos",img:"https://picsum.photos/600/340?24",plataforma:"Telegram",  categoria:"+18", miembros:390, link:"https://t.me/", favoritosBase:17},
+  {nombre:"Amantes Digitales", img:"https://picsum.photos/600/340?25", plataforma:"WhatsApp", categoria:"+18", miembros:720, link:"https://chat.whatsapp.com/", favoritosBase:36},
+  {nombre:"Seducción Latina",  img:"https://picsum.photos/600/340?26", plataforma:"Telegram",  categoria:"+18", miembros:560, link:"https://t.me/", favoritosBase:24},
+  {nombre:"Privado y Exclusivo",img:"https://picsum.photos/600/340?27",plataforma:"WhatsApp", categoria:"+18", miembros:310, link:"https://chat.whatsapp.com/", favoritosBase:13},
+  {nombre:"Vip Nocturno",      img:"https://picsum.photos/600/340?28", plataforma:"Telegram",  categoria:"+18", miembros:830, link:"https://t.me/", favoritosBase:40},
+  {nombre:"Entre Adultos",     img:"https://picsum.photos/600/340?29", plataforma:"WhatsApp", categoria:"+18", miembros:475, link:"https://chat.whatsapp.com/", favoritosBase:22},
+  {nombre:"Rumba Caliente",    img:"https://picsum.photos/600/340?30", plataforma:"Telegram",  categoria:"+18", miembros:615, link:"https://t.me/", favoritosBase:31},
+  {nombre:"Confesiones Íntimas",img:"https://picsum.photos/600/340?31",plataforma:"WhatsApp", categoria:"+18", miembros:355, link:"https://chat.whatsapp.com/", favoritosBase:15},
+  {nombre:"Solteros Atrevidos",img:"https://picsum.photos/600/340?32", plataforma:"Telegram",  categoria:"+18", miembros:990, link:"https://t.me/", favoritosBase:50},
+  {nombre:"La Guarida",        img:"https://picsum.photos/600/340?33", plataforma:"WhatsApp", categoria:"+18", miembros:420, link:"https://chat.whatsapp.com/", favoritosBase:18},
+  {nombre:"Candela Pura",      img:"https://picsum.photos/600/340?34", plataforma:"Telegram",  categoria:"+18", miembros:700, link:"https://t.me/", favoritosBase:35},
+  {nombre:"Noches de Infarto", img:"https://picsum.photos/600/340?35", plataforma:"WhatsApp", categoria:"+18", miembros:530, link:"https://chat.whatsapp.com/", favoritosBase:26},
+  {nombre:"Instinto Natural",  img:"https://picsum.photos/600/340?36", plataforma:"Telegram",  categoria:"+18", miembros:440, link:"https://t.me/", favoritosBase:19},
+  {nombre:"Adrenalina Adulta", img:"https://picsum.photos/600/340?37", plataforma:"WhatsApp", categoria:"+18", miembros:660, link:"https://chat.whatsapp.com/", favoritosBase:32},
+  {nombre:"Magia y Fuego",     img:"https://picsum.photos/600/340?38", plataforma:"Telegram",  categoria:"+18", miembros:510, link:"https://t.me/", favoritosBase:23},
+  {nombre:"Los Sin Límite",    img:"https://picsum.photos/600/340?39", plataforma:"WhatsApp", categoria:"+18", miembros:375, link:"https://chat.whatsapp.com/", favoritosBase:16},
+  {nombre:"Élite Adulta",      img:"https://picsum.photos/600/340?40", plataforma:"Telegram",  categoria:"+18", miembros:870, link:"https://t.me/", favoritosBase:44},
+  {nombre:"Química Peligrosa", img:"https://picsum.photos/600/340?41", plataforma:"WhatsApp", categoria:"+18", miembros:490, link:"https://chat.whatsapp.com/", favoritosBase:21},
+  {nombre:"Más de 18 Solo",    img:"https://picsum.photos/600/340?42", plataforma:"Telegram",  categoria:"+18", miembros:340, link:"https://t.me/", favoritosBase:14},
+  {nombre:"Zona Prohibida",    img:"https://picsum.photos/600/340?43", plataforma:"WhatsApp", categoria:"+18", miembros:925, link:"https://chat.whatsapp.com/", favoritosBase:46}
+];
+
+/* =========================================================
+   FIREBASE DATA LAYER — usa _db (firebase.firestore()) directamente
+   localStorage se usa SOLO para sesión y preferencias de UI.
+   ========================================================= */
+
+// ── Grupos extra (añadidos por admin/usuario) ──
+let gruposExtra = [];
+const grupos=[...baseGrupos];
+
+// ── Guardar grupo en Firestore ──
+async function guardarGrupoFirestore(g){
+  try{
+    await _db.collection("grupos_extra").add({...g, creadoEn: firebase.firestore.FieldValue.serverTimestamp()});
+  }catch(e){ console.warn("FB guardarGrupo:",e); }
+}
+async function guardarGrupoUsuario(g){
+  gruposExtra.push(g);
+  grupos.push(g);
+  await guardarGrupoFirestore(g);
+}
+
+const GRUPOS_POR_PAGINA=6;
+let paginaActual=1;
+
+const grid=document.getElementById("grid");
+const catRow=document.getElementById("catRow");
+const resultadoInfo=document.getElementById("resultadoInfo");
+let categoriaActiva="Todos";
+let favoritos=new Set();
+let ajustesFavoritos={};
+
+function guardarFavoritos(){
+  const user=obtenerSesion();
+  if(!user) return;
+  const correoKey=user.correo.replace(/[.#$[\]]/g,"_");
+  _db.collection("favoritos").doc(correoKey)
+    .set({lista:[...favoritos], ajustes:ajustesFavoritos})
+    .catch(e=>console.warn("FB guardarFavoritos:",e));
+}
+
+/* Conteo de "favoritismo" */
+function guardarAjustes(){
+  guardarFavoritos();
+}
+function totalFavoritos(g){
+  return g.favoritosBase+(ajustesFavoritos[g.nombre]||0);
+}
+
+function pintarCategorias(){
+  catRow.innerHTML="";
+  categorias.forEach(c=>{
+    const activo=c.nombre===categoriaActiva?"activo":"";
+    catRow.innerHTML+=`<div class="chip ${activo}" onclick="elegirCategoria('${c.nombre}')"><span class="ico">${c.icono}</span>${categoriaLabel[c.nombre]||c.nombre}</div>`;
+  });
+}
+
+let _catPendiente=null;
+
+function elegirCategoria(nombre){
+  if(nombre==="+18" && sessionStorage.getItem("grupohub_edad_ok")!=="1"){
+    _catPendiente=nombre;
+    document.getElementById("overlayEdad").classList.add("abierto");
+    return;
+  }
+  if(nombre!=="+18" && nombre!=="Todos" && sessionStorage.getItem("grupohub_foto_ok")!=="1"){
+    _catPendiente=nombre;
+    document.getElementById("overlayFotoAviso").classList.add("abierto");
+    return;
+  }
+  categoriaActiva=nombre;
+  paginaActual=1;
+  pintarCategorias();
+  filtrar();
+}
+
+function confirmarEdad(){
+  sessionStorage.setItem("grupohub_edad_ok","1");
+  document.getElementById("overlayEdad").classList.remove("abierto");
+  categoriaActiva=_catPendiente||"+18";
+  _catPendiente=null;
+  paginaActual=1;
+  pintarCategorias();
+  filtrar();
+}
+
+function rechazarEdad(){
+  _catPendiente=null;
+  document.getElementById("overlayEdad").classList.remove("abierto");
+}
+
+function confirmarFotoAviso(){
+  sessionStorage.setItem("grupohub_foto_ok","1");
+  document.getElementById("overlayFotoAviso").classList.remove("abierto");
+  const cat=_catPendiente;
+  _catPendiente=null;
+  categoriaActiva=cat;
+  paginaActual=1;
+  pintarCategorias();
+  filtrar();
+}
+
+function cerrarFotoAviso(){
+  _catPendiente=null;
+  document.getElementById("overlayFotoAviso").classList.remove("abierto");
+}
+
+/* =========================================================
+   AÑADIR GRUPO
+   ========================================================= */
+let plataformaForm="WhatsApp";
+
+function poblarSelectCategorias(){
+  const sel=document.getElementById("agCategoria");
+  categorias.filter(c=>c.nombre!=="Todos").forEach(c=>{
+    sel.innerHTML+=`<option value="${c.nombre}">${c.icono} ${categoriaLabel[c.nombre]||c.nombre}</option>`;
+  });
+}
+
+function abrirAgregar(){
+  if(!obtenerSesion()){
+    mostrarToast("Bitte anmelden, um eine Gruppe hinzuzufügen","🔒");
+    abrirAuth("login");
+    return;
+  }
+  document.getElementById("overlayAgregar").classList.add("abierto");
+}
+function cerrarAgregar(){
+  document.getElementById("overlayAgregar").classList.remove("abierto");
+  document.getElementById("errorAgregar").textContent="";
+}
+
+function elegirPlataformaForm(p){
+  plataformaForm=p;
+  document.getElementById("optWhatsApp").classList.toggle("activa",p==="WhatsApp");
+  document.getElementById("optTelegram").classList.toggle("activa",p==="Telegram");
+  const linkInput=document.getElementById("agLink");
+  const ayuda=document.getElementById("agLinkAyuda");
+  if(p==="WhatsApp"){
+    linkInput.placeholder="https://chat.whatsapp.com/AbCdEfG123...";
+    if(ayuda) ayuda.textContent="Muss mit https://chat.whatsapp.com/ beginnen.";
+    linkInput.style.borderColor="";
+  } else {
+    linkInput.placeholder="https://t.me/gruppenname";
+    if(ayuda) ayuda.textContent="Muss mit https://t.me/ beginnen.";
+    linkInput.style.borderColor="";
+  }
+  // Limpiar el campo y el error al cambiar plataforma
+  linkInput.value="";
+  const err=document.getElementById("errorAgregar");
+  if(err) err.textContent="";
+}
+
+function actualizarCategoriaForm(){
+  const esAdulto=document.getElementById("agCategoria").value==="+18";
+  document.getElementById("cajaConfirma18").style.display=esAdulto?"flex":"none";
+}
+
+function previsualizarFoto(input){
+  const file=input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const preview=document.getElementById("agFotoPreview");
+    preview.src=e.target.result;
+    preview.style.display="block";
+    document.getElementById("agFotoIco").style.display="none";
+    document.getElementById("agFotoTexto").textContent=file.name.length>24?file.name.substring(0,22)+"…":file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+function publicarGrupo(){
+  const nombre=document.getElementById("agNombre").value.trim();
+  const categoria=document.getElementById("agCategoria").value;
+  const link=document.getElementById("agLink").value.trim();
+  const descripcion=document.getElementById("agDescripcion").value.trim();
+  const err=document.getElementById("errorAgregar");
+
+  if(!nombre||!categoria||!link){err.textContent="Bitte Name, Kategorie und Link ausfüllen.";return}
+  // Validar que el link corresponda a la plataforma seleccionada
+  if(plataformaForm==="WhatsApp"){
+    if(!/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+/i.test(link)){
+      err.textContent="⚠️ Für WhatsApp-Gruppen muss der Link das Format https://chat.whatsapp.com/... haben.";return;
+    }
+  } else if(plataformaForm==="Telegram"){
+    if(!/^https:\/\/(t\.me|telegram\.me|telegram\.dog)\/[A-Za-z0-9_+]+/i.test(link)){
+      err.textContent="⚠️ Für Telegram-Gruppen muss der Link das Format https://t.me/... haben.";return;
+    }
+  } else if(!/^https?:\/\//i.test(link)){
+    err.textContent="Der Link muss mit https:// beginnen.";return;
+  }
+  if(grupos.some(g=>g.nombre.toLowerCase()===nombre.toLowerCase())){err.textContent="Eine Gruppe mit diesem Namen existiert bereits.";return}
+  if(categoria==="+18" && !document.getElementById("agConfirma18").checked){
+    err.textContent="Du musst bestätigen, dass die Gruppe für Personen über 18 Jahre geeignet ist.";
+    return;
+  }
+
+  const user=obtenerSesion();
+  const fotoPreview=document.getElementById("agFotoPreview");
+  const imgSrc=(fotoPreview&&fotoPreview.src&&fotoPreview.style.display!=="none")
+    ? fotoPreview.src
+    : `https://picsum.photos/600/340?random=${Date.now()}`;
+  const solicitud={
+    id:Date.now().toString(),
+    nombre,categoria,plataforma:plataformaForm,link,descripcion,
+    img:imgSrc,
+    miembros:0,favoritosBase:0,
+    estado:"pendiente",
+    usuarioCorreo:user.correo,
+    usuarioNombre:user.nombre,
+    fecha:new Date().toISOString()
+  };
+
+  const solis=obtenerSolicitudes();
+  solis.push(solicitud);
+  guardarSolicitudes(solis);
+
+  const msgSistema={
+    de:"sistema",
+    texto:`📋 Nueva solicitud de grupo:\n*${nombre}* (${categoria} · ${plataformaForm})${descripcion?'\n'+descripcion:''}`,
+    hora:horaActual(),
+    solicitudId:solicitud.id
+  };
+  agregarMensajeChat(user.correo, msgSistema);
+
+  const convAdmin=obtenerConversacion(user.correo);
+  if(convAdmin.length<=1){
+    const msgAdmin={de:"admin",texto:`Hallo ${user.nombre}! Wir haben deine Anfrage für die Gruppe *${nombre}* erhalten. Wir prüfen sie bald. 👋`,hora:horaActual()};
+    agregarMensajeChat(user.correo, msgAdmin);
+  }
+
+  err.textContent="";
+  cerrarAgregar();
+  document.getElementById("agNombre").value="";
+  document.getElementById("agCategoria").value="";
+  document.getElementById("agLink").value="";
+  document.getElementById("agDescripcion").value="";
+  document.getElementById("cajaConfirma18").style.display="none";
+  // reset foto
+  document.getElementById("agFotoInput").value="";
+  document.getElementById("agFotoPreview").style.display="none";
+  document.getElementById("agFotoIco").style.display="";
+  document.getElementById("agFotoTexto").textContent="Foto auswählen";
+  elegirPlataformaForm("WhatsApp");
+
+  actualizarBadgeChat();
+  mostrarNotif("📤","Anfrage gesendet","Der Admin prüft deine Gruppe bald.");
+  mostrarToast(`Anfrage gesendet. Der Admin prüft sie bald!`,"📤");
+
+  setTimeout(()=>{
+    if(!document.getElementById("panelChat").classList.contains("abierto")){
+      toggleChat();
+    }
+  }, 900);
+}
+
+function reiniciar(){
+  buscar.value="";
+  categoriaActiva="Todos";
+  paginaActual=1;
+  pintarCategorias();
+  filtrar();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function pintar(arr){
+  if(arr.length===0){
+    grid.innerHTML=`<div class="vacio"><span class="e">🔍</span>Keine Gruppen mit dieser Suche gefunden.<br>Probiere ein anderes Wort oder eine andere Kategorie.</div>`;
+    resultadoInfo.textContent="";
+    document.getElementById("paginacion").innerHTML="";
+    return;
+  }
+
+  /* Ordenamiento:
+     1. Los grupos con página fija se ubican en su página exacta.
+     2. El resto se ordena por popularidad (favoritos).          */
+  const pf=obtenerPaginasFijas();
+  const conPagFija=arr.filter(g=>pf[g.nombre]);
+  const sinPagFija=[...arr].filter(g=>!pf[g.nombre]).sort((a,b)=>totalFavoritos(b)-totalFavoritos(a));
+
+  // Construye el array de todas las páginas (slots)
+  const totalPaginas=Math.max(1,Math.ceil(arr.length/GRUPOS_POR_PAGINA));
+  const slots=Array.from({length:totalPaginas},()=>[]);
+
+  // Primero coloca los de página fija en su slot
+  conPagFija.forEach(g=>{
+    const pag=Math.min(pf[g.nombre],totalPaginas)-1;
+    slots[pag].push(g);
+  });
+
+  // Rellena el resto en orden de popularidad
+  let ptrLibre=0;
+  sinPagFija.forEach(g=>{
+    while(ptrLibre<totalPaginas && slots[ptrLibre].length>=GRUPOS_POR_PAGINA) ptrLibre++;
+    if(ptrLibre<totalPaginas) slots[ptrLibre].push(g);
+  });
+
+  if(paginaActual>totalPaginas) paginaActual=totalPaginas;
+  const visibles=slots[paginaActual-1]||[];
+
+  resultadoInfo.textContent=`${arr.length} Gruppe${arr.length===1?"":"n"} verfügbar · Seite ${paginaActual} von ${totalPaginas}`;
+
+  grid.innerHTML=visibles.map(g=>{
+    const claseBtn=g.plataforma==="WhatsApp"?"w":"t";
+    const icoPlat=g.plataforma==="WhatsApp"
+      ?`<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>`
+      :`<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>`;
+    const esFav=favoritos.has(g.nombre);
+    const bloqueado=!puedeVotar(g.nombre);
+    return `
+    <div class="card">
+      <div class="img-wrap">
+        <img src="${g.img}" alt="${g.nombre}" loading="lazy">
+        <span class="plataforma-badge ${claseBtn}"><span class="circ">${icoPlat}</span>${g.plataforma}</span>
+        <button class="btn-fav ${esFav?'activo':''} ${bloqueado?'fav-bloqueado':''}"
+          onclick="alternarFavorito(this,'${g.nombre}')"
+          aria-label="${bloqueado?'Heute bereits abgestimmt':'Als Favorit speichern'}"
+          title="${bloqueado?'Du kannst in '+tiempoRestante(g.nombre)+' wieder abstimmen':'Als Favorit markieren'}">
+          <span class="fav-ico">${esFav?'⭐':'☆'}</span>
+          <span class="fav-num">${totalFavoritos(g)}</span>
+        </button>
+      </div>
+      <div class="card-body">
+        <span class="tag ${g.categoria==='+18'?'plus18':''}">${categorias.find(c=>c.nombre===g.categoria)?.icono||""} ${categoriaLabel[g.categoria]||g.categoria}</span>
+        <h3>${g.nombre}</h3>
+        <div class="meta">👥 ${g.miembros.toLocaleString("de-DE")} Mitglieder</div>
+        <div class="acciones">
+          <a class="btn-unirse ${claseBtn}" target="_blank" rel="noopener" href="${g.link}">
+            Gruppe beitreten <span class="flecha">→</span>
+          </a>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+
+  pintarPaginacion(totalPaginas);
+}
+
+function pintarPaginacion(totalPaginas){
+  const cont=document.getElementById("paginacion");
+  if(totalPaginas<=1){cont.innerHTML="";return}
+  let botones=`<button class="pag-btn" ${paginaActual===1?"disabled":""} onclick="irPagina(${paginaActual-1})">‹</button>`;
+  for(let i=1;i<=totalPaginas;i++){
+    botones+=`<button class="pag-btn ${i===paginaActual?'activo':''}" onclick="irPagina(${i})">${i}</button>`;
+  }
+  botones+=`<button class="pag-btn" ${paginaActual===totalPaginas?"disabled":""} onclick="irPagina(${paginaActual+1})">›</button>`;
+  cont.innerHTML=botones;
+}
+
+function irPagina(n){
+  paginaActual=n;
+  filtrar();
+  // animación de entrada
+  const g=document.getElementById("grid");
+  g.classList.remove("animando");
+  void g.offsetWidth;
+  g.classList.add("animando");
+  setTimeout(()=>g.classList.remove("animando"),600);
+  window.scrollTo({top:g.offsetTop-140,behavior:"smooth"});
+}
+
+/* =========================================================
+   LÍMITE DE FAVORITOS — máximo 1 voto por grupo cada 24 horas
+   Se guarda en Firestore bajo "votos_fav/{correo}"
+   ========================================================= */
+let _votosCache={};
+function obtenerVotosFav(){ return _votosCache; }
+function guardarVotosFav(obj){
+  _votosCache=obj;
+  const user=obtenerSesion();
+  if(!user) return;
+  const correoKey=user.correo.replace(/[.#$[\]]/g,"_");
+  _db.collection("votos_fav").doc(correoKey)
+    .set({votos:obj})
+    .catch(e=>console.warn("FB guardarVotos:",e));
+}
+function puedeVotar(nombre){
+  const votos=obtenerVotosFav();
+  if(!votos[nombre]) return true;
+  const diff=Date.now()-votos[nombre];
+  return diff>24*60*60*1000; // 24 horas en ms
+}
+function tiempoRestante(nombre){
+  const votos=obtenerVotosFav();
+  if(!votos[nombre]) return "";
+  const restMs=24*60*60*1000-(Date.now()-votos[nombre]);
+  if(restMs<=0) return "";
+  const h=Math.floor(restMs/3600000);
+  const m=Math.floor((restMs%3600000)/60000);
+  return `${h}h ${m}m`;
+}
+
+function animarNumero(btn, nuevoVal, subiendo){
+  const numEl=btn.querySelector(".fav-num");
+  const icoEl=btn.querySelector(".fav-ico");
+  if(!numEl) return;
+
+  // clase de animación
+  const animClass=subiendo?"anim-sube":"anim-baja";
+  numEl.classList.remove("anim-sube","anim-baja");
+  void numEl.offsetWidth; // reflow
+  numEl.classList.add(animClass);
+
+  // cambiar valor en el punto medio de la animación
+  setTimeout(()=>{ numEl.textContent=nuevoVal; },200);
+  numEl.addEventListener("animationend",()=>numEl.classList.remove(animClass),{once:true});
+
+  // ícono
+  if(icoEl) icoEl.textContent=subiendo?"⭐":"☆";
+
+  // partícula flotante solo al sumar
+  if(subiendo){
+    const wrap=btn.closest(".img-wrap");
+    if(wrap){
+      const p=document.createElement("span");
+      p.className="fav-particle";
+      p.textContent="+1";
+      wrap.appendChild(p);
+      setTimeout(()=>p.remove(),700);
+    }
+  }
+}
+
+function alternarFavorito(btn,nombre){
+  if(!puedeVotar(nombre)){
+    const resta=tiempoRestante(nombre);
+    mostrarToast(`Heute bereits abgestimmt · Wieder in ${resta}`,"⏳");
+    return;
+  }
+  const votos=obtenerVotosFav();
+  let subiendo;
+  if(favoritos.has(nombre)){
+    favoritos.delete(nombre);
+    ajustesFavoritos[nombre]=(ajustesFavoritos[nombre]||0)-1;
+    delete votos[nombre];
+    subiendo=false;
+    mostrarToast(`Aus Favoriten entfernt · ${nombre}`,"➖");
+  }else{
+    favoritos.add(nombre);
+    ajustesFavoritos[nombre]=(ajustesFavoritos[nombre]||0)+1;
+    votos[nombre]=Date.now();
+    subiendo=true;
+    mostrarToast(`+1 Favoritenbonus · ${nombre}`,"⭐");
+  }
+  guardarVotosFav(votos);
+  guardarFavoritos();
+  guardarAjustes();
+
+  // calcular nuevo total sin re-renderizar todo
+  const g=grupos.find(x=>x.nombre===nombre)||gruposExtra.find(x=>x.nombre===nombre);
+  if(g){
+    const nuevoTotal=totalFavoritos(g);
+    btn.classList.toggle("activo",subiendo);
+    btn.classList.add("pulso");
+    animarNumero(btn, nuevoTotal, subiendo);
+    btn.addEventListener("animationend",()=>btn.classList.remove("pulso"),{once:true});
+  } else {
+    filtrar();
+  }
+}
+
+let toastTimer;
+function mostrarToast(msg,emoji="✅"){
+  const t=document.getElementById("toast");
+  t.innerHTML=`<span>${emoji}</span> ${msg}`;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"),2200);
+}
+
+function suscribirNews(){
+  const input=document.getElementById("newsCorreo");
+  const correo=input.value.trim();
+  if(!correo||!correo.includes("@")){
+    mostrarToast("Bitte eine gültige E-Mail-Adresse eingeben","⚠️");
+    return;
+  }
+  mostrarToast("Fertig! Wir benachrichtigen dich über neue Gruppen","📩");
+  input.value="";
+}
+
+function buscarCambio(){
+  paginaActual=1;
+  filtrar();
+}
+
+function filtrar(){
+  const q=buscar.value.toLowerCase();
+  let filtrados=grupos.filter(g=>{
+    const coincideTexto=g.nombre.toLowerCase().includes(q)||g.plataforma.toLowerCase().includes(q);
+    const coincideCategoria=categoriaActiva==="Todos"||g.categoria===categoriaActiva;
+    return coincideTexto&&coincideCategoria;
+  });
+
+  // Ordenar por favoritos (descendente) - más favoritos primero
+  filtrados.sort((a,b)=>{
+    const favA=a.favoritos||a.favoritosBase||0;
+    const favB=b.favoritos||b.favoritosBase||0;
+    return favB-favA;
+  });
+
+  pintar(filtrados);
+}
+
+function modo(){
+  const esDark=document.body.classList.toggle('dark');
+  localStorage.setItem("grupohub_modo",esDark?"oscuro":"claro");
+  const btn=document.getElementById("btnModo");
+  if(btn) btn.title=esDark?"Tagmodus":"Nachtmodus";
+}
+
+if(localStorage.getItem("grupohub_modo")==="oscuro"){
+  document.body.classList.add('dark');
+}
+
+/* =========================================================
+   AUTENTICACIÓN + ADMINISTRADOR
+   El correo cristhianzh1994@gmail.com con la contraseña
+   2772274032 tiene acceso completo de administrador.
+   ========================================================= */
+const ADMIN_CORREO="cristhianzh1994@gmail.com";
+const ADMIN_PASS="2772274032";
+
+function esAdmin(user){
+  return user&&user.correo===ADMIN_CORREO&&user.esAdmin===true;
+}
+
+async function obtenerUsuarioFirestore(correo){
+  const correoKey=correo.replace(/[.#$[\]]/g,"_");
+  try{
+    const snap=await _db.collection("usuarios").doc(correoKey).get();
+    return snap.exists?snap.data():null;
+  }catch(e){ console.warn("FB obtenerUsuario:",e); return null; }
+}
+async function guardarUsuarioFirestore(userData){
+  const correoKey=userData.correo.replace(/[.#$[\]]/g,"_");
+  try{
+    await _db.collection("usuarios").doc(correoKey).set(userData);
+  }catch(e){ console.warn("FB guardarUsuario:",e); }
+}
+let _usuariosCache=[];
+function obtenerUsuarios(){ return _usuariosCache; }
+function guardarUsuarios(lista){ _usuariosCache=lista; }
+function obtenerSesion(){
+  return JSON.parse(localStorage.getItem("grupohub_sesion")||"null");
+}
+function guardarSesion(user){
+  localStorage.setItem("grupohub_sesion",JSON.stringify(user));
+  pintarSesion();
+}
+
+function abrirAuth(tab){
+  document.getElementById("overlayAuth").classList.add("abierto");
+  cambiarTab(tab||"login");
+}
+function cerrarAuth(){
+  document.getElementById("overlayAuth").classList.remove("abierto");
+  document.getElementById("errorLogin").textContent="";
+  document.getElementById("errorRegistro").textContent="";
+}
+function cambiarTab(tab){
+  const esLogin=tab==="login";
+  document.getElementById("tabLogin").classList.toggle("activo",esLogin);
+  document.getElementById("tabRegistro").classList.toggle("activo",!esLogin);
+  document.getElementById("vistaLogin").style.display=esLogin?"block":"none";
+  document.getElementById("vistaRegistro").style.display=esLogin?"none":"block";
+}
+
+async function registrar(){
+  const nombre=document.getElementById("regNombre").value.trim();
+  const correo=document.getElementById("regCorreo").value.trim().toLowerCase();
+  const pass=document.getElementById("regPass").value;
+  const err=document.getElementById("errorRegistro");
+  if(!nombre||!correo||!pass){err.textContent="Bitte alle Felder ausfüllen.";return}
+  if(pass.length<6){err.textContent="Das Passwort muss mindestens 6 Zeichen haben.";return}
+  if(correo===ADMIN_CORREO){err.textContent="Diese E-Mail-Adresse ist reserviert.";return}
+  const existente=await obtenerUsuarioFirestore(correo);
+  if(existente){err.textContent="Ein Konto mit dieser E-Mail-Adresse existiert bereits.";return}
+  const userData={nombre,correo,pass};
+  await guardarUsuarioFirestore(userData);
+  _usuariosCache.push(userData);
+  guardarSesion({nombre,correo,metodo:"correo"});
+  err.textContent="";
+  cerrarAuth();
+  mostrarToast(`Willkommen, ${nombre}!`,"🎉");
+  pintarSesion();
+}
+
+async function iniciarSesion(){
+  const correo=document.getElementById("loginCorreo").value.trim().toLowerCase();
+  const pass=document.getElementById("loginPass").value;
+  const err=document.getElementById("errorLogin");
+
+  if(correo===ADMIN_CORREO && pass===ADMIN_PASS){
+    guardarSesion({nombre:"Cristhian (Admin)",correo:ADMIN_CORREO,metodo:"correo",esAdmin:true});
+    err.textContent="";
+    cerrarAuth();
+    mostrarToast("Willkommen, Administrator! 👑","🛠️");
+    await cargarDatosAdmin();
+    pintarSesion();
+    filtrar();
+    iniciarListenersChat();
+    return;
+  }
+
+  const usuario=await obtenerUsuarioFirestore(correo);
+  if(!usuario||usuario.pass!==pass){err.textContent="E-Mail-Adresse oder Passwort falsch.";return}
+  guardarSesion({nombre:usuario.nombre,correo:usuario.correo,metodo:"correo"});
+  err.textContent="";
+  cerrarAuth();
+  mostrarToast(`Hallo wieder, ${usuario.nombre}`,"👋");
+  await cargarDatosUsuario(correo);
+  pintarSesion();
+  iniciarListenersChat();
+}
+
+async function googleSignIn(){
+  try{
+    const result=await _auth.signInWithPopup(_googleProvider);
+    const gUser=result.user;
+    const nombre=gUser.displayName||"Google-Nutzer";
+    const correo=(gUser.email||"usuario@gmail.com").toLowerCase();
+    // Guardar/actualizar usuario en Firestore
+    await guardarUsuarioFirestore({nombre,correo,metodo:"google"});
+    guardarSesion({nombre,correo,metodo:"google"});
+    cerrarAuth();
+    mostrarToast(`Willkommen, ${nombre}! 🎉`,"🔵");
+    await cargarDatosUsuario(correo);
+    pintarSesion();
+    iniciarListenersChat();
+  }catch(e){
+    console.warn("Google Sign-In error:",e);
+    mostrarToast("Google-Anmeldung fehlgeschlagen: "+e.message,"⚠️");
+  }
+}
+
+function cerrarSesion(){
+  desconectarListenersChat();
+  localStorage.removeItem("grupohub_sesion");
+  pintarSesion();
+  mostrarToast("Abgemeldet","👋");
+}
+
+function alternarMenuUsuario(){
+  document.getElementById("menuUsuario")?.classList.toggle("abierto");
+}
+
+function pintarSesion(){
+  const zona=document.getElementById("zonaSesion");
+  const user=obtenerSesion();
+  if(!user){
+    zona.innerHTML=`<button class="btn-sesion" onclick="abrirAuth('login')">Anmelden</button>`;
+    document.getElementById("chatFlotante").classList.remove("visible");
+    return;
+  }
+  document.getElementById("chatFlotante").classList.add("visible");
+  const inicial=user.nombre.trim().charAt(0).toUpperCase();
+  const adminBtn=esAdmin(user)
+    ?`<button onclick="abrirAdmin();document.getElementById('menuUsuario').classList.remove('abierto')" style="color:#d97706;font-weight:700">⚙️ Admin-Panel</button>`
+    :"";
+  zona.innerHTML=`
+    <div class="chip-usuario" onclick="alternarMenuUsuario()">
+      <div class="avatar" style="${esAdmin(user)?'overflow:hidden;padding:0':''}">${esAdmin(user)?'<img src="https://s67.erome.com/8391/25otK4Ph/KHyzTjkN.jpg?v=1782372656" alt="Admin" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':inicial}</div>
+      <span>${user.nombre.split(" ")[0]}</span>
+      <div class="menu-usuario" id="menuUsuario">
+        ${adminBtn}
+        <button onclick="abrirMisGrupos();document.getElementById('menuUsuario').classList.remove('abierto')">👤 Meine Gruppen</button>
+        <button onclick="cerrarSesion()">Abmelden</button>
+      </div>
+    </div>`;
+}
+
+/* =========================================================
+   PANEL ADMINISTRADOR — funciones
+   ========================================================= */
+/* Página fija: permite al admin anclar un grupo a una página concreta. */
+let _paginasFijasCache={};
+function obtenerPaginasFijas(){ return _paginasFijasCache; }
+function guardarPaginasFijas(obj){
+  _paginasFijasCache=obj;
+  _db.collection("config").doc("paginas_fijas")
+    .set(obj)
+    .catch(e=>console.warn("FB pagFija:",e));
+}
+
+function abrirAdmin(){
+  if(!esAdmin(obtenerSesion())){mostrarToast("Zugriff verweigert","🚫");return}
+  poblarSelectAdmin();
+  adminTab("agregar");
+  document.getElementById("panelAdmin").classList.add("abierto");
+}
+function cerrarAdmin(){
+  document.getElementById("panelAdmin").classList.remove("abierto");
+}
+
+function adminTab(tab){
+  const tabs=["agregar","gestionar","solicitudes","chats"];
+  document.querySelectorAll(".admin-tab").forEach((b,i)=>{
+    b.classList.toggle("activo",tabs[i]===tab);
+  });
+  tabs.forEach(t=>{
+    const el=document.getElementById("admin"+t.charAt(0).toUpperCase()+t.slice(1));
+    if(el) el.classList.toggle("activa",t===tab);
+  });
+  if(tab==="gestionar") renderAdminTabla();
+  if(tab==="solicitudes") renderAdminSolicitudes();
+  if(tab==="chats") renderAdminChats();
+}
+
+function poblarSelectAdmin(){
+  const sel=document.getElementById("adCategoria");
+  sel.innerHTML=`<option value="" disabled selected>Selecciona</option>`;
+  categorias.filter(c=>c.nombre!=="Todos").forEach(c=>{
+    sel.innerHTML+=`<option value="${c.nombre}">${c.icono} ${categoriaLabel[c.nombre]||c.nombre}</option>`;
+  });
+}
+
+function adminActualizar18(){
+  const es18=document.getElementById("adCategoria").value==="+18";
+  document.getElementById("adminCaja18").style.display=es18?"flex":"none";
+}
+
+function adminImagenSeleccionada(event){
+  const archivo=event.target.files[0];
+  if(!archivo)return;
+  if(!archivo.type.startsWith("image/")){
+    document.getElementById("errorAdmin").textContent="Bitte wähle eine Bilddatei aus.";
+    event.target.value="";
+    return;
+  }
+  const lector=new FileReader();
+  lector.onload=function(e){
+    document.getElementById("adImagen").value=e.target.result;
+    document.getElementById("adImagenPreview").src=e.target.result;
+    document.getElementById("adImagenPreviewWrap").style.display="flex";
+    document.getElementById("errorAdmin").textContent="";
+  };
+  lector.readAsDataURL(archivo);
+}
+
+function adminImagenQuitar(){
+  document.getElementById("adImagenFile").value="";
+  document.getElementById("adImagen").value="";
+  document.getElementById("adImagenPreviewWrap").style.display="none";
+  document.getElementById("adImagenPreview").src="";
+}
+
+function adminPublicar(){
+  const nombre=document.getElementById("adNombre").value.trim();
+  const categoria=document.getElementById("adCategoria").value;
+  const plataforma=document.getElementById("adPlataforma").value;
+  const link=document.getElementById("adLink").value.trim();
+  const imagen=document.getElementById("adImagen").value.trim();
+  const miembrosTxt=document.getElementById("adMiembros").value.trim();
+  const favTxt=document.getElementById("adFavoritos").value.trim();
+  const paginaTxt=document.getElementById("adPagina").value.trim();
+  const err=document.getElementById("errorAdmin");
+
+  if(!nombre||!categoria||!link){err.textContent="Name, Kategorie und Link sind erforderlich.";return}
+  // Validar que el link corresponda a la plataforma seleccionada
+  if(plataforma==="WhatsApp"){
+    if(!/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+/i.test(link)){
+      err.textContent="⚠️ WhatsApp-Links müssen das Format https://chat.whatsapp.com/... haben.";return;
+    }
+  } else if(plataforma==="Telegram"){
+    if(!/^https:\/\/(t\.me|telegram\.me|telegram\.dog)\/[A-Za-z0-9_+]+/i.test(link)){
+      err.textContent="⚠️ Telegram-Links müssen das Format https://t.me/... haben.";return;
+    }
+  } else if(!/^https?:\/\//i.test(link)){
+    err.textContent="Der Link muss mit https:// beginnen.";return;
+  }
+  if(grupos.some(g=>g.nombre.toLowerCase()===nombre.toLowerCase())){err.textContent="Eine Gruppe mit diesem Namen existiert bereits.";return}
+  if(categoria==="+18"&&!document.getElementById("adConfirma18").checked){
+    err.textContent="Bitte bestätige, dass es sich um +18-Inhalte handelt.";return;
+  }
+
+  const miembros=miembrosTxt?Math.max(0,parseInt(miembrosTxt)||0):0;
+  const favoritosBase=favTxt?Math.max(0,parseInt(favTxt)||0):0;
+  const nuevoGrupo={
+    nombre,categoria,plataforma,link,miembros,favoritosBase,
+    img:imagen||`https://picsum.photos/600/340?random=${Date.now()}`
+  };
+
+  // Página fija
+  if(paginaTxt){
+    const pag=Math.max(1,parseInt(paginaTxt)||1);
+    const pf=obtenerPaginasFijas();
+    pf[nombre]=pag;
+    guardarPaginasFijas(pf);
+    nuevoGrupo.pagFija=pag;
+  }
+
+  grupos.push(nuevoGrupo);
+  guardarGrupoUsuario(nuevoGrupo);
+
+  err.textContent="";
+  ["adNombre","adLink","adImagen","adMiembros","adFavoritos","adPagina"].forEach(id=>{
+    document.getElementById(id).value="";
+  });
+  document.getElementById("adImagenFile").value="";
+  document.getElementById("adImagenPreviewWrap").style.display="none";
+  document.getElementById("adImagenPreview").src="";
+  document.getElementById("adCategoria").value="";
+  document.getElementById("adminCaja18").style.display="none";
+
+  buscar.value="";categoriaActiva="Todos";paginaActual=1;
+  pintarCategorias();filtrar();
+  mostrarToast(`✅ "${nombre}" publicado`,"🎉");
+}
+
+function renderAdminTabla(){
+  const pf=obtenerPaginasFijas();
+  const body=document.getElementById("adminTablaBody");
+  body.innerHTML=grupos.map((g,i)=>`
+    <tr>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.nombre}">${g.nombre}</td>
+      <td>${g.categoria}</td>
+      <td>${g.plataforma}</td>
+      <td>
+        <input type="number" min="1" value="${pf[g.nombre]||''}" placeholder="Auto"
+          id="pf_${i}" style="width:60px">
+      </td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-admin-sm save" onclick="adminGuardarPagina(${i},'${g.nombre}')">Speichern</button>
+        <button class="btn-admin-sm del" onclick="adminEliminar(${i},'${g.nombre}')">Löschen</button>
+      </td>
+    </tr>`).join("");
+}
+
+function adminGuardarPagina(i,nombre){
+  const val=document.getElementById(`pf_${i}`).value.trim();
+  const pf=obtenerPaginasFijas();
+  if(val){
+    pf[nombre]=Math.max(1,parseInt(val)||1);
+    const g=grupos.find(x=>x.nombre===nombre);
+    if(g) g.pagFija=pf[nombre];
+  }else{
+    delete pf[nombre];
+    const g=grupos.find(x=>x.nombre===nombre);
+    if(g) delete g.pagFija;
+  }
+  guardarPaginasFijas(pf);
+  mostrarToast(`Seite gespeichert für „${nombre}"`,"📌");
+  filtrar();
+}
+
+function adminEliminar(i,nombre){
+  if(!confirm(`Gruppe „${nombre}" löschen?`)) return;
+  grupos.splice(i,1);
+  const idx=gruposExtra.findIndex(g=>g.nombre===nombre);
+  if(idx!==-1){
+    gruposExtra.splice(idx,1);
+    _db.collection("grupos_extra").where("nombre","==",nombre).get().then(snap=>{
+      snap.forEach(d=>d.ref.delete().catch(console.warn));
+    });
+  }
+  const pf=obtenerPaginasFijas();
+  delete pf[nombre];
+  guardarPaginasFijas(pf);
+  mostrarToast(`„${nombre}" gelöscht`,"🗑️");
+  renderAdminTabla();
+  filtrar();
+}
+
+document.addEventListener("click",(e)=>{
+  const chip=document.querySelector(".chip-usuario");
+  if(chip && !chip.contains(e.target)){
+    document.getElementById("menuUsuario")?.classList.remove("abierto");
+  }
+  // Cerrar panel admin al hacer click en el fondo
+  const pa=document.getElementById("panelAdmin");
+  if(pa&&pa.classList.contains("abierto")&&e.target===pa){
+    cerrarAdmin();
+  }
+});
+
+function aplicarPaginasFijasLocal(){
+  const pf=obtenerPaginasFijas();
+  grupos.forEach(g=>{if(pf[g.nombre]) g.pagFija=pf[g.nombre]});
+}
+
+/* =========================================================
+   FUNCIONES DE CARGA DESDE FIRESTORE
+   ========================================================= */
+async function cargarDatosUsuario(correo){
+  const correoKey=correo.replace(/[.#$[\]]/g,"_");
+  try{
+    const snap=await _db.collection("favoritos").doc(correoKey).get();
+    if(snap.exists){ const d=snap.data(); favoritos=new Set(d.lista||[]); ajustesFavoritos=d.ajustes||{}; }
+  }catch(e){console.warn("FB cargarFav:",e);}
+  try{
+    const snap=await _db.collection("votos_fav").doc(correoKey).get();
+    if(snap.exists) _votosCache=snap.data().votos||{};
+  }catch(e){console.warn("FB cargarVotos:",e);}
+  try{
+    // Chat: buscar por campo "correo" ya que el ID es base64
+    const snap=await _db.collection("chats").where("correo","==",correo).get();
+    if(!snap.empty) _chatsCache[correo]=snap.docs[0].data().mensajes||[];
+  }catch(e){
+    // Fallback: intentar con clave antigua
+    try{
+      const key=correoAKey(correo);
+      const snap2=await _db.collection("chats").doc(key).get();
+      if(snap2.exists) _chatsCache[correo]=snap2.data().mensajes||[];
+    }catch(e2){console.warn("FB cargarChat:",e2);}
+  }
+  filtrar();
+}
+
+async function cargarDatosAdmin(){
+  try{
+    const snap=await _db.collection("solicitudes").get();
+    _solicitudesCache=snap.docs.map(d=>d.data());
+  }catch(e){console.warn("FB cargarSolicitudes:",e);}
+  try{
+    const snap=await _db.collection("usuarios").get();
+    _usuariosCache=snap.docs.map(d=>d.data());
+  }catch(e){console.warn("FB cargarUsuarios:",e);}
+  try{
+    const snap=await _db.collection("chats").get();
+    snap.forEach(d=>{
+      const data=d.data();
+      // Usamos el campo "correo" guardado junto con los mensajes
+      const correo=data.correo||d.id;
+      _chatsCache[correo]=data.mensajes||[];
+    });
+  }catch(e){console.warn("FB cargarChats:",e);}
+}
+
+async function initFirebase(){
+  // El splash ya cubre la pantalla — no necesitamos fbLoading
+  try{
+    // 1. Grupos extra
+    const gruposSnap=await _db.collection("grupos_extra").get();
+    gruposSnap.forEach(d=>{
+      const g={...d.data()}; delete g.creadoEn;
+      gruposExtra.push(g); grupos.push(g);
+    });
+    // 2. Páginas fijas
+    const pfSnap=await _db.collection("config").doc("paginas_fijas").get();
+    if(pfSnap.exists) _paginasFijasCache=pfSnap.data();
+    aplicarPaginasFijasLocal();
+    // 3. Datos del usuario actual
+    const user=obtenerSesion();
+    if(user){
+      if(esAdmin(user)) await cargarDatosAdmin();
+      else await cargarDatosUsuario(user.correo);
+    }
+  }catch(e){
+    console.warn("Firebase init error:",e);
+    mostrarToast("⚠️ Firebase-Verbindung fehlgeschlagen — prüfe Firestore-Regeln","⚠️");
+  }
+  pintarSesion();
+  pintarCategorias();
+  poblarSelectCategorias();
+  pintar(grupos);
+  iniciarListenersChat();
+  // Asegurarse de que el splash desaparezca tras Firebase (mínimo 2.1s ya garantizado)
+  const splash=document.getElementById("splash");
+  if(splash && !splash.classList.contains("oculto")){
+    splash.classList.add("oculto");
+    setTimeout(()=>splash.remove(),520);
+  }
+}
+
+// Iniciar cuando el DOM esté listo
+document.addEventListener("DOMContentLoaded", initFirebase);
+
+/* =========================================================
+   SISTEMA DE SOLICITUDES Y CHAT
+   ========================================================= */
+let _solicitudesCache=[];
+function obtenerSolicitudes(){ return _solicitudesCache; }
+function guardarSolicitudes(lista){
+  _solicitudesCache=lista;
+  lista.forEach(s=>{
+    _db.collection("solicitudes").doc(s.id).set(s).catch(e=>console.warn("FB sol:",e));
+  });
+}
+
+function horaActual(){
+  return new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"});
+}
+
+/* --- CHAT --- */
+// Codifica el correo a un ID válido para Firestore (sin puntos, #, $, /, [, ])
+function correoAKey(correo){ return btoa(correo).replace(/[^a-zA-Z0-9]/g,"_"); }
+// Guarda en cache SIEMPRE con el correo real como clave
+let _chatsCache={};
+function obtenerConversacion(correo){
+  return _chatsCache[correo]||[];
+}
+function guardarConversacion(correo, msgs){
+  _chatsCache[correo]=msgs;
+  const key=correoAKey(correo);
+  _db.collection("chats").doc(key)
+    .set({mensajes:msgs, correo:correo})
+    .catch(e=>{
+      console.warn("FB chat:",e);
+      mostrarToast("⚠️ No se pudo guardar el mensaje en el servidor","⚠️");
+    });
+}
+function agregarMensajeChat(correo, msg){
+  if(msg.leido===undefined) msg.leido=false;
+  if(msg.ts===undefined) msg.ts=Date.now(); // timestamp para comparar con última lectura local
+  const msgs=obtenerConversacion(correo);
+  msgs.push(msg);
+  guardarConversacion(correo, msgs);
+}
+
+/* --- LECTURA / NO LEÍDOS --- */
+// ladoPropio: "usuario" = el usuario está leyendo (marca lo que viene de admin/sistema)
+//             "admin"   = el admin está leyendo (marca lo que viene del usuario)
+function marcarConversacionLeida(correo, ladoPropio){
+  const msgs=obtenerConversacion(correo);
+  let cambiado=false;
+  msgs.forEach(m=>{
+    const esDeOtro = ladoPropio==="admin" ? m.de==="usuario" : m.de!=="usuario";
+    if(esDeOtro && m.leido===false){ m.leido=true; cambiado=true; }
+  });
+  if(cambiado) guardarConversacion(correo, msgs);
+  // Guardar índice del último mensaje leído localmente (no depende de Firestore)
+  if(ladoPropio==="usuario"){
+    const allMsgs=obtenerConversacion(correo);
+    localStorage.setItem("chat_leido_idx_"+correo, (allMsgs.length-1).toString());
+  }
+}
+function contarNoLeidosParaAdmin(){
+  let total=0;
+  Object.keys(_chatsCache).forEach(correo=>{
+    const msgs=_chatsCache[correo]||[];
+    total+=msgs.filter(m=>m.de==="usuario"&&m.leido===false).length;
+  });
+  return total;
+}
+function contarNoLeidosParaUsuario(correo){
+  const msgs=obtenerConversacion(correo)||[];
+  // El badge del usuario se basa SOLO en el índice local del último mensaje leído.
+  // NO dependemos del campo "leido" de Firestore (que el admin puede cambiar).
+  const ultimoIdxLeido=parseInt(localStorage.getItem("chat_leido_idx_"+correo)||"-1",10);
+  // Contar mensajes del admin que están DESPUÉS del último leído
+  let count=0;
+  msgs.forEach((m,idx)=>{
+    if(m.de!=="usuario" && idx>ultimoIdxLeido) count++;
+  });
+  return count;
+}
+function formatoBadge(n){
+  return n>99?"+99":String(n);
+}
+function actualizarBadgeAdminGlobal(){
+  const n=contarNoLeidosParaAdmin();
+  const tabChats=document.getElementById("tabChats");
+  if(tabChats) tabChats.textContent=`💬 Chats${n>0?` (${formatoBadge(n)})`:""}`;
+  const badge=document.getElementById("chatBadge");
+  if(badge){
+    if(n>0){
+      badge.textContent=formatoBadge(n);
+      badge.classList.add("visible");
+    } else {
+      badge.classList.remove("visible");
+    }
+  }
+  if(document.getElementById("chatConvSelect")) poblarSelectChat();
+  if(document.getElementById("adminChatSelect")) poblarSelectAdminChats();
+}
+function actualizarBadgeUsuarioChat(correo){
+  const n=contarNoLeidosParaUsuario(correo);
+  const badge=document.getElementById("chatBadge");
+  if(!badge) return;
+  if(n>0){
+    badge.textContent=formatoBadge(n);
+    badge.classList.add("visible");
+  } else {
+    badge.classList.remove("visible");
+  }
+}
+
+/* --- LISTENERS EN TIEMPO REAL (Firestore onSnapshot) --- */
+let _ultimoConteoMsj={};
+let _listenerChatsAdmin=null;
+let _listenerChatUsuario=null;
+
+// Guarda el estado de "leido" de los mensajes del admin para detectar cambios
+let _leidoCache={};
+function attachAdminChatsListener(){
+  if(_listenerChatsAdmin) return;
+  _listenerChatsAdmin=_db.collection("chats").onSnapshot(snap=>{
+    snap.forEach(d=>{
+      const data=d.data();
+      const correo=data.correo||d.id;
+      const mensajes=data.mensajes||[];
+      const anteriores=_ultimoConteoMsj[correo]||0;
+      _chatsCache[correo]=mensajes;
+
+      // Detectar si algún mensaje del admin pasó a leido=true (usuario lo leyó)
+      const prevLeido=_leidoCache[correo]||[];
+      let cambioVisto=false;
+      mensajes.forEach((m,i)=>{
+        if(m.de==="admin" && m.leido===true && prevLeido[i]===false){
+          cambioVisto=true;
+        }
+      });
+      _leidoCache[correo]=mensajes.map(m=>m.leido);
+
+      if(mensajes.length>anteriores){
+        const nuevos=mensajes.slice(anteriores);
+        nuevos.forEach(m=>{ if(m.de==="usuario") notificarAdminNuevoMensaje(correo,m); });
+      } else if(cambioVisto){
+        // El usuario leyó mensajes → actualizar ticks en tiempo real para el admin
+        const user=obtenerSesion();
+        if(esAdmin(user)){
+          const chatFlotanteConEsta=chatAbierto && document.getElementById("chatConvSelect")?.value===correo;
+          if(chatFlotanteConEsta){
+            renderMensajes(obtenerConversacion(correo),document.getElementById("chatMensajes"),true);
+          }
+          const panelAdmin=document.getElementById("panelAdmin");
+          if(panelAdmin&&panelAdmin.classList.contains("abierto")&&document.getElementById("adminChatSelect")?.value===correo){
+            renderMensajes(obtenerConversacion(correo),document.getElementById("adminChatMensajes"),true);
+          }
+        }
+      }
+      _ultimoConteoMsj[correo]=mensajes.length;
+    });
+    actualizarBadgeAdminGlobal();
+  },e=>console.warn("FB listener chats:",e));
+}
+
+function notificarAdminNuevoMensaje(correo,m){
+  const user=obtenerSesion();
+  if(!esAdmin(user)) return;
+  const chatFlotanteConEsta = chatAbierto && document.getElementById("chatConvSelect")?.value===correo;
+  const panelAdminAbierto = document.getElementById("panelAdmin").classList.contains("abierto");
+  const adminPanelConEsta = panelAdminAbierto && document.getElementById("adminChatSelect")?.value===correo;
+
+  if(chatFlotanteConEsta){
+    renderMensajes(obtenerConversacion(correo),document.getElementById("chatMensajes"),true);
+    marcarConversacionLeida(correo,"admin");
+  } else if(adminPanelConEsta){
+    renderMensajes(obtenerConversacion(correo),document.getElementById("adminChatMensajes"),true);
+    marcarConversacionLeida(correo,"admin");
+  } else {
+    const texto=m.tipo==="imagen"?"📷 Bild":m.texto;
+    mostrarNotif("💬","Neue Nachricht",(texto||"").length>50?texto.slice(0,50)+"…":texto);
+  }
+}
+
+function attachUserChatListener(correo){
+  if(_listenerChatUsuario) return;
+  const key=correoAKey(correo);
+  _listenerChatUsuario=_db.collection("chats").doc(key).onSnapshot(doc=>{
+    if(!doc.exists) return;
+    const mensajes=doc.data().mensajes||[];
+    const anteriores=_ultimoConteoMsj[correo]||0;
+    _chatsCache[correo]=mensajes;
+    if(mensajes.length>anteriores){
+      const nuevos=mensajes.slice(anteriores);
+      nuevos.forEach(m=>{
+        if(m.de!=="usuario"){
+          if(chatAbierto){
+            // Solo renderizar, NO marcar como leído automáticamente
+            renderMensajes(mensajes,document.getElementById("chatMensajes"),false);
+          } else {
+            const texto=m.tipo==="imagen"?"📷 Bild":(m.texto||"Neue Nachricht");
+            mostrarNotif("💬","Neue Nachricht vom Admin",texto.length>50?texto.slice(0,50)+"…":texto);
+          }
+        }
+      });
+    }
+    _ultimoConteoMsj[correo]=mensajes.length;
+    actualizarBadgeUsuarioChat(correo);
+  },e=>console.warn("FB listener chat usuario:",e));
+}
+
+function desconectarListenersChat(){
+  if(_listenerChatsAdmin){_listenerChatsAdmin();_listenerChatsAdmin=null;}
+  if(_listenerChatUsuario){_listenerChatUsuario();_listenerChatUsuario=null;}
+  _ultimoConteoMsj={};
+}
+
+function iniciarListenersChat(){
+  const user=obtenerSesion();
+  if(!user) return;
+  desconectarListenersChat();
+  Object.keys(_chatsCache).forEach(c=>{ _ultimoConteoMsj[c]=(_chatsCache[c]||[]).length; });
+  if(esAdmin(user)){
+    actualizarBadgeAdminGlobal();
+    attachAdminChatsListener();
+  } else {
+    // Si nunca se guardó índice de lectura local, inicializarlo:
+    // - Si hay mensajes con leido===false del admin → índice antes de ellos (para mostrar badge)
+    // - Si todos leídos según Firestore → índice al final (no mostrar badge)
+    const idxKey="chat_leido_idx_"+user.correo;
+    if(localStorage.getItem(idxKey)===null){
+      const msgs=obtenerConversacion(user.correo)||[];
+      // Encontrar el índice del primer mensaje del admin no leído
+      let primerNoLeido=-1;
+      for(let i=0;i<msgs.length;i++){
+        if(msgs[i].de!=="usuario" && msgs[i].leido===false){ primerNoLeido=i; break; }
+      }
+      if(primerNoLeido===-1){
+        // Todos leídos → guardar índice al final
+        localStorage.setItem(idxKey,(msgs.length-1).toString());
+      } else {
+        // Hay no leídos → guardar índice justo antes del primero no leído
+        localStorage.setItem(idxKey,(primerNoLeido-1).toString());
+      }
+    }
+    actualizarBadgeUsuarioChat(user.correo);
+    attachUserChatListener(user.correo);
+  }
+}
+
+function renderMensajes(msgs, contenedor, esAdminView){
+  contenedor.innerHTML="";
+  if(msgs.length===0){
+    contenedor.innerHTML=`<div style="text-align:center;color:var(--sub);font-size:13px;margin:auto">Sin mensajes aún.</div>`;
+    return;
+  }
+
+  // Función para convertir URLs en links clicables
+  function convertirURLsALinks(texto){
+    const urlRegex=/https?:\/\/[^\s<>]+/gi;
+    return texto.replace(urlRegex,function(url){
+      return `<a href="${url}" target="_blank" rel="noopener" style="color:var(--verde);text-decoration:underline;word-break:break-all;font-weight:500">${url}</a>`;
+    });
+  }
+
+  // SVG ticks estilo WhatsApp
+  function svgTick(clase){
+    if(clase==="tick-enviado"){
+      // Un solo check ✓
+      return `<span class="msg-ticks ${clase}"><svg viewBox="0 0 12 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:12px;height:9px"><path d="M1 4.5L4 7.5L11 1" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="tick-stroke"/></svg></span>`;
+    } else {
+      // Doble check ✓✓ (entregado o visto)
+      return `<span class="msg-ticks ${clase}"><svg viewBox="0 0 18 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:18px;height:9px"><path d="M1 4.5L4 7.5L11 1" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="tick-stroke"/><path d="M6 7.5L13 1" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="tick-stroke"/><path d="M9 7.5L16 1" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="tick-stroke"/></svg></span>`;
+    }
+  }
+  function metaMensaje(m, esAdminView){
+    const esMio = esAdminView ? m.de==="admin" : m.de==="usuario";
+    const tickClase = m.leido===true ? "tick-visto" : "tick-entregado";
+    const ticks = esMio ? svgTick(tickClase) : "";
+    // Float derecho dentro del texto: el span empuja el texto y queda pegado abajo-derecha
+    return `<span class="msg-meta"><span class="msg-hora">${m.hora}</span>${ticks}</span>`;
+  }
+
+  msgs.forEach(m=>{
+    if(m.de==="sistema"){
+      const soli=obtenerSolicitudes().find(s=>s.id===m.solicitudId);
+      const estadoHtml=soli?`<span class="estado-solicitud ${soli.estado}">${soli.estado==="pendiente"?"⏳ Pendiente":soli.estado==="aprobado"?"✅ Aprobado":"❌ Rechazado"}</span>`:"";
+      const btnHtml=esAdminView&&soli&&soli.estado==="pendiente"
+        ?`<div class="btns"><button class="aprobar" onclick="adminAprobarSolicitud('${soli.id}')">✅ Aprobar</button><button class="rechazar" onclick="adminRechazarSolicitud('${soli.id}')">❌ Rechazar</button></div>`
+        :"";
+      contenedor.innerHTML+=`<div class="chat-solicitud">
+        <strong>📋 Solicitud de grupo</strong>
+        ${m.texto.replace(/\*(.*?)\*/g,"<b>$1</b>").replace(/\n/g,"<br>")}
+        ${estadoHtml}
+        ${btnHtml}
+        <span class="hora" style="font-size:10px;color:var(--sub);display:block;margin-top:4px">${m.hora}</span>
+      </div>`;
+    } else if(m.tipo==="imagen"){
+      const claseAlign=m.de==="admin"?"admin":"usuario";
+      contenedor.innerHTML+=`<div class="chat-burbuja ${claseAlign}">
+        <img class="chat-img" src="${m.src}" alt="imagen" onclick="this.requestFullscreen&&this.requestFullscreen()">
+        <div style="display:flex;justify-content:flex-end;margin-top:3px">${metaMensaje(m, esAdminView)}</div>
+      </div>`;
+    } else {
+      const claseAlign=m.de==="admin"?"admin":"usuario";
+      const textoConLinks=convertirURLsALinks(m.texto);
+      // Spacer invisible para que el texto no se solape con hora+ticks (truco WhatsApp)
+      contenedor.innerHTML+=`<div class="chat-burbuja ${claseAlign}">${textoConLinks.replace(/\n/g,"<br>")}${metaMensaje(m, esAdminView)}<span style="display:inline-block;width:${m.de==="usuario"||m.de==="admin"?"54px":"36px"};height:1px"></span></div>`;
+    }
+  });
+  contenedor.scrollTop=contenedor.scrollHeight;
+}
+
+/* --- BOTÓN FLOTANTE Y PANEL CHAT USUARIO --- */
+let chatAbierto=false;
+
+function toggleChat(){
+  const user=obtenerSesion();
+  if(!user){
+    mostrarToast("Inicia sesión para usar el chat","🔒");
+    abrirAuth("login");
+    return;
+  }
+  chatAbierto=!chatAbierto;
+  const panel=document.getElementById("panelChat");
+  panel.classList.toggle("abierto",chatAbierto);
+
+  if(chatAbierto){
+    if(esAdmin(user)){
+      document.getElementById("chatNombreHeader").textContent="Loresmitt (Telegram)";
+      document.getElementById("chatSubHeader").textContent="Support · Admin";
+      document.getElementById("chatConvSel").style.display="flex";
+      // Recargar chats frescos de Firestore antes de mostrar
+      cargarDatosAdmin().then(()=>{
+        poblarSelectChat();
+        const correos=Object.keys(_chatsCache);
+        if(correos.length>0){
+          document.getElementById("chatConvSelect").value=correos[0];
+          cambiarConversacion();
+        }
+      });
+    } else {
+      document.getElementById("chatNombreHeader").textContent="Loresmitt (Telegram)";
+      document.getElementById("chatSubHeader").textContent="Support";
+      document.getElementById("chatConvSel").style.display="none";
+      renderMensajes(obtenerConversacion(user.correo), document.getElementById("chatMensajes"), false);
+      marcarConversacionLeida(user.correo,"usuario");
+      // Ocultar badge solo después de marcar como leídos
+      actualizarBadgeUsuarioChat(user.correo);
+    }
+  }
+}
+
+function contarNoLeidosCorreo(correo){
+  return (obtenerConversacion(correo)||[]).filter(m=>m.de==="usuario"&&m.leido===false).length;
+}
+
+function obtenerNombrePorCorreo(correo){
+  if(correo===ADMIN_CORREO) return "Cristhian (Admin)";
+  const soli=obtenerSolicitudes().find(s=>s.usuarioCorreo===correo);
+  if(soli&&soli.usuarioNombre) return soli.usuarioNombre;
+  const usuario=(_usuariosCache||[]).find(u=>u.correo===correo);
+  if(usuario&&usuario.nombre) return usuario.nombre;
+  return correo.split("@")[0];
+}
+
+function poblarSelectChat(){
+  const sel=document.getElementById("chatConvSelect");
+  const valorActual=sel.value;
+  const correos=Object.keys(_chatsCache);
+  sel.innerHTML=`<option value="">Selecciona usuario...</option>`;
+  correos.forEach(correo=>{
+    const label=obtenerNombrePorCorreo(correo);
+    const n=contarNoLeidosCorreo(correo);
+    sel.innerHTML+=`<option value="${correo}">${label}${n>0?` 🔴(${n})`:""}</option>`;
+  });
+  if(valorActual) sel.value=valorActual;
+}
+
+function cambiarConversacion(){
+  const correo=document.getElementById("chatConvSelect").value;
+  if(!correo) return;
+  const msgs=obtenerConversacion(correo);
+  renderMensajes(msgs, document.getElementById("chatMensajes"), false);
+  marcarConversacionLeida(correo,"admin");
+  actualizarBadgeAdminGlobal();
+}
+
+let chatCorActual=""; // correo de conversación activa en panel usuario
+function enviarMensaje(){
+  const user=obtenerSesion();
+  if(!user){return;}
+  const input=document.getElementById("chatInput");
+  const texto=input.value.trim();
+  if(!texto) return;
+
+  const correo=esAdmin(user)
+    ? document.getElementById("chatConvSelect").value
+    : user.correo;
+  if(!correo){mostrarToast("Selecciona una conversación","⚠️");return;}
+
+  const msg={de:esAdmin(user)?"admin":"usuario",texto,hora:horaActual()};
+  agregarMensajeChat(correo, msg);
+  input.value="";
+
+  if(esAdmin(user)){
+    renderMensajes(obtenerConversacion(correo), document.getElementById("chatMensajes"), true);
+    // Notificar al usuario que el admin respondió
+    actualizarBadgeChat(correo);
+  } else {
+    renderMensajes(obtenerConversacion(user.correo), document.getElementById("chatMensajes"), false);
+    // Notificar al admin (badge en flotante, igual que antes)
+    // Mostrar la notificación solo la primera vez que el usuario envía un mensaje
+    if(!localStorage.getItem("notif_enviado_una_vez")){
+      mostrarNotif("📩","Nachricht an Admin gesendet","Wir antworten dir so schnell wie möglich.");
+      localStorage.setItem("notif_enviado_una_vez","1");
+    }
+  }
+}
+
+function actualizarBadgeChat(correoDestino){
+  // Mantiene compatibilidad con llamadas antiguas, pero ahora delega
+  // en el cálculo correcto según la sesión actual (no leídos reales).
+  const user=obtenerSesion();
+  if(!user) return;
+  if(esAdmin(user)){
+    actualizarBadgeAdminGlobal();
+  } else {
+    actualizarBadgeUsuarioChat(user.correo);
+  }
+}
+
+let notifTimer;
+function mostrarNotif(ico, titulo, texto){
+  const el=document.getElementById("notifPush");
+  document.getElementById("notifIco").textContent=ico;
+  document.getElementById("notifTitulo").textContent=titulo;
+  document.getElementById("notifTexto").textContent=texto;
+  el.classList.add("visible");
+  clearTimeout(notifTimer);
+  notifTimer=setTimeout(()=>el.classList.remove("visible"),5000);
+}
+function cerrarNotif(){
+  document.getElementById("notifPush").classList.remove("visible");
+}
+
+/* --- IMÁGENES EN CHAT --- */
+function comprimirImagenChat(archivo, callback){
+  const lector=new FileReader();
+  lector.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      const MAX=900; // ancho/alto máximo en px
+      let {width,height}=img;
+      if(width>height && width>MAX){ height=Math.round(height*(MAX/width)); width=MAX; }
+      else if(height>MAX){ width=Math.round(width*(MAX/height)); height=MAX; }
+      const canvas=document.createElement("canvas");
+      canvas.width=width; canvas.height=height;
+      canvas.getContext("2d").drawImage(img,0,0,width,height);
+      // Intentar calidades decrecientes hasta quedar por debajo de ~600KB en base64
+      let calidad=0.75, dataUrl=canvas.toDataURL("image/jpeg",calidad);
+      while(dataUrl.length>600000 && calidad>0.2){
+        calidad-=0.1;
+        dataUrl=canvas.toDataURL("image/jpeg",calidad);
+      }
+      callback(dataUrl);
+    };
+    img.src=e.target.result;
+  };
+  lector.readAsDataURL(archivo);
+}
+
+function enviarImagen(input){
+  const user=obtenerSesion();
+  if(!user||!input.files[0]) return;
+  const correo=esAdmin(user)?document.getElementById("chatConvSelect").value:user.correo;
+  if(!correo) return;
+  comprimirImagenChat(input.files[0], dataUrl=>{
+    const msg={de:esAdmin(user)?"admin":"usuario",tipo:"imagen",src:dataUrl,hora:horaActual()};
+    agregarMensajeChat(correo, msg);
+    if(esAdmin(user)){
+      renderMensajes(obtenerConversacion(correo),document.getElementById("chatMensajes"),true);
+      // notificar al usuario
+      actualizarBadgeChat(correo);
+      mostrarNotifAdmin(correo,"📷","El admin envió una imagen");
+    } else {
+      renderMensajes(obtenerConversacion(user.correo),document.getElementById("chatMensajes"),false);
+    }
+  });
+  input.value="";
+}
+
+function adminEnviarImagen(input){
+  const correo=document.getElementById("adminChatSelect").value;
+  if(!correo||!input.files[0]) return;
+  comprimirImagenChat(input.files[0], dataUrl=>{
+    const msg={de:"admin",tipo:"imagen",src:dataUrl,hora:horaActual()};
+    agregarMensajeChat(correo, msg);
+    renderMensajes(obtenerConversacion(correo),document.getElementById("adminChatMensajes"),true);
+    actualizarBadgeChat(correo);
+    const badge=document.getElementById("chatBadge");
+    badge.textContent="!";badge.classList.add("visible");
+  });
+  input.value="";
+}
+
+function mostrarNotifAdmin(correoUsuario, ico, texto){
+  // Esta función no tiene efecto real en el mismo dispositivo del admin
+  // pero deja preparada la notificación para cuando el usuario abra el chat
+}
+
+/* --- ADMIN: RENDERIZAR SOLICITUDES --- */
+function renderAdminSolicitudes(){
+  // Recargar solicitudes frescas de Firestore
+  _db.collection("solicitudes").get().then(snap=>{
+    _solicitudesCache=snap.docs.map(d=>d.data());
+    _pintarSolicitudes();
+  }).catch(()=>_pintarSolicitudes());
+}
+
+function _pintarSolicitudes(){
+  let solis=obtenerSolicitudes();
+
+  // Separar por estado y luego concatenar en el orden correcto
+  const pendientes=solis.filter(s=>s.estado==="pendiente");
+  const aprobadas=solis.filter(s=>s.estado==="aprobado");
+  const rechazadas=solis.filter(s=>s.estado==="rechazado");
+
+  // Concatenar en orden: Pendientes PRIMERO, luego aprobadas, luego rechazadas
+  let solisOrdenadas=[...pendientes, ...aprobadas, ...rechazadas];
+
+  const body=document.getElementById("adminSolicitudesBody");
+  if(solisOrdenadas.length===0){
+    body.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--sub);padding:20px">Noch keine Anfragen vorhanden.</td></tr>`;
+    document.getElementById("tabSolicitudes").textContent="🕐 Anfragen";
+    return;
+  }
+  body.innerHTML=solisOrdenadas.map(s=>`
+    <tr>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${s.nombre}">${s.nombre}</td>
+      <td>${s.categoria}</td>
+      <td>${s.plataforma}</td>
+      <td style="font-size:12px">${s.usuarioNombre||s.usuarioCorreo}</td>
+      <td style="font-size:11px;max-width:200px;word-break:break-all">
+        ${s.link?`<a href="${s.link}" target="_blank" rel="noopener" style="color:var(--verde);text-decoration:none;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:5px">🔗 ${s.link.substring(0,45)}${s.link.length>45?"...":""}</a>`:"—"}
+      </td>
+      <td><span class="estado-solicitud ${s.estado}">${s.estado==="pendiente"?"⏳ Ausstehend":s.estado==="aprobado"?"✅ Genehmigt":"❌ Abgelehnt"}</span></td>
+      <td style="display:flex;gap:5px;flex-wrap:wrap">
+        ${s.estado==="pendiente"?`
+          <button class="btn-admin-sm save" onclick="adminAprobarSolicitud('${s.id}')" title="Grupo con 0 favoritos al inicio">✅ Aceptar</button>
+          <button class="btn-admin-sm del" onclick="adminRechazarSolicitud('${s.id}')">❌ Ablehnen</button>
+        `:`<span style="font-size:12px;color:var(--sub)">—</span>`}
+      </td>
+    </tr>`).join("");
+  const numPendientes=pendientes.length;
+  document.getElementById("tabSolicitudes").textContent=`🕐 Anfragen${numPendientes>0?` (${numPendientes})`:""}`;
+}
+
+function adminAprobarSolicitud(id){
+  const solis=obtenerSolicitudes();
+  const s=solis.find(x=>x.id===id);
+  if(!s) return;
+  s.estado="aprobado";
+  guardarSolicitudes(solis);
+
+  // Agregar a grupos con 0 favoritos iniciales
+  const nuevoGrupo={
+    nombre:s.nombre,
+    categoria:s.categoria,
+    plataforma:s.plataforma,
+    link:s.link,
+    img:s.img,
+    miembros:s.miembros||0,
+    favoritosBase:0,
+    favoritos:0,
+    fechaAprobacion:new Date().getTime()
+  };
+
+  // Agregar a ambos arrays (gruposExtra y grupos)
+  gruposExtra.push(nuevoGrupo);
+  grupos.push(nuevoGrupo);
+  guardarGrupoFirestore(nuevoGrupo);
+
+  // Notificar usuario por chat
+  const msgAdmin={de:"admin",texto:`✅ Deine Gruppe *${s.nombre}* wurde genehmigt und ist jetzt auf Gruppen🇩🇪 sichtbar! 🎉 Jetzt haben andere die Möglichkeit, deine Gruppe zu favorisieren und ihr Ranking zu verbessern.`,hora:horaActual()};
+  agregarMensajeChat(s.usuarioCorreo, msgAdmin);
+  actualizarBadgeChat(s.usuarioCorreo);
+
+  // Actualizar vista inmediatamente
+  filtrar();
+  renderAdminSolicitudes();
+  mostrarToast(`Gruppe „${s.nombre}" genehmigt und veröffentlicht mit 0 Favoritos ⭐`,"✅");
+}
+
+function adminRechazarSolicitud(id){
+  const solis=obtenerSolicitudes();
+  const s=solis.find(x=>x.id===id);
+  if(!s) return;
+  s.estado="rechazado";
+  guardarSolicitudes(solis);
+
+  // Notificar usuario por chat
+  const msgAdmin={de:"admin",texto:`❌ Deine Anfrage für die Gruppe *${s.nombre}* wurde abgelehnt. Bei Fragen schreib uns hier.`,hora:horaActual()};
+  agregarMensajeChat(s.usuarioCorreo, msgAdmin);
+  actualizarBadgeChat(s.usuarioCorreo);
+
+  renderAdminSolicitudes();
+  mostrarToast(`Anfrage für „${s.nombre}" abgelehnt`,"❌");
+}
+
+/* --- ADMIN: CHAT DESDE PANEL ADMIN --- */
+function renderAdminChats(){
+  // Recargar desde Firestore para ver mensajes actualizados
+  cargarDatosAdmin().then(()=>{
+    poblarSelectAdminChats();
+    document.getElementById("adminChatMensajes").innerHTML=
+      `<div style="text-align:center;color:var(--sub);font-size:13px;margin:auto">Benutzer auswählen, um den Chat zu sehen.</div>`;
+  });
+}
+
+function poblarSelectAdminChats(){
+  const sel=document.getElementById("adminChatSelect");
+  if(!sel) return;
+  const valorActual=sel.value;
+  const correos=Object.keys(_chatsCache);
+  sel.innerHTML=`<option value="">Benutzer auswählen...</option>`;
+  correos.forEach(correo=>{
+    const label=obtenerNombrePorCorreo(correo);
+    const n=contarNoLeidosCorreo(correo);
+    sel.innerHTML+=`<option value="${correo}">${label}${n>0?` 🔴(${n})`:""}</option>`;
+  });
+  if(valorActual) sel.value=valorActual;
+}
+
+function adminCambiarChat(){
+  const correo=document.getElementById("adminChatSelect").value;
+  if(!correo) return;
+  renderMensajes(obtenerConversacion(correo), document.getElementById("adminChatMensajes"), true);
+  marcarConversacionLeida(correo,"admin");
+  actualizarBadgeAdminGlobal();
+}
+
+function adminEnviarMensaje(){
+  const correo=document.getElementById("adminChatSelect").value;
+  if(!correo){mostrarToast("Benutzer auswählen","⚠️");return;}
+  const input=document.getElementById("adminChatInput");
+  const texto=input.value.trim();
+  if(!texto) return;
+  const msg={de:"admin",texto,hora:horaActual()};
+  agregarMensajeChat(correo, msg);
+  input.value="";
+  renderMensajes(obtenerConversacion(correo), document.getElementById("adminChatMensajes"), true);
+  // Badge flotante para el usuario (si está en la misma sesión, muestra notif)
+  actualizarBadgeChat(correo);
+}
+
+/* =========================================================
+   PANEL MEINE GRUPPEN
+   ========================================================= */
+function abrirMisGrupos(){
+  const user=obtenerSesion();
+  if(!user){mostrarToast("Bitte anmelden","🔒");return;}
+  renderMisGrupos(user);
+  // Ocultar contenido principal
+  document.getElementById("grid").style.display="none";
+  document.getElementById("paginacion").style.display="none";
+  document.getElementById("buscar").style.display="none";
+  document.getElementById("resultadoInfo").style.display="none";
+  // Mover el panel antes del footer
+  const panel=document.getElementById("panelMisGrupos");
+  const footer=document.querySelector("footer");
+  if(footer && panel.nextElementSibling!==footer){
+    footer.parentNode.insertBefore(panel,footer);
+  }
+  panel.classList.add("abierto");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function cerrarMisGrupos(){
+  document.getElementById("panelMisGrupos").classList.remove("abierto");
+  document.getElementById("grid").style.display="";
+  document.getElementById("paginacion").style.display="";
+  document.getElementById("buscar").style.display="";
+  document.getElementById("resultadoInfo").style.display="";
+}
+
+function renderMisGrupos(user){
+  const solis=obtenerSolicitudes().filter(s=>s.usuarioCorreo===user.correo);
+  // también grupos aprobados que ya están en el array principal
+  const gruposAprobados=solis.filter(s=>s.estado==="aprobado").map(s=>s.nombre);
+  const subtitle=document.getElementById("misGruposSubtitle");
+  subtitle.textContent=`${solis.length} Gruppe${solis.length===1?"":"n"} eingereicht`;
+
+  const grid=document.getElementById("misGruposGrid");
+  if(solis.length===0){
+    grid.innerHTML=`
+      <div class="mis-grupos-vacio">
+        <span class="e">📭</span>
+        <strong style="display:block;font-size:16px;margin-bottom:8px">Noch keine Gruppen eingereicht</strong>
+        <p style="margin:0 0 18px;font-size:14px">Teile deine Community mit Tausenden!</p>
+        <button class="btn-principal" style="display:inline-flex;padding:11px 24px;border-radius:10px" onclick="cerrarMisGrupos();abrirAgregar()">＋ Gruppe hinzufügen</button>
+      </div>`;
+    return;
+  }
+
+  const estadoLabel={pendiente:"⏳ Ausstehend",aprobado:"✅ Genehmigt",rechazado:"❌ Abgelehnt"};
+  const icoPlat=p=>p==="WhatsApp"
+    ?`<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>`
+    :`<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>`;
+
+  grid.innerHTML=solis.map(s=>{
+    const claseBtn=s.plataforma==="WhatsApp"?"w":"t";
+    const img=s.img||`https://picsum.photos/600/340?random=${s.id}`;
+    const catInfo=categorias.find(c=>c.nombre===s.categoria);
+    return `
+    <div class="card">
+      <div class="img-wrap">
+        <img src="${img}" alt="${s.nombre}" loading="lazy" onerror="this.src='https://picsum.photos/600/340?random=${s.id}'">
+        <span class="plataforma-badge ${claseBtn}"><span class="circ">${icoPlat(s.plataforma)}</span>${s.plataforma}</span>
+      </div>
+      <div class="card-body">
+        <span class="estado-card-badge ${s.estado}">${estadoLabel[s.estado]||s.estado}</span>
+        <span class="tag ${s.categoria==='+18'?'plus18':''}">${catInfo?.icono||""} ${categoriaLabel[s.categoria]||s.categoria}</span>
+        <h3>${s.nombre}</h3>
+        <div class="meta">📅 ${new Date(s.fecha).toLocaleDateString("de-DE",{day:"2-digit",month:"short",year:"numeric"})}</div>
+        <div class="acciones">
+          ${s.estado==="aprobado"
+            ?`<a class="btn-unirse ${claseBtn}" target="_blank" rel="noopener" href="${s.link}">Gruppe öffnen <span class="flecha">→</span></a>`
+            :`<button class="btn-unirse ${claseBtn}" disabled style="opacity:.5;cursor:not-allowed">
+                ${s.estado==="pendiente"?"⏳ Wird geprüft…":"❌ Abgelehnt"}
+              </button>`}
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+/* ===== DRAWER MÓVIL ===== */
+function toggleDrawer(){
+  const drawer=document.getElementById("navDrawer");
+  const overlay=document.getElementById("navOverlay");
+  const btn=document.getElementById("btnHamburger");
+  if(drawer.classList.contains("abierto")){cerrarDrawer();}
+  else{
+    drawer.classList.add("abierto");
+    overlay.classList.add("visible");
+    if(btn) btn.classList.add("abierto");
+    document.body.style.overflow="hidden";
+    _sincDrawerSesion();
+    _sincDrawerIdioma();
+  }
+}
+function cerrarDrawer(){
+  document.getElementById("navDrawer").classList.remove("abierto");
+  document.getElementById("navOverlay").classList.remove("visible");
+  const btn=document.getElementById("btnHamburger");
+  if(btn) btn.classList.remove("abierto");
+  document.body.style.overflow="";
+}
+function _sincDrawerSesion(){
+  const user=typeof obtenerSesion==="function"?obtenerSesion():null;
+  const label=document.getElementById("drawerSesionLabel");
+  const misGruposBtn=document.getElementById("drawerBtnMisGrupos");
+  const adminBtn=document.getElementById("drawerBtnAdmin");
+  const btnSesion=document.getElementById("drawerBtnSesion");
+  const t=_traducciones[_idiomaActual]||_traducciones["de"];
+  if(user){
+    if(label) label.textContent=t.abmelden+" ("+((user.nombre||user.correo)||"")+")";
+    if(misGruposBtn) misGruposBtn.style.display="flex";
+    if(adminBtn) adminBtn.style.display=(typeof esAdmin==="function"&&esAdmin(user))?"flex":"none";
+    if(btnSesion) btnSesion.onclick=()=>{if(typeof cerrarSesion==="function")cerrarSesion();cerrarDrawer();};
+  } else {
+    if(label) label.textContent=t.anmelden;
+    if(misGruposBtn) misGruposBtn.style.display="none";
+    if(adminBtn) adminBtn.style.display="none";
+    if(btnSesion) btnSesion.onclick=()=>{abrirAuth("login");cerrarDrawer();};
+  }
+}
+function _sincDrawerIdioma(){
+  const lang=_idiomaActual;
+  document.querySelectorAll(".drawer-lang-opt").forEach(o=>o.classList.remove("activa"));
+  const optId=lang==="en-GB"?"dLangOpt-en-GB":`dLangOpt-${lang}`;
+  const el=document.getElementById(optId);
+  if(el) el.classList.add("activa");
+}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")cerrarDrawer();});
+
+/* ===== SELECTOR DE IDIOMA ===== */
+const _traducciones = {
+  de: {
+    buscar: "Gruppen nach Name oder Plattform suchen …",
+    btnAgregar: "＋ Gruppe hinzufügen",
+    anmelden: "Anmelden",
+    abmelden: "Abmelden",
+    meineProfil: "Mein Profil",
+    meineGruppen: "Meine Gruppen",
+    footerDesc: "Das Verzeichnis für WhatsApp- und Telegram-Communitys – finde deine Community: Gamer, Entwickler, Reisende und vieles mehr, alles an einem Ort.",
+    bannerTitulo: "Hast du eine tolle Gruppe?",
+    bannerSub: "Teile sie mit Tausenden von Menschen auf Gruppen🇩🇪",
+    bannerBtn: "＋ Gruppe hinzufügen",
+    resultadoVacio: "Keine Gruppen gefunden",
+  },
+  en: {
+    buscar: "Search groups by name or platform …",
+    btnAgregar: "＋ Add Group",
+    anmelden: "Sign in",
+    abmelden: "Sign out",
+    meineProfil: "My Profile",
+    meineGruppen: "My Groups",
+    footerDesc: "The directory for WhatsApp and Telegram communities – find your community: Gamers, Developers, Travelers and much more, all in one place.",
+    bannerTitulo: "Do you have an awesome group?",
+    bannerSub: "Share it with thousands of people on Gruppen🇩🇪",
+    bannerBtn: "＋ Add Group",
+    resultadoVacio: "No groups found",
+  },
+  "en-GB": {
+    buscar: "Search groups by name or platform …",
+    btnAgregar: "＋ Add Group",
+    anmelden: "Sign in",
+    abmelden: "Sign out",
+    meineProfil: "My Profile",
+    meineGruppen: "My Groups",
+    footerDesc: "The directory for WhatsApp and Telegram communities – find your community: Gamers, Developers, Travellers and much more, all in one place.",
+    bannerTitulo: "Have you got a brilliant group?",
+    bannerSub: "Share it with thousands of people on Gruppen🇩🇪",
+    bannerBtn: "＋ Add Group",
+    resultadoVacio: "No groups found",
+  },
+  es: {
+    buscar: "Buscar grupos por nombre o plataforma …",
+    btnAgregar: "＋ Añadir grupo",
+    anmelden: "Iniciar sesión",
+    abmelden: "Cerrar sesión",
+    meineProfil: "Mi Perfil",
+    meineGruppen: "Mis Grupos",
+    footerDesc: "El directorio de comunidades de WhatsApp y Telegram – encuentra tu comunidad: Gamers, Desarrolladores, Viajeros y mucho más, todo en un solo lugar.",
+    bannerTitulo: "¿Tienes un grupo genial?",
+    bannerSub: "Compártelo con miles de personas en Gruppen🇩🇪",
+    bannerBtn: "＋ Añadir grupo",
+    resultadoVacio: "No se encontraron grupos",
+  }
+};
+
+let _idiomaActual = localStorage.getItem("lang") || "de";
+
+function toggleLangMenu(){
+  const sel = document.getElementById("langSelector");
+  sel.classList.toggle("open");
+  // cerrar al hacer click fuera
+  setTimeout(()=>{
+    document.addEventListener("click", _cerrarLangMenuFuera, {once:true});
+  },10);
+}
+
+function _cerrarLangMenuFuera(e){
+  const sel = document.getElementById("langSelector");
+  if(sel && !sel.contains(e.target)) sel.classList.remove("open");
+}
+
+function cambiarIdioma(lang, flag, codigo){
+  const sel = document.getElementById("langSelector");
+  sel.classList.remove("open");
+
+  if(lang === _idiomaActual) return;
+
+  // Mostrar spinner
+  document.getElementById("langSpinner").classList.add("visible");
+
+  setTimeout(()=>{
+    _idiomaActual = lang;
+    localStorage.setItem("lang", lang);
+
+    // Actualizar botón
+    document.getElementById("langFlagActual").textContent = flag;
+    document.getElementById("langCodigoActual").textContent = codigo;
+
+    // Marcar opción activa
+    document.querySelectorAll(".lang-option").forEach(o => o.classList.remove("activa"));
+    const optId = lang === "en-GB" ? "langOpt-en-GB" : `langOpt-${lang}`;
+    const el = document.getElementById(optId);
+    if(el) el.classList.add("activa");
+
+    // Sincronizar drawer
+    _sincDrawerIdioma();
+
+    // Aplicar traducciones
+    _aplicarIdioma(lang);
+
+    document.getElementById("langSpinner").classList.remove("visible");
+  }, 420);
+}
+
+function _aplicarIdioma(lang){
+  const t = _traducciones[lang] || _traducciones["de"];
+
+  // Buscador
+  const buscar = document.getElementById("buscar");
+  if(buscar) buscar.placeholder = t.buscar;
+
+  // Botones "Agregar"
+  document.querySelectorAll(".btn-agregar").forEach(b => b.textContent = t.btnAgregar);
+  document.querySelectorAll(".btn-agregar-banner").forEach(b => b.innerHTML = `<span class="plus">＋</span> ${t.btnAgregar.replace("＋ ","")}`);
+
+  // Banner
+  const bannerTitulo = document.querySelector(".banner-agregar-texto strong");
+  const bannerSub = document.querySelector(".banner-agregar-texto span");
+  if(bannerTitulo) bannerTitulo.textContent = t.bannerTitulo;
+  if(bannerSub) bannerSub.textContent = t.bannerSub;
+
+  // Footer descripción
+  const footerDesc = document.querySelector(".footer-marca p");
+  if(footerDesc) footerDesc.textContent = t.footerDesc;
+
+  // Zona sesión (botón Anmelden/iniciar)
+  const zonaSesion = document.getElementById("zonaSesion");
+  if(zonaSesion){
+    // Actualizar el botón de sesión si existe
+    const btnLogin = zonaSesion.querySelector("a[onclick*='abrirSesion'], button[onclick*='abrirSesion']");
+    if(btnLogin) btnLogin.textContent = t.anmelden;
+    const btnLogout = zonaSesion.querySelector("a[onclick*='cerrarSesion'], button[onclick*='cerrarSesion']");
+    if(btnLogout) btnLogout.textContent = t.abmelden;
+  }
+
+  // html lang attribute
+  document.documentElement.lang = lang;
+}
+
+// Inicializar idioma guardado al cargar
+(function(){
+  const lang = _idiomaActual;
+  const flags = {de:"🇩🇪",en:"🇺🇸","en-GB":"🇬🇧",es:"🇪🇸"};
+  const codes = {de:"DE",en:"EN","en-GB":"EN",es:"ES"};
+  const flag = flags[lang] || "🇩🇪";
+  const codigo = codes[lang] || "DE";
+
+  const flagEl = document.getElementById("langFlagActual");
+  const codeEl = document.getElementById("langCodigoActual");
+  if(flagEl) flagEl.textContent = flag;
+  if(codeEl) codeEl.textContent = codigo;
+
+  document.querySelectorAll(".lang-option").forEach(o => o.classList.remove("activa"));
+  const optId = lang === "en-GB" ? "langOpt-en-GB" : `langOpt-${lang}`;
+  const el = document.getElementById(optId);
+  if(el) el.classList.add("activa");
+
+  if(lang !== "de") _aplicarIdioma(lang);
+})();
+
+/* ===== SPLASH DISMISS ===== */
+(function(){
+  const splash=document.getElementById("splash");
+  // El splash se oculta cuando Firebase termina (initFirebase lo hace).
+  // Este timer es el mínimo garantizado de 2.1s en caso de que Firebase sea ultra-rápido.
+  setTimeout(()=>{
+    if(splash && !splash.classList.contains("oculto")){
+      splash.classList.add("oculto");
+      setTimeout(()=>splash.remove(),520);
+    }
+  },2100);
+})();
+(function inicializarChat(){
+  const user=obtenerSesion();
+  if(user){
+    document.getElementById("chatFlotante").classList.add("visible");
+    // Revisar si hay mensajes no leídos
+    const msgs=obtenerConversacion(user.correo);
+    const tieneAdmin=msgs.some(m=>m.de==="admin");
+    if(tieneAdmin&&!chatAbierto){
+      document.getElementById("chatBadge").textContent="!";
+      document.getElementById("chatBadge").classList.add("visible");
+    }
+  }
+})();
+</script>
+<!-- FIREBASE LOADING OVERLAY -->
+<div id="fbLoading" style="display:none!important"></div>
+
+<!-- SPINNER CAMBIO DE IDIOMA -->
+<div id="langSpinner">
+  <div class="spin"></div>
+  <span id="langSpinnerTxt">Sprache wird geladen …</span>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+</body>
+</html>
