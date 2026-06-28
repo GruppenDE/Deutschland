@@ -1047,7 +1047,7 @@
       <button class="admin-tab activo" onclick="adminTab('agregar')">➕ Gruppe hinzufügen</button>
       <button class="admin-tab" onclick="adminTab('gestionar')">📋 Gruppen verwalten</button>
       <button class="admin-tab" onclick="adminTab('solicitudes')" id="tabSolicitudes">🕐 Anfragen</button>
-      <button class="admin-tab" onclick="adminTab('chats')">💬 Chats</button>
+      <button class="admin-tab" onclick="adminTab('chats')" id="tabChats">💬 Chats</button>
     </div>
 
     <!-- TAB: AGREGAR -->
@@ -1993,6 +1993,7 @@ async function iniciarSesion(){
     await cargarDatosAdmin();
     pintarSesion();
     filtrar();
+    iniciarListenersChat();
     return;
   }
 
@@ -2004,6 +2005,7 @@ async function iniciarSesion(){
   mostrarToast(`Hallo wieder, ${usuario.nombre}`,"👋");
   await cargarDatosUsuario(correo);
   pintarSesion();
+  iniciarListenersChat();
 }
 
 async function googleSignIn(){
@@ -2018,6 +2020,8 @@ async function googleSignIn(){
     cerrarAuth();
     mostrarToast(`Willkommen, ${nombre}! 🎉`,"🔵");
     await cargarDatosUsuario(correo);
+    pintarSesion();
+    iniciarListenersChat();
   }catch(e){
     console.warn("Google Sign-In error:",e);
     mostrarToast("Google-Anmeldung fehlgeschlagen: "+e.message,"⚠️");
@@ -2025,6 +2029,7 @@ async function googleSignIn(){
 }
 
 function cerrarSesion(){
+  desconectarListenersChat();
   localStorage.removeItem("grupohub_sesion");
   pintarSesion();
   mostrarToast("Abgemeldet","👋");
@@ -2328,6 +2333,7 @@ async function initFirebase(){
   pintarCategorias();
   poblarSelectCategorias();
   pintar(grupos);
+  iniciarListenersChat();
   // Asegurarse de que el splash desaparezca tras Firebase (mínimo 2.1s ya garantizado)
   const splash=document.getElementById("splash");
   if(splash && !splash.classList.contains("oculto")){
@@ -2374,9 +2380,149 @@ function guardarConversacion(correo, msgs){
     });
 }
 function agregarMensajeChat(correo, msg){
+  if(msg.leido===undefined) msg.leido=false;
   const msgs=obtenerConversacion(correo);
   msgs.push(msg);
   guardarConversacion(correo, msgs);
+}
+
+/* --- LECTURA / NO LEÍDOS --- */
+// ladoPropio: "usuario" = el usuario está leyendo (marca lo que viene de admin/sistema)
+//             "admin"   = el admin está leyendo (marca lo que viene del usuario)
+function marcarConversacionLeida(correo, ladoPropio){
+  const msgs=obtenerConversacion(correo);
+  let cambiado=false;
+  msgs.forEach(m=>{
+    const esDeOtro = ladoPropio==="admin" ? m.de==="usuario" : m.de!=="usuario";
+    if(esDeOtro && m.leido===false){ m.leido=true; cambiado=true; }
+  });
+  if(cambiado) guardarConversacion(correo, msgs);
+}
+function contarNoLeidosParaAdmin(){
+  let total=0;
+  Object.keys(_chatsCache).forEach(correo=>{
+    const msgs=_chatsCache[correo]||[];
+    if(msgs.some(m=>m.de==="usuario"&&m.leido===false)) total++;
+  });
+  return total;
+}
+function contarNoLeidosParaUsuario(correo){
+  const msgs=obtenerConversacion(correo)||[];
+  return msgs.filter(m=>m.de!=="usuario"&&m.leido===false).length;
+}
+function actualizarBadgeAdminGlobal(){
+  const n=contarNoLeidosParaAdmin();
+  const tabChats=document.getElementById("tabChats");
+  if(tabChats) tabChats.textContent=`💬 Chats${n>0?` (${n})`:""}`;
+  const badge=document.getElementById("chatBadge");
+  if(!badge) return;
+  if(!chatAbierto && n>0){
+    badge.textContent=n>9?"9+":String(n);
+    badge.classList.add("visible");
+  } else if(!chatAbierto){
+    badge.classList.remove("visible");
+  }
+}
+function actualizarBadgeUsuarioChat(correo){
+  const n=contarNoLeidosParaUsuario(correo);
+  const badge=document.getElementById("chatBadge");
+  if(!badge) return;
+  if(!chatAbierto && n>0){
+    badge.textContent=n>9?"9+":String(n);
+    badge.classList.add("visible");
+  } else if(!chatAbierto){
+    badge.classList.remove("visible");
+  }
+}
+
+/* --- LISTENERS EN TIEMPO REAL (Firestore onSnapshot) --- */
+let _ultimoConteoMsj={};
+let _listenerChatsAdmin=null;
+let _listenerChatUsuario=null;
+
+function attachAdminChatsListener(){
+  if(_listenerChatsAdmin) return;
+  _listenerChatsAdmin=_db.collection("chats").onSnapshot(snap=>{
+    snap.forEach(d=>{
+      const data=d.data();
+      const correo=data.correo||d.id;
+      const mensajes=data.mensajes||[];
+      const anteriores=_ultimoConteoMsj[correo]||0;
+      _chatsCache[correo]=mensajes;
+      if(mensajes.length>anteriores){
+        const nuevos=mensajes.slice(anteriores);
+        nuevos.forEach(m=>{ if(m.de==="usuario") notificarAdminNuevoMensaje(correo,m); });
+      }
+      _ultimoConteoMsj[correo]=mensajes.length;
+    });
+    actualizarBadgeAdminGlobal();
+  },e=>console.warn("FB listener chats:",e));
+}
+
+function notificarAdminNuevoMensaje(correo,m){
+  const user=obtenerSesion();
+  if(!esAdmin(user)) return;
+  const chatFlotanteConEsta = chatAbierto && document.getElementById("chatConvSelect")?.value===correo;
+  const panelAdminAbierto = document.getElementById("panelAdmin").classList.contains("abierto");
+  const adminPanelConEsta = panelAdminAbierto && document.getElementById("adminChatSelect")?.value===correo;
+
+  if(chatFlotanteConEsta){
+    renderMensajes(obtenerConversacion(correo),document.getElementById("chatMensajes"),true);
+    marcarConversacionLeida(correo,"admin");
+  } else if(adminPanelConEsta){
+    renderMensajes(obtenerConversacion(correo),document.getElementById("adminChatMensajes"),true);
+    marcarConversacionLeida(correo,"admin");
+  } else {
+    const texto=m.tipo==="imagen"?"📷 Bild":m.texto;
+    mostrarNotif("💬","Neue Nachricht",(texto||"").length>50?texto.slice(0,50)+"…":texto);
+  }
+}
+
+function attachUserChatListener(correo){
+  if(_listenerChatUsuario) return;
+  const key=correoAKey(correo);
+  _listenerChatUsuario=_db.collection("chats").doc(key).onSnapshot(doc=>{
+    if(!doc.exists) return;
+    const mensajes=doc.data().mensajes||[];
+    const anteriores=_ultimoConteoMsj[correo]||0;
+    _chatsCache[correo]=mensajes;
+    if(mensajes.length>anteriores){
+      const nuevos=mensajes.slice(anteriores);
+      nuevos.forEach(m=>{
+        if(m.de!=="usuario"){
+          if(chatAbierto){
+            renderMensajes(mensajes,document.getElementById("chatMensajes"),false);
+            marcarConversacionLeida(correo,"usuario");
+          } else {
+            const texto=m.tipo==="imagen"?"📷 Bild":(m.texto||"Neue Nachricht");
+            mostrarNotif("💬","Neue Nachricht vom Admin",texto.length>50?texto.slice(0,50)+"…":texto);
+          }
+        }
+      });
+    }
+    _ultimoConteoMsj[correo]=mensajes.length;
+    actualizarBadgeUsuarioChat(correo);
+  },e=>console.warn("FB listener chat usuario:",e));
+}
+
+function desconectarListenersChat(){
+  if(_listenerChatsAdmin){_listenerChatsAdmin();_listenerChatsAdmin=null;}
+  if(_listenerChatUsuario){_listenerChatUsuario();_listenerChatUsuario=null;}
+  _ultimoConteoMsj={};
+}
+
+function iniciarListenersChat(){
+  const user=obtenerSesion();
+  if(!user) return;
+  desconectarListenersChat();
+  Object.keys(_chatsCache).forEach(c=>{ _ultimoConteoMsj[c]=(_chatsCache[c]||[]).length; });
+  if(esAdmin(user)){
+    actualizarBadgeAdminGlobal();
+    attachAdminChatsListener();
+  } else {
+    actualizarBadgeUsuarioChat(user.correo);
+    attachUserChatListener(user.correo);
+  }
 }
 
 function renderMensajes(msgs, contenedor, esAdminView){
@@ -2456,6 +2602,7 @@ function toggleChat(){
       document.getElementById("chatSubHeader").textContent="Support";
       document.getElementById("chatConvSel").style.display="none";
       renderMensajes(obtenerConversacion(user.correo), document.getElementById("chatMensajes"), false);
+      marcarConversacionLeida(user.correo,"usuario");
     }
     document.getElementById("chatBadge").classList.remove("visible");
   }
@@ -2477,6 +2624,8 @@ function cambiarConversacion(){
   if(!correo) return;
   const msgs=obtenerConversacion(correo);
   renderMensajes(msgs, document.getElementById("chatMensajes"), false);
+  marcarConversacionLeida(correo,"admin");
+  actualizarBadgeAdminGlobal();
 }
 
 let chatCorActual=""; // correo de conversación activa en panel usuario
@@ -2508,21 +2657,14 @@ function enviarMensaje(){
 }
 
 function actualizarBadgeChat(correoDestino){
-  // Badge en botón flotante
-  const badge=document.getElementById("chatBadge");
-  if(!chatAbierto){
-    badge.textContent="!";
-    badge.classList.add("visible");
-  }
-  // Si hay un correoDestino, mostrar notificación push
-  // (solo si el panel no está abierto o el usuario es diferente al activo)
+  // Mantiene compatibilidad con llamadas antiguas, pero ahora delega
+  // en el cálculo correcto según la sesión actual (no leídos reales).
   const user=obtenerSesion();
-  if(correoDestino && user && correoDestino===user.correo && !chatAbierto){
-    const msgs=obtenerConversacion(user.correo);
-    const ultimo=msgs[msgs.length-1];
-    if(ultimo&&ultimo.de==="admin"){
-      mostrarNotif("💬","Neue Nachricht vom Admin",ultimo.texto.length>50?ultimo.texto.slice(0,50)+"…":ultimo.texto);
-    }
+  if(!user) return;
+  if(esAdmin(user)){
+    actualizarBadgeAdminGlobal();
+  } else {
+    actualizarBadgeUsuarioChat(user.correo);
   }
 }
 
@@ -2725,6 +2867,8 @@ function adminCambiarChat(){
   const correo=document.getElementById("adminChatSelect").value;
   if(!correo) return;
   renderMensajes(obtenerConversacion(correo), document.getElementById("adminChatMensajes"), true);
+  marcarConversacionLeida(correo,"admin");
+  actualizarBadgeAdminGlobal();
 }
 
 function adminEnviarMensaje(){
