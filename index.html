@@ -1561,7 +1561,7 @@
     <div class="admin-tabs">
       <button class="admin-tab activo" onclick="adminTab('agregar')">➕ Gruppe hinzufügen</button>
       <button class="admin-tab" onclick="adminTab('gestionar')">📋 Gruppen verwalten</button>
-      <button class="admin-tab" onclick="adminTab('solicitudes')" id="tabSolicitudes">🕐 Anfragen</button>
+      <button class="admin-tab" onclick="adminTab('solicitudes')" id="tabSolicitudes">🕐 Anfragen<span id="badgeSolicitudes" style="display:none;margin-left:6px;background:#ef4444;color:#fff;border-radius:99px;font-size:11px;font-weight:700;padding:1px 7px;vertical-align:middle"></span></button>
       <button class="admin-tab" onclick="adminTab('chats')" id="tabChats">💬 Chats</button>
       <button class="admin-tab" onclick="adminTab('notificacion')">📢 Notificación</button>
     </div>
@@ -3274,6 +3274,7 @@ function iniciarListenersChat(){
   if(esAdmin(user)){
     actualizarBadgeAdminGlobal();
     attachAdminChatsListener();
+    attachSolicitudesListener();
   } else {
     // Si nunca se guardó índice de lectura local, inicializarlo:
     // - Si hay mensajes con leido===false del admin → índice antes de ellos (para mostrar badge)
@@ -3560,6 +3561,27 @@ function mostrarNotifAdmin(correoUsuario, ico, texto){
   // pero deja preparada la notificación para cuando el usuario abra el chat
 }
 
+/* --- LISTENER TIEMPO REAL: NUEVAS SOLICITUDES --- */
+let _listenerSolicitudes=null;
+let _prevSolicitudesCount=null;
+function attachSolicitudesListener(){
+  const user=obtenerSesion();
+  if(!esAdmin(user)||_listenerSolicitudes) return;
+  _listenerSolicitudes=_db.collection("solicitudes").onSnapshot(snap=>{
+    const todas=snap.docs.map(d=>d.data());
+    _solicitudesCache=todas;
+    const pendientes=todas.filter(s=>s.estado==="pendiente");
+    const num=pendientes.length;
+    // Notificar solo cuando el número aumenta
+    if(_prevSolicitudesCount!==null && num>_prevSolicitudesCount){
+      const diff=num-_prevSolicitudesCount;
+      mostrarNotifPush("🔔",`${diff} neue Gruppenanfrage${diff>1?"n":""}!`,`Insgesamt ${num} ausstehend.`,6000);
+    }
+    _prevSolicitudesCount=num;
+    _pintarSolicitudes();
+  },e=>console.warn("Solicitudes listener:",e));
+}
+
 /* --- ADMIN: RENDERIZAR SOLICITUDES --- */
 function renderAdminSolicitudes(){
   // Recargar solicitudes frescas de Firestore
@@ -3600,11 +3622,22 @@ function _pintarSolicitudes(){
         ${s.estado==="pendiente"?`
           <button class="btn-admin-sm save" onclick="adminAprobarSolicitud('${s.id}')" title="Grupo con 0 favoritos al inicio">✅ Aceptar</button>
           <button class="btn-admin-sm del" onclick="adminRechazarSolicitud('${s.id}')">❌ Ablehnen</button>
-        `:`<span style="font-size:12px;color:var(--sub)">—</span>`}
+        `:`<button class="btn-admin-sm del" onclick="adminBorrarSolicitud('${s.id}')" title="Solicitud löschen" style="font-size:12px;padding:3px 8px">🗑️ Löschen</button>`}
       </td>
     </tr>`).join("");
   const numPendientes=pendientes.length;
-  document.getElementById("tabSolicitudes").textContent=`🕐 Anfragen${numPendientes>0?` (${numPendientes})`:""}`;
+  // Texto del tab (sin badge, lo maneja el span)
+  document.getElementById("tabSolicitudes").childNodes[0].textContent="🕐 Anfragen";
+  const badgeEl=document.getElementById("badgeSolicitudes");
+  if(numPendientes>0){
+    badgeEl.textContent=numPendientes;
+    badgeEl.style.display="inline-block";
+    // Actualizar el título de la pestaña del navegador con contador
+    document.title=`(${numPendientes}) Neue Anfrage${numPendientes>1?"n":""} · Gruppen🇩🇪`;
+  } else {
+    badgeEl.style.display="none";
+    document.title="Gruppen🇩🇪 - WhatsApp & Telegram Gruppen finden";
+  }
 }
 
 function adminAprobarSolicitud(id){
@@ -3657,6 +3690,17 @@ function adminRechazarSolicitud(id){
 
   renderAdminSolicitudes();
   mostrarToast(`Anfrage für „${s.nombre}" abgelehnt`,"❌");
+}
+
+function adminBorrarSolicitud(id){
+  if(!confirm("Diese Anfrage wirklich löschen?")) return;
+  const solis=obtenerSolicitudes().filter(x=>x.id!==id);
+  _solicitudesCache=solis;
+  // Borrar también en Firestore
+  _db.collection("solicitudes").doc(id).delete().catch(()=>{});
+  guardarSolicitudes(solis);
+  renderAdminSolicitudes();
+  mostrarToast("Anfrage gelöscht","🗑️");
 }
 
 /* --- ADMIN: CHAT DESDE PANEL ADMIN --- */
