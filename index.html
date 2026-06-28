@@ -348,6 +348,59 @@
   }
   #buscar:focus{border-color:var(--verde)}
 
+  /* ===== FILTRO DE PLATAFORMA ===== */
+  .plat-wrap{display:flex;justify-content:center;margin:0 0 6px}
+  .plat-selector{position:relative;display:inline-flex}
+  .plat-btn{
+    display:flex;align-items:center;gap:8px;
+    background:#fff;border:1.5px solid var(--borde);border-radius:999px;
+    padding:9px 16px;cursor:pointer;font-size:13.5px;font-weight:600;
+    color:var(--texto);box-shadow:var(--sombra);transition:.2s;
+  }
+  .plat-btn:hover{border-color:var(--verde);box-shadow:var(--sombra-hov)}
+  .plat-btn .plat-ico{font-size:16px;line-height:1}
+  .plat-btn .plat-chevron{font-size:10px;opacity:.6;transition:transform .25s}
+  .plat-selector.open .plat-chevron{transform:rotate(180deg)}
+  .plat-dropdown{
+    position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(-8px) scale(.96);
+    background:#fff;border-radius:13px;
+    box-shadow:0 10px 32px rgba(0,0,0,.18);
+    border:1px solid rgba(0,0,0,.08);
+    min-width:200px;overflow:hidden;z-index:120;
+    opacity:0;pointer-events:none;
+    transform-origin:top center;
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .plat-selector.open .plat-dropdown{
+    opacity:1;pointer-events:all;
+    transform:translateX(-50%) translateY(0) scale(1);
+  }
+  .plat-option{
+    display:flex;align-items:center;gap:10px;
+    padding:11px 16px;cursor:pointer;font-size:14px;font-weight:500;
+    color:var(--texto);transition:background .15s;
+  }
+  .plat-option:hover{background:#f0f7f3}
+  .plat-option.activa{background:#edf7f0;font-weight:700;color:var(--verde-d)}
+  .plat-option .po-ico{font-size:18px;line-height:1;width:20px;text-align:center}
+  .po-ico-logo{
+    width:22px;height:22px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .po-ico-logo.w{background:var(--verde)}
+  .po-ico-logo.t{background:var(--tele)}
+  .po-ico-logo.s{background:var(--signal)}
+  .po-ico-logo.g{background:var(--sub)}
+  .plat-ico .po-ico-logo{width:18px;height:18px}
+  .plat-option .po-nombre{flex:1}
+  .plat-option .po-check{color:var(--verde);font-size:14px;opacity:0}
+  .plat-option.activa .po-check{opacity:1}
+  body.dark .plat-btn{background:#1d2421;border-color:#3a4440;color:#eef2f0}
+  body.dark .plat-dropdown{background:#1c2220;border-color:#2a332f}
+  body.dark .plat-option{color:#eef2f0}
+  body.dark .plat-option:hover{background:#252e2a}
+  body.dark .plat-option.activa{background:#1a2e22;color:#4ade80}
+
   .resultado-info{
     text-align:center;color:var(--sub);font-size:13.5px;margin:4px 0 10px;
   }
@@ -1318,6 +1371,31 @@
 </div>
 
 <input id="buscar" placeholder="Gruppen nach Name oder Plattform suchen …" onkeyup="buscarCambio()">
+
+<div class="plat-wrap">
+  <div class="plat-selector" id="platSelector">
+    <button class="plat-btn" onclick="togglePlatMenu()" type="button">
+      <span class="plat-ico" id="platIcoActual"><span class="po-ico-logo g"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 0 1 0 18a13 13 0 0 1 0-18"/></svg></span></span>
+      <span id="platTextoActual">Alle Plattformen</span>
+      <span class="plat-chevron">▾</span>
+    </button>
+    <div class="plat-dropdown" id="platDropdown">
+      <div class="plat-option activa" id="platOpt-Todos" onclick="elegirPlataforma('Todos')">
+        <span class="po-ico-logo g"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 0 1 0 18a13 13 0 0 1 0-18"/></svg></span><span class="po-nombre" id="platLbl-Todos">Alle Plattformen</span><span class="po-check">✓</span>
+      </div>
+      <div class="plat-option" id="platOpt-WhatsApp" onclick="elegirPlataforma('WhatsApp')">
+        <span class="po-ico-logo w"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></span><span class="po-nombre">WhatsApp</span><span class="po-check">✓</span>
+      </div>
+      <div class="plat-option" id="platOpt-Telegram" onclick="elegirPlataforma('Telegram')">
+        <span class="po-ico-logo t"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></span><span class="po-nombre">Telegram</span><span class="po-check">✓</span>
+      </div>
+      <div class="plat-option" id="platOpt-Signal" onclick="elegirPlataforma('Signal')">
+        <span class="po-ico-logo s"><svg width="14" height="14" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="18.5" fill="none" stroke="white" stroke-width="2.6" stroke-dasharray="4.8 3.2" stroke-linecap="round"/><path d="M24 11.5c-6.9 0-12.5 5.3-12.5 11.85 0 2.9 1.1 5.54 2.91 7.57l-1.91 7.08 7.23-2.34A12.7 12.7 0 0 0 24 36.35c6.9 0 12.5-5.3 12.5-11.85S30.9 11.5 24 11.5z" fill="white"/></svg></span><span class="po-nombre">Signal</span><span class="po-check">✓</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <p class="resultado-info" id="resultadoInfo"></p>
 
 <div class="grid" id="grid"></div>
@@ -1771,6 +1849,7 @@ const grid=document.getElementById("grid");
 const catRow=document.getElementById("catRow");
 const resultadoInfo=document.getElementById("resultadoInfo");
 let categoriaActiva="Todos";
+let plataformaActiva="Todos";
 let favoritos=new Set();
 let ajustesFavoritos={};
 
@@ -1815,6 +1894,40 @@ function elegirCategoria(nombre){
   categoriaActiva=nombre;
   paginaActual=1;
   pintarCategorias();
+  filtrar();
+}
+
+/* ===== FILTRO DE PLATAFORMA ===== */
+function togglePlatMenu(){
+  const sel=document.getElementById("platSelector");
+  sel.classList.toggle("open");
+  setTimeout(()=>{
+    document.addEventListener("click",_cerrarPlatMenuFuera,{once:true});
+  },10);
+}
+function _cerrarPlatMenuFuera(e){
+  const sel=document.getElementById("platSelector");
+  if(sel && !sel.contains(e.target)) sel.classList.remove("open");
+}
+const _logosPlataforma={
+  Todos:'<span class="po-ico-logo g"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 0 1 0 18a13 13 0 0 1 0-18"/></svg></span>',
+  WhatsApp:'<span class="po-ico-logo w"><svg width="11" height="11" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></span>',
+  Telegram:'<span class="po-ico-logo t"><svg width="11" height="11" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></span>',
+  Signal:'<span class="po-ico-logo s"><svg width="13" height="13" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="18.5" fill="none" stroke="white" stroke-width="2.6" stroke-dasharray="4.8 3.2" stroke-linecap="round"/><path d="M24 11.5c-6.9 0-12.5 5.3-12.5 11.85 0 2.9 1.1 5.54 2.91 7.57l-1.91 7.08 7.23-2.34A12.7 12.7 0 0 0 24 36.35c6.9 0 12.5-5.3 12.5-11.85S30.9 11.5 24 11.5z" fill="white"/></svg></span>'
+};
+function elegirPlataforma(plat){
+  plataformaActiva=plat;
+  paginaActual=1;
+
+  document.getElementById("platSelector").classList.remove("open");
+  document.getElementById("platIcoActual").innerHTML=_logosPlataforma[plat]||_logosPlataforma.Todos;
+  const nombreVisible=plat==="Todos"?document.getElementById("platLbl-Todos").textContent:plat;
+  document.getElementById("platTextoActual").textContent=nombreVisible;
+
+  document.querySelectorAll(".plat-option").forEach(o=>o.classList.remove("activa"));
+  const opt=document.getElementById("platOpt-"+plat);
+  if(opt) opt.classList.add("activa");
+
   filtrar();
 }
 
@@ -2016,8 +2129,13 @@ function publicarGrupo(){
 function reiniciar(){
   buscar.value="";
   categoriaActiva="Todos";
+  plataformaActiva="Todos";
   paginaActual=1;
   pintarCategorias();
+  document.querySelectorAll(".plat-option").forEach(o=>o.classList.remove("activa"));
+  document.getElementById("platOpt-Todos").classList.add("activa");
+  document.getElementById("platIcoActual").innerHTML=_logosPlataforma.Todos;
+  document.getElementById("platTextoActual").textContent=document.getElementById("platLbl-Todos").textContent;
   filtrar();
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -2271,7 +2389,8 @@ function filtrar(){
   let filtrados=grupos.filter(g=>{
     const coincideTexto=g.nombre.toLowerCase().includes(q)||g.plataforma.toLowerCase().includes(q);
     const coincideCategoria=categoriaActiva==="Todos"||g.categoria===categoriaActiva;
-    return coincideTexto&&coincideCategoria;
+    const coincidePlataforma=plataformaActiva==="Todos"||g.plataforma===plataformaActiva;
+    return coincideTexto&&coincideCategoria&&coincidePlataforma;
   });
 
   // Ordenar por favoritos (descendente) - más favoritos primero
@@ -3605,6 +3724,7 @@ const _traducciones = {
     bannerSub: "Teile sie mit Tausenden von Menschen auf Gruppen🇩🇪",
     bannerBtn: "＋ Gruppe hinzufügen",
     resultadoVacio: "Keine Gruppen gefunden",
+    platTodos: "Alle Plattformen",
   },
   en: {
     buscar: "Search groups by name or platform …",
@@ -3618,6 +3738,7 @@ const _traducciones = {
     bannerSub: "Share it with thousands of people on Gruppen🇩🇪",
     bannerBtn: "＋ Add Group",
     resultadoVacio: "No groups found",
+    platTodos: "All platforms",
   },
   "en-GB": {
     buscar: "Search groups by name or platform …",
@@ -3631,6 +3752,7 @@ const _traducciones = {
     bannerSub: "Share it with thousands of people on Gruppen🇩🇪",
     bannerBtn: "＋ Add Group",
     resultadoVacio: "No groups found",
+    platTodos: "All platforms",
   },
   es: {
     buscar: "Buscar grupos por nombre o plataforma …",
@@ -3644,6 +3766,7 @@ const _traducciones = {
     bannerSub: "Compártelo con miles de personas en Gruppen🇩🇪",
     bannerBtn: "＋ Añadir grupo",
     resultadoVacio: "No se encontraron grupos",
+    platTodos: "Todas las plataformas",
   }
 };
 
@@ -3716,6 +3839,14 @@ function _aplicarIdioma(lang){
   // Footer descripción
   const footerDesc = document.querySelector(".footer-marca p");
   if(footerDesc) footerDesc.textContent = t.footerDesc;
+
+  // Filtro de plataforma
+  const platLblTodos = document.getElementById("platLbl-Todos");
+  if(platLblTodos) platLblTodos.textContent = t.platTodos;
+  if(plataformaActiva==="Todos"){
+    const platTexto = document.getElementById("platTextoActual");
+    if(platTexto) platTexto.textContent = t.platTodos;
+  }
 
   // Zona sesión (botón Anmelden/iniciar)
   const zonaSesion = document.getElementById("zonaSesion");
