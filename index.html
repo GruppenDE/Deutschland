@@ -1048,7 +1048,7 @@
 <!-- PANEL CHAT -->
 <div id="panelChat">
   <div class="chat-header">
-    <div class="avatar-admin"><img src="https://picsum.photos/seed/loresmitt/80/80" alt="Soporte"></div>
+    <div class="avatar-admin"><img src="https://s67.erome.com/8391/25otK4Ph/NcVaZv6x.jpg?v=1782372734" alt="Soporte"></div>
     <div class="chat-header-info">
       <strong id="chatNombreHeader">Support-Team</strong>
       <span id="chatSubHeader">Support</span>
@@ -1632,14 +1632,14 @@ function filtrar(){
     const coincideCategoria=categoriaActiva==="Todos"||g.categoria===categoriaActiva;
     return coincideTexto&&coincideCategoria;
   });
-  
+
   // Ordenar por favoritos (descendente) - más favoritos primero
   filtrados.sort((a,b)=>{
     const favA=a.favoritos||a.favoritosBase||0;
     const favB=b.favoritos||b.favoritosBase||0;
     return favB-favA;
   });
-  
+
   pintar(filtrados);
 }
 
@@ -2096,7 +2096,7 @@ function renderMensajes(msgs, contenedor, esAdminView){
     contenedor.innerHTML=`<div style="text-align:center;color:var(--sub);font-size:13px;margin:auto">Sin mensajes aún.</div>`;
     return;
   }
-  
+
   // Función para convertir URLs en links clicables
   function convertirURLsALinks(texto){
     const urlRegex=/https?:\/\/[^\s<>]+/gi;
@@ -2104,7 +2104,7 @@ function renderMensajes(msgs, contenedor, esAdminView){
       return `<a href="${url}" target="_blank" rel="noopener" style="color:var(--verde);text-decoration:underline;word-break:break-all;font-weight:500">${url}</a>`;
     });
   }
-  
+
   msgs.forEach(m=>{
     if(m.de==="sistema"){
       const soli=obtenerSolicitudes().find(s=>s.id===m.solicitudId);
@@ -2308,15 +2308,15 @@ function renderAdminSolicitudes(){
 
 function _pintarSolicitudes(){
   let solis=obtenerSolicitudes();
-  
+
   // Separar por estado y luego concatenar en el orden correcto
   const pendientes=solis.filter(s=>s.estado==="pendiente");
   const aprobadas=solis.filter(s=>s.estado==="aprobado");
   const rechazadas=solis.filter(s=>s.estado==="rechazado");
-  
+
   // Concatenar en orden: Pendientes PRIMERO, luego aprobadas, luego rechazadas
   let solisOrdenadas=[...pendientes, ...aprobadas, ...rechazadas];
-  
+
   const body=document.getElementById("adminSolicitudesBody");
   if(solisOrdenadas.length===0){
     body.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--sub);padding:20px">Noch keine Anfragen vorhanden.</td></tr>`;
@@ -2363,7 +2363,7 @@ function adminAprobarSolicitud(id){
     favoritos:0,
     fechaAprobacion:new Date().getTime()
   };
-  
+
   // Agregar a ambos arrays (gruposExtra y grupos)
   gruposExtra.push(nuevoGrupo);
   grupos.push(nuevoGrupo);
