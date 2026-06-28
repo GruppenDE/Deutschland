@@ -2423,10 +2423,10 @@ function actualizarBadgeAdminGlobal(){
   if(tabChats) tabChats.textContent=`💬 Chats${n>0?` (${formatoBadge(n)})`:""}`;
   const badge=document.getElementById("chatBadge");
   if(badge){
-    if(!chatAbierto && n>0){
+    if(n>0){
       badge.textContent=formatoBadge(n);
       badge.classList.add("visible");
-    } else if(!chatAbierto){
+    } else {
       badge.classList.remove("visible");
     }
   }
@@ -2437,10 +2437,10 @@ function actualizarBadgeUsuarioChat(correo){
   const n=contarNoLeidosParaUsuario(correo);
   const badge=document.getElementById("chatBadge");
   if(!badge) return;
-  if(!chatAbierto && n>0){
+  if(n>0){
     badge.textContent=formatoBadge(n);
     badge.classList.add("visible");
-  } else if(!chatAbierto){
+  } else {
     badge.classList.remove("visible");
   }
 }
@@ -2613,8 +2613,9 @@ function toggleChat(){
       document.getElementById("chatConvSel").style.display="none";
       renderMensajes(obtenerConversacion(user.correo), document.getElementById("chatMensajes"), false);
       marcarConversacionLeida(user.correo,"usuario");
+      // Ocultar badge solo después de marcar como leídos
+      actualizarBadgeUsuarioChat(user.correo);
     }
-    document.getElementById("chatBadge").classList.remove("visible");
   }
 }
 
