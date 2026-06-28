@@ -1079,8 +1079,13 @@
           <input type="url" id="adLink" placeholder="https://chat.whatsapp.com/...">
         </div>
         <div class="admin-campo admin-full">
-          <label>Bild (optionale URL)</label>
-          <input type="url" id="adImagen" placeholder="https://...">
+          <label>Bild (Foto hochladen)</label>
+          <input type="file" id="adImagenFile" accept="image/*" onchange="adminImagenSeleccionada(event)">
+          <input type="hidden" id="adImagen">
+          <div id="adImagenPreviewWrap" style="display:none;margin-top:8px;align-items:center;gap:10px">
+            <img id="adImagenPreview" src="" alt="Vorschau" style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--borde)">
+            <button type="button" onclick="adminImagenQuitar()" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;text-decoration:underline">Entfernen</button>
+          </div>
         </div>
         <div class="admin-campo">
           <label>Feste Seite (optional)</label>
@@ -2104,6 +2109,31 @@ function adminActualizar18(){
   document.getElementById("adminCaja18").style.display=es18?"flex":"none";
 }
 
+function adminImagenSeleccionada(event){
+  const archivo=event.target.files[0];
+  if(!archivo)return;
+  if(!archivo.type.startsWith("image/")){
+    document.getElementById("errorAdmin").textContent="Bitte wähle eine Bilddatei aus.";
+    event.target.value="";
+    return;
+  }
+  const lector=new FileReader();
+  lector.onload=function(e){
+    document.getElementById("adImagen").value=e.target.result;
+    document.getElementById("adImagenPreview").src=e.target.result;
+    document.getElementById("adImagenPreviewWrap").style.display="flex";
+    document.getElementById("errorAdmin").textContent="";
+  };
+  lector.readAsDataURL(archivo);
+}
+
+function adminImagenQuitar(){
+  document.getElementById("adImagenFile").value="";
+  document.getElementById("adImagen").value="";
+  document.getElementById("adImagenPreviewWrap").style.display="none";
+  document.getElementById("adImagenPreview").src="";
+}
+
 function adminPublicar(){
   const nombre=document.getElementById("adNombre").value.trim();
   const categoria=document.getElementById("adCategoria").value;
@@ -2145,6 +2175,9 @@ function adminPublicar(){
   ["adNombre","adLink","adImagen","adMiembros","adFavoritos","adPagina"].forEach(id=>{
     document.getElementById(id).value="";
   });
+  document.getElementById("adImagenFile").value="";
+  document.getElementById("adImagenPreviewWrap").style.display="none";
+  document.getElementById("adImagenPreview").src="";
   document.getElementById("adCategoria").value="";
   document.getElementById("adminCaja18").style.display="none";
 
