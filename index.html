@@ -2054,7 +2054,7 @@ function pintarSesion(){
     :"";
   zona.innerHTML=`
     <div class="chip-usuario" onclick="alternarMenuUsuario()">
-      <div class="avatar" style="${esAdmin(user)?'overflow:hidden;padding:0':''}">${esAdmin(user)?'<img src="https://s67.erome.com/8391/25otK4Ph/KHyzTjkN.jpg?v=1782372656" alt="Admin" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':inicial}</div>
+      <div class="avatar" style="${esAdmin(user)?'overflow:hidden;padding:0':''}">${esAdmin(user)?'<img src="https://picsum.photos/seed/admin/80/80" alt="Admin" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':inicial}</div>
       <span>${user.nombre.split(" ")[0]}</span>
       <div class="menu-usuario" id="menuUsuario">
         ${adminBtn}
@@ -2402,7 +2402,7 @@ function contarNoLeidosParaAdmin(){
   let total=0;
   Object.keys(_chatsCache).forEach(correo=>{
     const msgs=_chatsCache[correo]||[];
-    if(msgs.some(m=>m.de==="usuario"&&m.leido===false)) total++;
+    total+=msgs.filter(m=>m.de==="usuario"&&m.leido===false).length;
   });
   return total;
 }
@@ -2410,14 +2410,17 @@ function contarNoLeidosParaUsuario(correo){
   const msgs=obtenerConversacion(correo)||[];
   return msgs.filter(m=>m.de!=="usuario"&&m.leido===false).length;
 }
+function formatoBadge(n){
+  return n>99?"+99":String(n);
+}
 function actualizarBadgeAdminGlobal(){
   const n=contarNoLeidosParaAdmin();
   const tabChats=document.getElementById("tabChats");
-  if(tabChats) tabChats.textContent=`💬 Chats${n>0?` (${n})`:""}`;
+  if(tabChats) tabChats.textContent=`💬 Chats${n>0?` (${formatoBadge(n)})`:""}`;
   const badge=document.getElementById("chatBadge");
   if(badge){
     if(!chatAbierto && n>0){
-      badge.textContent=n>9?"9+":String(n);
+      badge.textContent=formatoBadge(n);
       badge.classList.add("visible");
     } else if(!chatAbierto){
       badge.classList.remove("visible");
@@ -2431,7 +2434,7 @@ function actualizarBadgeUsuarioChat(correo){
   const badge=document.getElementById("chatBadge");
   if(!badge) return;
   if(!chatAbierto && n>0){
-    badge.textContent=n>9?"9+":String(n);
+    badge.textContent=formatoBadge(n);
     badge.classList.add("visible");
   } else if(!chatAbierto){
     badge.classList.remove("visible");
