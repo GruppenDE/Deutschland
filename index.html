@@ -2417,9 +2417,14 @@ function contarNoLeidosParaAdmin(){
 }
 function contarNoLeidosParaUsuario(correo){
   const msgs=obtenerConversacion(correo)||[];
-  // Usar timestamp de última lectura guardado localmente, más confiable que el campo "leido" en Firestore
   const ultimaLectura=parseInt(localStorage.getItem("chat_leido_"+correo)||"0",10);
-  return msgs.filter(m=>m.de!=="usuario" && (m.ts||0)>ultimaLectura).length;
+  return msgs.filter(m=>{
+    if(m.de==="usuario") return false;
+    // Mensajes con ts: comparar contra última lectura local
+    if(m.ts) return m.ts > ultimaLectura;
+    // Mensajes antiguos sin ts: respetar el campo "leido" de Firestore
+    return m.leido===false;
+  }).length;
 }
 function formatoBadge(n){
   return n>99?"+99":String(n);
