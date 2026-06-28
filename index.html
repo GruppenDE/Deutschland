@@ -1220,6 +1220,30 @@
   .estado-solicitud.pendiente{background:#fef3c7;color:#92400e}
   .estado-solicitud.aprobado{background:#d1fae5;color:#065f46}
   .estado-solicitud.rechazado{background:#fee2e2;color:#dc2626}
+
+  /* ===== BANNER NOTIFICACIÓN GLOBAL ===== */
+  #notifGlobalBanner{
+    position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:linear-gradient(120deg,var(--verde),var(--verde-d));
+    color:#fff;padding:14px 20px;border-radius:14px;
+    box-shadow:0 8px 28px rgba(31,175,85,.35);
+    z-index:9990;display:none;align-items:center;gap:16px;
+    max-width:min(520px,90vw);width:max-content;
+    animation:slideUpNotifGlobal .4s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  #notifGlobalBanner.visible{display:flex}
+  @keyframes slideUpNotifGlobal{
+    from{opacity:0;transform:translateX(-50%) translateY(20px)}
+    to{opacity:1;transform:translateX(-50%) translateY(0)}
+  }
+  #notifGlobalBanner .notif-g-ico{font-size:22px;flex-shrink:0}
+  #notifGlobalBanner .notif-g-txt{font-size:14.5px;font-weight:500;flex:1}
+  #notifGlobalBanner .notif-g-close{
+    background:rgba(255,255,255,.2);border:none;border-radius:8px;
+    color:#fff;cursor:pointer;padding:6px 12px;font-size:13px;font-weight:600;
+    flex-shrink:0;transition:.2s;
+  }
+  #notifGlobalBanner .notif-g-close:hover{background:rgba(255,255,255,.35)}
 </style>
 </head>
 <body>
@@ -1499,6 +1523,7 @@
       <button class="admin-tab" onclick="adminTab('gestionar')">📋 Gruppen verwalten</button>
       <button class="admin-tab" onclick="adminTab('solicitudes')" id="tabSolicitudes">🕐 Anfragen</button>
       <button class="admin-tab" onclick="adminTab('chats')" id="tabChats">💬 Chats</button>
+      <button class="admin-tab" onclick="adminTab('notificacion')">📢 Notificación</button>
     </div>
 
     <!-- TAB: AGREGAR -->
@@ -1606,10 +1631,34 @@
       </div>
     </div>
 
+    <!-- TAB: NOTIFICACIÓN GLOBAL -->
+    <div class="admin-seccion" id="adminNotificacion">
+      <p style="font-size:13px;color:var(--sub);margin-bottom:14px">Envía un banner de notificación a todos los usuarios que abran la página. Cada usuario lo ve <b>una sola vez</b>.</p>
+      <div class="admin-campo">
+        <label>Mensaje de notificación</label>
+        <input type="text" id="notifAdminInput" placeholder="Ej: Un grupo nuevo ha sido añadido 🎉" maxlength="120">
+      </div>
+      <p style="font-size:11.5px;color:var(--sub);margin:-6px 0 12px">Máx. 120 caracteres.</p>
+      <button class="btn-principal" style="margin-top:4px" onclick="enviarNotificacionGlobal()">📢 Enviar notificación a todos</button>
+      <div id="notifAdminPreview" style="margin-top:16px;display:none">
+        <p style="font-size:12px;color:var(--sub);margin-bottom:6px">Última notificación enviada:</p>
+        <div style="background:linear-gradient(120deg,var(--verde),var(--verde-d));color:#fff;padding:12px 16px;border-radius:10px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px">
+          <span>📢</span><span id="notifAdminPreviewTxt"></span>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /admin-modal -->
 </div><!-- /panelAdmin -->
 
 <div id="toast"></div>
+
+<!-- BANNER NOTIFICACIÓN GLOBAL -->
+<div id="notifGlobalBanner">
+  <span class="notif-g-ico">📢</span>
+  <span class="notif-g-txt" id="notifGlobalTxt"></span>
+  <button class="notif-g-close" onclick="cerrarNotifGlobal()">✕</button>
+</div>
 
 <!-- NOTIFICACIÓN PUSH -->
 <div id="notifPush">
@@ -2658,17 +2707,19 @@ function cerrarAdmin(){
 }
 
 function adminTab(tab){
-  const tabs=["agregar","gestionar","solicitudes","chats"];
+  const tabs=["agregar","gestionar","solicitudes","chats","notificacion"];
   document.querySelectorAll(".admin-tab").forEach((b,i)=>{
     b.classList.toggle("activo",tabs[i]===tab);
   });
   tabs.forEach(t=>{
-    const el=document.getElementById("admin"+t.charAt(0).toUpperCase()+t.slice(1));
+    const key=t.charAt(0).toUpperCase()+t.slice(1);
+    const el=document.getElementById("admin"+key);
     if(el) el.classList.toggle("activa",t===tab);
   });
   if(tab==="gestionar") renderAdminTabla();
   if(tab==="solicitudes") renderAdminSolicitudes();
   if(tab==="chats") renderAdminChats();
+  if(tab==="notificacion") cargarPreviewNotificacion();
 }
 
 function poblarSelectAdmin(){
@@ -2954,6 +3005,7 @@ async function initFirebase(){
   }
 
   iniciarListenersChat();
+  verificarNotificacionGlobal();
 }
 
 // Iniciar cuando el DOM esté listo
@@ -3912,6 +3964,78 @@ function _aplicarIdioma(lang){
 
   if(lang !== "de") _aplicarIdioma(lang);
 })();
+
+/* ===== NOTIFICACIONES GLOBALES ===== */
+async function enviarNotificacionGlobal(){
+  const msg=document.getElementById("notifAdminInput").value.trim();
+  if(!msg){mostrarToast("Escribe un mensaje primero","⚠️");return;}
+  const notif={
+    mensaje:msg,
+    id:Date.now().toString(),
+    creadaEn:new Date().toISOString()
+  };
+  try{
+    await _db.collection("notificaciones").doc("global").set(notif);
+    mostrarToast("✅ Notificación enviada a todos los usuarios","📢");
+    document.getElementById("notifAdminInput").value="";
+    document.getElementById("notifAdminPreviewTxt").textContent=msg;
+    document.getElementById("notifAdminPreview").style.display="block";
+  }catch(e){
+    mostrarToast("Error al enviar: "+e.message,"⚠️");
+    console.warn("FB notifGlobal:",e);
+  }
+}
+
+async function cargarPreviewNotificacion(){
+  try{
+    const snap=await _db.collection("notificaciones").doc("global").get();
+    if(snap.exists){
+      const data=snap.data();
+      document.getElementById("notifAdminPreviewTxt").textContent=data.mensaje||"";
+      document.getElementById("notifAdminPreview").style.display="block";
+    }
+  }catch(e){console.warn("FB cargarNotif:",e);}
+}
+
+function mostrarNotificacionGlobal(mensaje){
+  const banner=document.getElementById("notifGlobalBanner");
+  document.getElementById("notifGlobalTxt").textContent=mensaje;
+  banner.classList.add("visible");
+  setTimeout(()=>{
+    banner.style.opacity="0";
+    banner.style.transition="opacity .4s ease";
+    setTimeout(()=>{
+      banner.classList.remove("visible");
+      banner.style.opacity="";
+      banner.style.transition="";
+    },400);
+  },8000);
+}
+
+function cerrarNotifGlobal(){
+  const banner=document.getElementById("notifGlobalBanner");
+  banner.style.opacity="0";
+  banner.style.transition="opacity .3s ease";
+  setTimeout(()=>{
+    banner.classList.remove("visible");
+    banner.style.opacity="";
+    banner.style.transition="";
+  },300);
+}
+
+async function verificarNotificacionGlobal(){
+  try{
+    const snap=await _db.collection("notificaciones").doc("global").get();
+    if(snap.exists){
+      const notif=snap.data();
+      const visto=localStorage.getItem("notif_global_vista_"+notif.id);
+      if(!visto && notif.mensaje){
+        localStorage.setItem("notif_global_vista_"+notif.id,"1");
+        setTimeout(()=>mostrarNotificacionGlobal(notif.mensaje), 1800);
+      }
+    }
+  }catch(e){console.warn("FB verificarNotif:",e);}
+}
 
 /* ===== SPLASH DISMISS ===== */
 /* El splash se quita en initFirebase al terminar de renderizar. Este bloque es solo fallback. */
