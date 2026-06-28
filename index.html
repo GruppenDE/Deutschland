@@ -4053,7 +4053,7 @@ function mostrarNotificacionGlobal(mensaje){
       banner.style.opacity="";
       banner.style.transition="";
     },400);
-  },2000);
+  },4000);
 }
 
 function cerrarNotifGlobal(){
@@ -4069,15 +4069,17 @@ function cerrarNotifGlobal(){
 
 async function verificarNotificacionGlobal(){
   try{
-    const snap=await _db.collection("notificaciones").doc("global").get();
-    if(snap.exists){
+    // Listener en tiempo real: se dispara en todos los usuarios al instante
+    _db.collection("notificaciones").doc("global").onSnapshot(snap=>{
+      if(!snap.exists) return;
       const notif=snap.data();
+      if(!notif || !notif.mensaje || !notif.id) return;
       const visto=localStorage.getItem("notif_global_vista_"+notif.id);
-      if(!visto && notif.mensaje){
+      if(!visto){
         localStorage.setItem("notif_global_vista_"+notif.id,"1");
-        setTimeout(()=>mostrarNotificacionGlobal(notif.mensaje), 1800);
+        mostrarNotificacionGlobal(notif.mensaje);
       }
-    }
+    });
   }catch(e){console.warn("FB verificarNotif:",e);}
 }
 
