@@ -171,6 +171,7 @@
     .btn-hamburger{display:flex!important}
     .nav-drawer{display:flex!important}
     .nav-overlay{display:block!important}
+    .cat-bar{top:58px!important}
   }
   @media(min-width:701px){
     .nav-drawer,.nav-overlay{display:none!important}
@@ -229,7 +230,7 @@
     transition:background .18s;text-decoration:none;
   }
   .nav-drawer .drawer-item:hover{background:rgba(255,255,255,.14)}
-  .nav-drawer .drawer-item .d-ico{font-size:18px;width:24px;text-align:center;flex-shrink:0}
+  .nav-drawer .drawer-item .d-ico{font-size:18px;width:24px;height:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
   .drawer-controls{
     display:flex;align-items:center;gap:10px;
     padding:10px 14px;background:rgba(255,255,255,.08);
@@ -313,20 +314,20 @@
     box-shadow:0 2px 8px rgba(20,100,50,.08);
   }
   .cat-row{
-    max-width:1100px;margin:0 auto;display:flex;gap:10px;overflow-x:auto;
-    padding:12px 20px;scrollbar-width:thin;
+    max-width:1100px;margin:0 auto;display:flex;gap:12px;overflow-x:auto;
+    padding:16px 20px;scrollbar-width:thin;
   }
   .cat-row::-webkit-scrollbar{height:5px}
   .cat-row::-webkit-scrollbar-thumb{background:#ddd;border-radius:10px}
   .chip{
-    flex:0 0 auto;display:flex;align-items:center;gap:7px;
-    padding:9px 16px;border-radius:999px;border:1.5px solid var(--borde);
-    background:#f5f7f6;color:var(--texto);font-size:14px;font-weight:500;
+    flex:0 0 auto;display:flex;align-items:center;gap:9px;
+    padding:12px 20px;border-radius:999px;border:1.5px solid var(--borde);
+    background:#f5f7f6;color:var(--texto);font-size:15.5px;font-weight:500;
     cursor:pointer;white-space:nowrap;transition:.18s ease;user-select:none;
   }
   .chip:hover{border-color:var(--verde);background:#edf7f0;transform:translateY(-1px)}
   .chip.activo{background:var(--verde);border-color:var(--verde);color:#fff;box-shadow:var(--sombra)}
-  .chip .ico{font-size:16px}
+  .chip .ico{font-size:18px}
   body.dark .cat-bar{background:#0f1311;border-color:#1e2824}
   body.dark .chip{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#e0f0e8}
   body.dark .chip:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.45)}
@@ -1243,13 +1244,13 @@
   <div class="drawer-seccion" style="border-top:none;padding-top:0">Menü</div>
 
   <button class="drawer-item" onclick="abrirAgregar();cerrarDrawer()">
-    <span class="d-ico">➕</span> <span id="drawerBtnAgregar">Gruppe hinzufügen</span>
+    <span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span> <span id="drawerBtnAgregar">Gruppe hinzufügen</span>
   </button>
   <button class="drawer-item" id="drawerBtnSesion" onclick="cerrarDrawer()">
-    <span class="d-ico">👤</span> <span id="drawerSesionLabel">Anmelden</span>
+    <span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> <span id="drawerSesionLabel">Anmelden</span>
   </button>
   <button class="drawer-item" id="drawerBtnMisGrupos" style="display:none" onclick="abrirMisGrupos();cerrarDrawer()">
-    <span class="d-ico">📁</span> <span>Meine Gruppen</span>
+    <span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span> <span>Meine Gruppen</span>
   </button>
 
   <div class="drawer-seccion">Darstellung</div>
@@ -2024,6 +2025,7 @@ function reiniciar(){
   paginaActual=1;
   pintarCategorias();
   filtrar();
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
 function pintar(arr){
