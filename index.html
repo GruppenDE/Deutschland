@@ -127,7 +127,7 @@
 
   /* Zona sesión — estilo ghost pill */
   #zonaSesion a,
-  #zonaSesion button:not(.btn-avatar){
+  #zonaSesion > button:not(.btn-avatar){
     display:inline-flex;align-items:center;gap:7px;
     padding:0 16px;height:38px;border-radius:999px;
     border:1.5px solid rgba(255,255,255,.5);
@@ -137,7 +137,7 @@
     transition:background .18s, border-color .18s, transform .15s;
   }
   #zonaSesion a:hover,
-  #zonaSesion button:not(.btn-avatar):hover{
+  #zonaSesion > button:not(.btn-avatar):hover{
     background:rgba(255,255,255,.18);
     border-color:rgba(255,255,255,.85);
     transform:translateY(-1px);
@@ -3497,7 +3497,7 @@ function _sincDrawerSesion(){
   } else {
     if(label) label.textContent=t.anmelden;
     if(misGruposBtn) misGruposBtn.style.display="none";
-    if(btnSesion) btnSesion.onclick=()=>{if(typeof abrirSesion==="function")abrirSesion();cerrarDrawer();};
+    if(btnSesion) btnSesion.onclick=()=>{abrirAuth("login");cerrarDrawer();};
   }
 }
 function _sincDrawerIdioma(){
