@@ -4243,8 +4243,29 @@ function renderNotifHistorial(historial){
         <div style="font-size:11px;color:var(--sub);margin-top:2px">${fecha}</div>
       </div>
       <span style="font-size:11px;color:var(--verde);font-weight:700;flex-shrink:0">↩ Reenviar</span>
+      <button type="button" onclick="event.stopPropagation();eliminarNotifHistorial('${n.id}')"
+        title="Eliminar"
+        style="flex-shrink:0;width:26px;height:26px;border-radius:8px;border:1.5px solid var(--borde);
+               background:#fff;color:#d64545;cursor:pointer;display:flex;align-items:center;justify-content:center;
+               font-size:13px;transition:border-color .18s,background .18s"
+        onmouseenter="event.stopPropagation();this.style.borderColor='#d64545';this.style.background='#fdecec'"
+        onmouseleave="event.stopPropagation();this.style.borderColor='var(--borde)';this.style.background='#fff'">🗑</button>
     </div>`;
   }).join("");
+}
+
+async function eliminarNotifHistorial(id){
+  try{
+    const histSnap = await _db.collection("notificaciones").doc("historial").get();
+    let historial = histSnap.exists ? (histSnap.data().lista || []) : [];
+    historial = historial.filter(n => n.id !== id);
+    await _db.collection("notificaciones").doc("historial").set({lista: historial});
+    renderNotifHistorial(historial);
+    mostrarToast("Notificación eliminada","🗑");
+  }catch(e){
+    mostrarToast("Error al eliminar: "+e.message,"⚠️");
+    console.warn("FB eliminarNotif:",e);
+  }
 }
 
 function mostrarNotificacionGlobal(mensaje){
