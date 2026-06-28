@@ -1051,8 +1051,28 @@
   }
   body.dark .chat-burbuja.admin{background:#1d2421;color:#eef2f0}
   .chat-burbuja.usuario{
-    align-self:flex-end;background:linear-gradient(135deg,var(--verde),var(--verde-d));color:#fff;
+    align-self:flex-end;background:linear-gradient(160deg,#2ec96a 0%,#1FAF55 60%,#179944 100%);color:#fff;
     border-bottom-right-radius:4px;
+    box-shadow:0 1px 4px rgba(31,175,85,.18);
+  }
+  /* Links en burbujas verdes (usuario): blanco con opacidad */
+  .chat-burbuja.usuario .chat-link{
+    color:#fff;
+    text-decoration:underline;
+    font-weight:500;
+  }
+  .chat-burbuja.usuario .chat-link:hover{
+    color:#fff;
+    opacity:.85;
+  }
+  /* Links en burbujas claras (admin/recibido): verde normal */
+  .chat-burbuja.admin .chat-link{
+    color:var(--verde-d);
+    text-decoration:underline;
+    font-weight:500;
+  }
+  .chat-burbuja.admin .chat-link:hover{
+    color:var(--verde);
   }
   .chat-burbuja .hora{display:block;font-size:10px;opacity:.6;margin-top:4px;text-align:right}
   .chat-burbuja.admin .hora{text-align:left}
@@ -1120,6 +1140,22 @@
   .chat-burbuja img.chat-img{
     max-width:100%;border-radius:10px;display:block;margin-top:4px;cursor:pointer;
   }
+  /* Burbuja de imagen: sin fondo verde, sin padding */
+  .chat-burbuja.chat-burbuja-img{
+    background:transparent!important;
+    padding:0!important;
+    box-shadow:none!important;
+  }
+  .chat-burbuja.chat-burbuja-img .msg-meta{
+    position:absolute;bottom:6px;right:8px;
+    background:rgba(0,0,0,0.38);
+    border-radius:8px;padding:1px 5px;
+  }
+  .chat-burbuja.chat-burbuja-img{
+    position:relative;
+  }
+  .chat-burbuja.chat-burbuja-img .msg-hora{color:#fff}
+  .chat-burbuja.chat-burbuja-img .tick-stroke{stroke:#fff!important}
 
   /* Notificación push estilo burbuja */
   #notifPush{
@@ -3274,7 +3310,7 @@ function renderMensajes(msgs, contenedor, esAdminView){
   function convertirURLsALinks(texto){
     const urlRegex=/https?:\/\/[^\s<>]+/gi;
     return texto.replace(urlRegex,function(url){
-      return `<a href="${url}" target="_blank" rel="noopener" style="color:var(--verde);text-decoration:underline;word-break:break-all;font-weight:500">${url}</a>`;
+      return `<a href="${url}" target="_blank" rel="noopener" class="chat-link" style="word-break:break-all">${url}</a>`;
     });
   }
 
@@ -3312,7 +3348,7 @@ function renderMensajes(msgs, contenedor, esAdminView){
       </div>`;
     } else if(m.tipo==="imagen"){
       const claseAlign=m.de==="admin"?"admin":"usuario";
-      contenedor.innerHTML+=`<div class="chat-burbuja ${claseAlign}">
+      contenedor.innerHTML+=`<div class="chat-burbuja chat-burbuja-img ${claseAlign}">
         <img class="chat-img" src="${m.src}" alt="imagen" onclick="this.requestFullscreen&&this.requestFullscreen()">
         <div style="display:flex;justify-content:flex-end;margin-top:3px">${metaMensaje(m, esAdminView)}</div>
       </div>`;
