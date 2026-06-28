@@ -1137,6 +1137,13 @@
   }
   body.dark .btn-galeria{background:#1d2421;border-color:#2a332f;color:#9aa6a2}
   .btn-galeria:hover{border-color:var(--verde);color:var(--verde);background:#1FAF5514}
+  /* Badge de verificación de miembros */
+  .miembros-ts{
+    font-size:10px;color:#16a34a;margin-left:4px;
+    vertical-align:middle;cursor:help;
+  }
+  .miembros-num{font-weight:600}
+
   .chat-burbuja img.chat-img{
     max-width:100%;border-radius:10px;display:block;margin-top:4px;cursor:pointer;
   }
@@ -1940,6 +1947,46 @@ async function guardarGrupoFirestore(g){
     await _db.collection("grupos_extra").add({...g, creadoEn: firebase.firestore.FieldValue.serverTimestamp()});
   }catch(e){ console.warn("FB guardarGrupo:",e); }
 }
+
+/* ─── OBTENER MIEMBROS REALES DEL GRUPO ───────────────────────── */
+async function obtenerMiembrosReales(link){
+  try{
+    // Telegram: los metadatos OG son públicos y accesibles via proxy CORS
+    if(link.includes("t.me")||link.includes("telegram.me")){
+      const proxy="https://api.allorigins.win/get?url="+encodeURIComponent(link);
+      const res=await fetch(proxy,{signal:AbortSignal.timeout(8000)});
+      const json=await res.json();
+      const html=json.contents||"";
+      // Telegram pone "X members" o "X Mitglieder" en og:description
+      const m=html.match(/(\d[\d\s.,]+)\s*(member|subscriber|Mitglied|miembro|follower)/i);
+      if(m){
+        const num=parseInt(m[1].replace(/[\s.,]/g,""));
+        if(!isNaN(num)&&num>0) return num;
+      }
+    }
+    // WhatsApp no expone metadatos públicos → retorna null
+    return null;
+  }catch(e){
+    console.warn("obtenerMiembrosReales:",e);
+    return null;
+  }
+}
+
+// Actualiza miembros de un grupo en Firestore y en memoria
+async function actualizarMiembrosGrupo(nombre, link){
+  const real=await obtenerMiembrosReales(link);
+  if(real===null) return null;
+  // Actualizar en memoria
+  [grupos, gruposExtra].forEach(arr=>{
+    const g=arr.find(x=>x.nombre===nombre);
+    if(g){ g.miembros=real; g.miembrosActualizadoEn=Date.now(); }
+  });
+  // Actualizar en Firestore
+  _db.collection("grupos_extra").where("nombre","==",nombre).get().then(snap=>{
+    snap.forEach(doc=>doc.ref.update({miembros:real, miembrosActualizadoEn:Date.now()}));
+  }).catch(()=>{});
+  return real;
+}
 async function guardarGrupoUsuario(g){
   gruposExtra.push(g);
   grupos.push(g);
@@ -2323,7 +2370,10 @@ function pintar(arr){
       <div class="card-body">
         <span class="tag ${g.categoria==='+18'?'plus18':''}">${categorias.find(c=>c.nombre===g.categoria)?.icono||""} ${categoriaLabel[g.categoria]||g.categoria}</span>
         <h3>${g.nombre}</h3>
-        <div class="meta">👥 ${g.miembros.toLocaleString("de-DE")} Mitglieder</div>
+        <div class="meta" id="meta-miembros-${g.nombre.replace(/[^a-z0-9]/gi,'_')}">
+          👥 <span class="miembros-num">${g.miembros>0?g.miembros.toLocaleString("de-DE"):"—"}</span> Mitglieder
+          ${g.miembrosActualizadoEn?`<span class="miembros-ts" title="Zuletzt aktualisiert: ${new Date(g.miembrosActualizadoEn).toLocaleDateString('de-DE')}">✓</span>`:""}
+        </div>
         <div class="acciones">
           <a class="btn-unirse ${claseBtn}" target="_blank" rel="noopener" href="${g.link}">
             Gruppe beitreten <span class="flecha">→</span>
@@ -2860,6 +2910,12 @@ function renderAdminTabla(){
       <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.nombre}">${g.nombre}</td>
       <td>${g.categoria}</td>
       <td>${g.plataforma}</td>
+      <td style="font-size:12px;white-space:nowrap">
+        <span id="miembros-admin-${i}">${g.miembros>0?g.miembros.toLocaleString("de-DE"):"—"}</span>
+        ${g.link&&g.link.includes("t.me")?`
+          <button class="btn-admin-sm" style="margin-left:4px;background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7;font-size:11px;padding:2px 6px"
+            onclick="adminRefreshMiembros(${i},'${g.nombre}','${g.link}')" title="Mitglieder jetzt abrufen">🔄</button>`:""}
+      </td>
       <td>
         <input type="number" min="1" value="${pf[g.nombre]||''}" placeholder="Auto"
           id="pf_${i}" style="width:60px">
@@ -3049,6 +3105,7 @@ async function initFirebase(){
 
   iniciarListenersChat();
   verificarNotificacionGlobal();
+  setTimeout(iniciarAutoRefreshMiembros, 3000);
 }
 
 // Iniciar cuando el DOM esté listo
@@ -3665,6 +3722,20 @@ function adminAprobarSolicitud(id){
   grupos.push(nuevoGrupo);
   guardarGrupoFirestore(nuevoGrupo);
 
+  // Intentar obtener miembros reales automáticamente
+  obtenerMiembrosReales(s.link).then(real=>{
+    if(real!==null){
+      nuevoGrupo.miembros=real;
+      nuevoGrupo.miembrosActualizadoEn=Date.now();
+      // Actualizar en Firestore
+      _db.collection("grupos_extra").where("nombre","==",nuevoGrupo.nombre).get().then(snap=>{
+        snap.forEach(doc=>doc.ref.update({miembros:real, miembrosActualizadoEn:Date.now()}));
+      }).catch(()=>{});
+      filtrar(); // re-pintar cards con el número real
+      mostrarToast(`Mitglieder aktualisiert: ${real.toLocaleString("de-DE")} 👥`,"📊");
+    }
+  });
+
   // Notificar usuario por chat
   const msgAdmin={de:"admin",texto:`✅ Deine Gruppe *${s.nombre}* wurde genehmigt und ist jetzt auf Gruppen🇩🇪 sichtbar! 🎉 Jetzt haben andere die Möglichkeit, deine Gruppe zu favorisieren und ihr Ranking zu verbessern.`,hora:horaActual()};
   agregarMensajeChat(s.usuarioCorreo, msgAdmin);
@@ -3673,7 +3744,7 @@ function adminAprobarSolicitud(id){
   // Actualizar vista inmediatamente
   filtrar();
   renderAdminSolicitudes();
-  mostrarToast(`Gruppe „${s.nombre}" genehmigt und veröffentlicht mit 0 Favoritos ⭐`,"✅");
+  mostrarToast(`Gruppe „${s.nombre}" genehmigt und veröffentlicht ⭐`,"✅");
 }
 
 function adminRechazarSolicitud(id){
@@ -3690,6 +3761,36 @@ function adminRechazarSolicitud(id){
 
   renderAdminSolicitudes();
   mostrarToast(`Anfrage für „${s.nombre}" abgelehnt`,"❌");
+}
+
+/* ─── ADMIN: ACTUALIZAR MIEMBROS MANUALMENTE ─── */
+async function adminRefreshMiembros(idx, nombre, link){
+  const spanAdmin=document.getElementById(`miembros-admin-${idx}`);
+  if(spanAdmin) spanAdmin.textContent="⏳ …";
+  const real=await actualizarMiembrosGrupo(nombre, link);
+  if(real!==null){
+    if(spanAdmin) spanAdmin.textContent=real.toLocaleString("de-DE");
+    filtrar(); // actualizar card pública
+    mostrarToast(`👥 ${nombre}: ${real.toLocaleString("de-DE")} Mitglieder aktualisiert`,"📊");
+  } else {
+    if(spanAdmin) spanAdmin.textContent="N/A";
+    mostrarToast("Mitgliederzahl konnte nicht abgerufen werden (nur Telegram)","⚠️");
+  }
+}
+
+/* Auto-refresh cada 6 horas para grupos de Telegram activos */
+function iniciarAutoRefreshMiembros(){
+  const INTERVALO=6*60*60*1000; // 6h
+  async function ciclo(){
+    const telegramGrupos=grupos.filter(g=>g.link&&g.link.includes("t.me"));
+    for(const g of telegramGrupos){
+      await actualizarMiembrosGrupo(g.nombre, g.link);
+      await new Promise(r=>setTimeout(r,2000)); // pausa entre requests
+    }
+    filtrar();
+  }
+  ciclo(); // primera ejecución al cargar
+  setInterval(ciclo, INTERVALO);
 }
 
 function adminBorrarSolicitud(id){
