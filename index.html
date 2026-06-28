@@ -9,6 +9,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyA3GpW1N7i9YNdw7KtZXx5VFgWyWoyoBYM",
@@ -24,6 +25,60 @@
   const _db  = firebase.firestore();
   const _auth = firebase.auth();
   const _googleProvider = new firebase.auth.GoogleAuthProvider();
+
+  /* ===== FIREBASE CLOUD MESSAGING (FCM) ===== */
+  let _messaging = null;
+
+  async function iniciarFCM(){
+    // 1. Verificar soporte del navegador
+    if(!("Notification" in window) || !("serviceWorker" in navigator)){
+      console.log("[FCM] Este navegador no soporta notificaciones push.");
+      return;
+    }
+    if(!firebase.messaging.isSupported()){
+      console.log("[FCM] Firebase Messaging no es soportado en este navegador.");
+      return;
+    }
+
+    try{
+      // 2. Registrar el Service Worker (debe estar en la raíz del sitio)
+      const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+      console.log("[FCM] Service Worker registrado correctamente:", registration);
+
+      _messaging = firebase.messaging();
+
+      // 3. Solicitar permiso de notificaciones al usuario
+      const permiso = await Notification.requestPermission();
+      if(permiso !== "granted"){
+        console.log("[FCM] Permiso de notificaciones NO concedido. Estado:", permiso);
+        return;
+      }
+      console.log("[FCM] Permiso de notificaciones concedido.");
+
+      // 4. Obtener el token de FCM usando la clave VAPID
+      const token = await _messaging.getToken({
+        vapidKey: _VAPID_KEY,
+        serviceWorkerRegistration: registration
+      });
+
+      if(token){
+        console.log("[FCM] Token obtenido correctamente:", token);
+        // Aquí puedes guardar el token en Firestore, p. ej.:
+        // _db.collection("fcm_tokens").doc(token).set({ creadoEn: new Date().toISOString() });
+      } else {
+        console.log("[FCM] No se pudo obtener el token. El usuario puede necesitar conceder permiso nuevamente.");
+      }
+
+      // 5. Escuchar mensajes mientras la pestaña está en primer plano
+      _messaging.onMessage(payload=>{
+        console.log("[FCM] Mensaje recibido en primer plano:", payload);
+      });
+
+    }catch(err){
+      console.log("[FCM] Error al configurar las notificaciones:", err);
+    }
+  }
+
 </script>
 <!-- ===== /FIREBASE SDK ===== -->
 
@@ -1512,14 +1567,15 @@
       <h4>Erkunden</h4>
       <ul>
         <li><a href="" onclick="reiniciar();return false;">✨ Alle Gruppen</a></li>
+        <li><a href="#" onclick="elegirCategoria('+18');return false;">🔞 +18</a></li>
+        <li><a href="#" onclick="elegirCategoria('Singles');return false;">💘 Singles</a></li>
         <li><a href="#" onclick="elegirCategoria('Gaming');return false;">🎮 Gaming</a></li>
         <li><a href="#" onclick="elegirCategoria('Programación');return false;">💻 Programmierung</a></li>
         <li><a href="#" onclick="elegirCategoria('Música');return false;">🎵 Musik</a></li>
         <li><a href="#" onclick="elegirCategoria('Viajes');return false;">🌍 Reisen</a></li>
         <li><a href="#" onclick="elegirCategoria('Estudio');return false;">📚 Lernen</a></li>
         <li><a href="#" onclick="elegirCategoria('Empleo');return false;">💼 Jobs</a></li>
-        <li><a href="#" onclick="elegirCategoria('Singles');return false;">💘 Singles</a></li>
-        <li><a href="#" onclick="elegirCategoria('+18');return false;">🔞 +18</a></li>
+
       </ul>
     </div>
     <div class="footer-col">
@@ -3129,6 +3185,7 @@ async function initFirebase(){
   iniciarListenersChat();
   verificarNotificacionGlobal();
   setTimeout(iniciarAutoRefreshMiembros, 3000);
+  iniciarFCM();
 }
 
 // Iniciar cuando el DOM esté listo
