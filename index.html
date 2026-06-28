@@ -2415,13 +2415,16 @@ function actualizarBadgeAdminGlobal(){
   const tabChats=document.getElementById("tabChats");
   if(tabChats) tabChats.textContent=`💬 Chats${n>0?` (${n})`:""}`;
   const badge=document.getElementById("chatBadge");
-  if(!badge) return;
-  if(!chatAbierto && n>0){
-    badge.textContent=n>9?"9+":String(n);
-    badge.classList.add("visible");
-  } else if(!chatAbierto){
-    badge.classList.remove("visible");
+  if(badge){
+    if(!chatAbierto && n>0){
+      badge.textContent=n>9?"9+":String(n);
+      badge.classList.add("visible");
+    } else if(!chatAbierto){
+      badge.classList.remove("visible");
+    }
   }
+  if(document.getElementById("chatConvSelect")) poblarSelectChat();
+  if(document.getElementById("adminChatSelect")) poblarSelectAdminChats();
 }
 function actualizarBadgeUsuarioChat(correo){
   const n=contarNoLeidosParaUsuario(correo);
@@ -2608,15 +2611,22 @@ function toggleChat(){
   }
 }
 
+function contarNoLeidosCorreo(correo){
+  return (obtenerConversacion(correo)||[]).filter(m=>m.de==="usuario"&&m.leido===false).length;
+}
+
 function poblarSelectChat(){
   const sel=document.getElementById("chatConvSelect");
+  const valorActual=sel.value;
   const correos=Object.keys(_chatsCache);
   sel.innerHTML=`<option value="">Selecciona usuario...</option>`;
   correos.forEach(correo=>{
     const soli=obtenerSolicitudes().find(s=>s.usuarioCorreo===correo);
     const label=soli?`${soli.usuarioNombre} (${correo})`:correo;
-    sel.innerHTML+=`<option value="${correo}">${label}</option>`;
+    const n=contarNoLeidosCorreo(correo);
+    sel.innerHTML+=`<option value="${correo}">${label}${n>0?` 🔴(${n})`:""}</option>`;
   });
+  if(valorActual) sel.value=valorActual;
 }
 
 function cambiarConversacion(){
@@ -2850,17 +2860,25 @@ function adminRechazarSolicitud(id){
 function renderAdminChats(){
   // Recargar desde Firestore para ver mensajes actualizados
   cargarDatosAdmin().then(()=>{
-    const sel=document.getElementById("adminChatSelect");
-    const correos=Object.keys(_chatsCache);
-    sel.innerHTML=`<option value="">Benutzer auswählen...</option>`;
-    correos.forEach(correo=>{
-      const soli=obtenerSolicitudes().find(s=>s.usuarioCorreo===correo);
-      const label=soli?`${soli.usuarioNombre} — ${correo}`:correo;
-      sel.innerHTML+=`<option value="${correo}">${label}</option>`;
-    });
+    poblarSelectAdminChats();
     document.getElementById("adminChatMensajes").innerHTML=
       `<div style="text-align:center;color:var(--sub);font-size:13px;margin:auto">Benutzer auswählen, um den Chat zu sehen.</div>`;
   });
+}
+
+function poblarSelectAdminChats(){
+  const sel=document.getElementById("adminChatSelect");
+  if(!sel) return;
+  const valorActual=sel.value;
+  const correos=Object.keys(_chatsCache);
+  sel.innerHTML=`<option value="">Benutzer auswählen...</option>`;
+  correos.forEach(correo=>{
+    const soli=obtenerSolicitudes().find(s=>s.usuarioCorreo===correo);
+    const label=soli?`${soli.usuarioNombre} — ${correo}`:correo;
+    const n=contarNoLeidosCorreo(correo);
+    sel.innerHTML+=`<option value="${correo}">${label}${n>0?` 🔴(${n})`:""}</option>`;
+  });
+  if(valorActual) sel.value=valorActual;
 }
 
 function adminCambiarChat(){
