@@ -804,6 +804,22 @@
   }
   .chat-burbuja .hora{display:block;font-size:10px;opacity:.6;margin-top:4px;text-align:right}
   .chat-burbuja.admin .hora{text-align:left}
+  /* Ticks de visto estilo WhatsApp */
+  .msg-meta{display:inline-flex;align-items:center;gap:3px;float:right;margin-left:8px;margin-top:3px}
+  .chat-burbuja.admin .msg-meta{float:left;margin-left:0;margin-right:8px}
+  .msg-hora{font-size:10px;opacity:.65;white-space:nowrap}
+  .msg-ticks{display:inline-flex;align-items:center;margin-left:2px}
+  .msg-ticks svg{width:15px;height:10px;display:block}
+  /* tick simple = enviado */
+  .tick-enviado .tick-stroke{stroke:rgba(255,255,255,0.6)}
+  /* tick doble = entregado (blanco semitransparente) */
+  .tick-entregado .tick-stroke{stroke:rgba(255,255,255,0.6)}
+  /* tick visto = azul claro */
+  .tick-visto .tick-stroke{stroke:#53BDEB}
+  /* para burbujas del admin (fondo claro), ticks en gris oscuro */
+  .chat-burbuja.admin .tick-enviado .tick-stroke{stroke:rgba(0,0,0,0.35)}
+  .chat-burbuja.admin .tick-entregado .tick-stroke{stroke:rgba(0,0,0,0.35)}
+  .chat-burbuja.admin .tick-visto .tick-stroke{stroke:#53BDEB}
 
   /* Solicitudes pendientes en chat */
   .chat-solicitud{
@@ -2464,6 +2480,8 @@ let _ultimoConteoMsj={};
 let _listenerChatsAdmin=null;
 let _listenerChatUsuario=null;
 
+// Guarda el estado de "leido" de los mensajes del admin para detectar cambios
+let _leidoCache={};
 function attachAdminChatsListener(){
   if(_listenerChatsAdmin) return;
   _listenerChatsAdmin=_db.collection("chats").onSnapshot(snap=>{
@@ -2473,9 +2491,33 @@ function attachAdminChatsListener(){
       const mensajes=data.mensajes||[];
       const anteriores=_ultimoConteoMsj[correo]||0;
       _chatsCache[correo]=mensajes;
+
+      // Detectar si algún mensaje del admin pasó a leido=true (usuario lo leyó)
+      const prevLeido=_leidoCache[correo]||[];
+      let cambioVisto=false;
+      mensajes.forEach((m,i)=>{
+        if(m.de==="admin" && m.leido===true && prevLeido[i]===false){
+          cambioVisto=true;
+        }
+      });
+      _leidoCache[correo]=mensajes.map(m=>m.leido);
+
       if(mensajes.length>anteriores){
         const nuevos=mensajes.slice(anteriores);
         nuevos.forEach(m=>{ if(m.de==="usuario") notificarAdminNuevoMensaje(correo,m); });
+      } else if(cambioVisto){
+        // El usuario leyó mensajes → actualizar ticks en tiempo real para el admin
+        const user=obtenerSesion();
+        if(esAdmin(user)){
+          const chatFlotanteConEsta=chatAbierto && document.getElementById("chatConvSelect")?.value===correo;
+          if(chatFlotanteConEsta){
+            renderMensajes(obtenerConversacion(correo),document.getElementById("chatMensajes"),true);
+          }
+          const panelAdmin=document.getElementById("panelAdmin");
+          if(panelAdmin&&panelAdmin.classList.contains("abierto")&&document.getElementById("adminChatSelect")?.value===correo){
+            renderMensajes(obtenerConversacion(correo),document.getElementById("adminChatMensajes"),true);
+          }
+        }
       }
       _ultimoConteoMsj[correo]=mensajes.length;
     });
@@ -2583,6 +2625,30 @@ function renderMensajes(msgs, contenedor, esAdminView){
     });
   }
 
+  // SVG ticks estilo WhatsApp
+  function svgTick(clase){
+    if(clase==="tick-enviado"){
+      // Un solo check ✓
+      return `<span class="msg-ticks ${clase}"><svg viewBox="0 0 12 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:12px;height:9px"><path d="M1 4.5L4 7.5L11 1" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="tick-stroke"/></svg></span>`;
+    } else {
+      // Doble check ✓✓ (entregado o visto)
+      return `<span class="msg-ticks ${clase}"><svg viewBox="0 0 18 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:18px;height:9px"><path d="M1 4.5L4 7.5L11 1" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="tick-stroke"/><path d="M6 7.5L13 1" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="tick-stroke"/><path d="M9 7.5L16 1" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="tick-stroke"/></svg></span>`;
+    }
+  }
+  function metaMensaje(m, esAdminView){
+    // Solo mostrar ticks en mensajes del usuario (en vista admin) o del admin (en vista usuario)
+    // Ticks: solo para mensajes del remitente "propio" de cada vista
+    const esMio = esAdminView ? m.de==="admin" : m.de==="usuario";
+    if(!esMio) return `<span class="msg-meta"><span class="msg-hora">${m.hora}</span></span>`;
+    let tickClase;
+    if(m.leido===true){
+      tickClase="tick-visto";
+    } else {
+      tickClase="tick-entregado";
+    }
+    return `<span class="msg-meta"><span class="msg-hora">${m.hora}</span>${svgTick(tickClase)}</span>`;
+  }
+
   msgs.forEach(m=>{
     if(m.de==="sistema"){
       const soli=obtenerSolicitudes().find(s=>s.id===m.solicitudId);
@@ -2601,12 +2667,12 @@ function renderMensajes(msgs, contenedor, esAdminView){
       const claseAlign=m.de==="admin"?"admin":"usuario";
       contenedor.innerHTML+=`<div class="chat-burbuja ${claseAlign}">
         <img class="chat-img" src="${m.src}" alt="imagen" onclick="this.requestFullscreen&&this.requestFullscreen()">
-        <span class="hora">${m.hora}</span>
+        ${metaMensaje(m, esAdminView)}
       </div>`;
     } else {
       const claseAlign=m.de==="admin"?"admin":"usuario";
       const textoConLinks=convertirURLsALinks(m.texto);
-      contenedor.innerHTML+=`<div class="chat-burbuja ${claseAlign}">${textoConLinks.replace(/\n/g,"<br>")}<span class="hora">${m.hora}</span></div>`;
+      contenedor.innerHTML+=`<div class="chat-burbuja ${claseAlign}">${textoConLinks.replace(/\n/g,"<br>")}${metaMensaje(m, esAdminView)}</div>`;
     }
   });
   contenedor.scrollTop=contenedor.scrollHeight;
