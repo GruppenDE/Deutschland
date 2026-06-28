@@ -616,6 +616,21 @@
   .vacio{text-align:center;color:var(--sub);padding:60px 20px;grid-column:1/-1}
   .vacio .e{font-size:38px;display:block;margin-bottom:10px}
 
+  /* SKELETON DE CARGA (mientras llegan los grupos de Firebase) */
+  .skeleton-card{
+    background:var(--card);border-radius:var(--radio);overflow:hidden;
+    border:1px solid var(--borde);display:flex;flex-direction:column;
+  }
+  .skeleton-card .sk-img{aspect-ratio:16/9}
+  .skeleton-card .sk-line{height:12px;margin:14px 14px 0;border-radius:6px}
+  .skeleton-card .sk-line.corta{width:55%;margin-top:10px;margin-bottom:14px}
+  .sk-img,.sk-line{
+    background:linear-gradient(100deg,var(--borde) 30%,#f5f7f6 50%,var(--borde) 70%);
+    background-size:200% 100%;animation:skShimmer 1.3s ease-in-out infinite;
+  }
+  @keyframes skShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  body.dark .sk-img,body.dark .sk-line{background:linear-gradient(100deg,#243029 30%,#2c3a32 50%,#243029 70%);background-size:200% 100%}
+
   /* FOOTER PROFESIONAL */
   footer{background:#121614;color:#9aa6a2;font-size:13.8px}
   .footer-top{
@@ -1843,6 +1858,7 @@ async function guardarGrupoUsuario(g){
 
 const GRUPOS_POR_PAGINA=6;
 let paginaActual=1;
+let _cargandoGrupos=true;
 const _splashInicio=Date.now();
 
 const grid=document.getElementById("grid");
@@ -2142,6 +2158,17 @@ function reiniciar(){
 
 function pintar(arr){
   if(arr.length===0){
+    if(_cargandoGrupos){
+      grid.innerHTML=Array.from({length:6}).map(()=>`
+        <div class="skeleton-card">
+          <div class="sk-img"></div>
+          <div class="sk-line"></div>
+          <div class="sk-line corta"></div>
+        </div>`).join("");
+      resultadoInfo.textContent="";
+      document.getElementById("paginacion").innerHTML="";
+      return;
+    }
     grid.innerHTML=`<div class="vacio"><span class="e">🔍</span>Keine Gruppen mit dieser Suche gefunden.<br>Probiere ein anderes Wort oder eine andere Kategorie.</div>`;
     resultadoInfo.textContent="";
     document.getElementById("paginacion").innerHTML="";
@@ -2916,11 +2943,14 @@ async function initFirebase(){
       aplicarPaginasFijasLocal();
     }
 
-    // Re-pintar solo si hay datos nuevos de Firebase
-    if(hayNuevos) filtrar();
+    // Ya terminó de cargar: repintar siempre (haya o no grupos nuevos)
+    _cargandoGrupos=false;
+    filtrar();
 
   }catch(e){
     console.warn("Firebase init error:",e);
+    _cargandoGrupos=false;
+    filtrar();
   }
 
   iniciarListenersChat();
