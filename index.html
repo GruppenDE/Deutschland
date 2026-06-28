@@ -1048,7 +1048,7 @@
 <!-- PANEL CHAT -->
 <div id="panelChat">
   <div class="chat-header">
-    <div class="avatar-admin"><img src="https://s67.erome.com/8391/25otK4Ph/NcVaZv6x.jpg?v=1782372734" alt="Soporte"></div>
+    <div class="avatar-admin"><img src="https://s67.erome.com/8391/25otK4Ph/KHyzTjkN.jpg?v=1782372656" alt="Soporte"></div>
     <div class="chat-header-info">
       <strong id="chatNombreHeader">Support-Team</strong>
       <span id="chatSubHeader">Support</span>
@@ -1132,7 +1132,18 @@
   </div>
 </div>
 
-<!-- MODAL DE VERIFICACIÓN DE EDAD (categoría +18) -->
+<!-- MODAL AVISO FOTO — todas las demás categorías -->
+<div class="overlay" id="overlayFotoAviso">
+  <div class="modal modal-edad">
+    <span class="e">📷</span>
+    <h2>Hinweis für deine Gruppe</h2>
+    <p class="sub">Es wird empfohlen, beim Hinzufügen Ihrer Gruppen eigene Fotos hochzuladen.</p>
+    <div class="acciones-edad">
+      <button class="no" onclick="cerrarFotoAviso()">Schließen</button>
+      <button class="si" onclick="confirmarFotoAviso()">Verstanden</button>
+    </div>
+  </div>
+</div>
 <div class="overlay" id="overlayEdad">
   <div class="modal modal-edad">
     <span class="e">🔒</span>
@@ -1182,6 +1193,19 @@
     <div class="campo">
       <label>Gruppenbeschreibung</label>
       <textarea id="agDescripcion" placeholder="Beschreibe kurz, worum es in deiner Gruppe geht, welche Regeln gelten und welche Mitglieder ihr sucht …" rows="3" style="padding:11px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:14px;outline:none;background:#fafbfa;resize:vertical;transition:border-color .18s;font-family:inherit;line-height:1.5;width:100%;box-sizing:border-box" onfocus="this.style.borderColor='var(--verde)'" onblur="this.style.borderColor='var(--borde)'"></textarea>
+    </div>
+
+    <div class="campo">
+      <label>Gruppenfoto hochladen</label>
+      <label id="agFotoLabel" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:11px 13px;border-radius:9px;border:1.5px dashed var(--borde);background:#fafbfa;transition:border-color .18s" onmouseenter="this.style.borderColor='var(--verde)'" onmouseleave="this.style.borderColor='var(--borde)'">
+        <input type="file" id="agFotoInput" accept="image/*" style="display:none" onchange="previsualizarFoto(this)">
+        <span id="agFotoIco" style="font-size:26px">📷</span>
+        <div>
+          <span id="agFotoTexto" style="font-size:14px;font-weight:600;color:var(--texto);display:block">Foto auswählen</span>
+          <span style="font-size:11.5px;color:var(--sub)">JPG, PNG oder GIF · max. 5 MB</span>
+        </div>
+        <img id="agFotoPreview" src="" alt="" style="display:none;width:56px;height:56px;object-fit:cover;border-radius:8px;margin-left:auto;border:1.5px solid var(--borde)">
+      </label>
     </div>
 
     <div class="campo-checkbox" id="cajaConfirma18" style="display:none">
@@ -1318,9 +1342,17 @@ function pintarCategorias(){
   });
 }
 
+let _catPendiente=null;
+
 function elegirCategoria(nombre){
   if(nombre==="+18" && sessionStorage.getItem("grupohub_edad_ok")!=="1"){
+    _catPendiente=nombre;
     document.getElementById("overlayEdad").classList.add("abierto");
+    return;
+  }
+  if(nombre!=="+18" && nombre!=="Todos" && sessionStorage.getItem("grupohub_foto_ok")!=="1"){
+    _catPendiente=nombre;
+    document.getElementById("overlayFotoAviso").classList.add("abierto");
     return;
   }
   categoriaActiva=nombre;
@@ -1332,14 +1364,32 @@ function elegirCategoria(nombre){
 function confirmarEdad(){
   sessionStorage.setItem("grupohub_edad_ok","1");
   document.getElementById("overlayEdad").classList.remove("abierto");
-  categoriaActiva="+18";
+  categoriaActiva=_catPendiente||"+18";
+  _catPendiente=null;
   paginaActual=1;
   pintarCategorias();
   filtrar();
 }
 
 function rechazarEdad(){
+  _catPendiente=null;
   document.getElementById("overlayEdad").classList.remove("abierto");
+}
+
+function confirmarFotoAviso(){
+  sessionStorage.setItem("grupohub_foto_ok","1");
+  document.getElementById("overlayFotoAviso").classList.remove("abierto");
+  const cat=_catPendiente;
+  _catPendiente=null;
+  categoriaActiva=cat;
+  paginaActual=1;
+  pintarCategorias();
+  filtrar();
+}
+
+function cerrarFotoAviso(){
+  _catPendiente=null;
+  document.getElementById("overlayFotoAviso").classList.remove("abierto");
 }
 
 /* =========================================================
@@ -1381,6 +1431,20 @@ function actualizarCategoriaForm(){
   document.getElementById("cajaConfirma18").style.display=esAdulto?"flex":"none";
 }
 
+function previsualizarFoto(input){
+  const file=input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const preview=document.getElementById("agFotoPreview");
+    preview.src=e.target.result;
+    preview.style.display="block";
+    document.getElementById("agFotoIco").style.display="none";
+    document.getElementById("agFotoTexto").textContent=file.name.length>24?file.name.substring(0,22)+"…":file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
 function publicarGrupo(){
   const nombre=document.getElementById("agNombre").value.trim();
   const categoria=document.getElementById("agCategoria").value;
@@ -1397,10 +1461,14 @@ function publicarGrupo(){
   }
 
   const user=obtenerSesion();
+  const fotoPreview=document.getElementById("agFotoPreview");
+  const imgSrc=(fotoPreview&&fotoPreview.src&&fotoPreview.style.display!=="none")
+    ? fotoPreview.src
+    : `https://picsum.photos/600/340?random=${Date.now()}`;
   const solicitud={
     id:Date.now().toString(),
     nombre,categoria,plataforma:plataformaForm,link,descripcion,
-    img:`https://picsum.photos/600/340?random=${Date.now()}`,
+    img:imgSrc,
     miembros:0,favoritosBase:0,
     estado:"pendiente",
     usuarioCorreo:user.correo,
@@ -1433,6 +1501,11 @@ function publicarGrupo(){
   document.getElementById("agLink").value="";
   document.getElementById("agDescripcion").value="";
   document.getElementById("cajaConfirma18").style.display="none";
+  // reset foto
+  document.getElementById("agFotoInput").value="";
+  document.getElementById("agFotoPreview").style.display="none";
+  document.getElementById("agFotoIco").style.display="";
+  document.getElementById("agFotoTexto").textContent="Foto auswählen";
   elegirPlataformaForm("WhatsApp");
 
   actualizarBadgeChat();
