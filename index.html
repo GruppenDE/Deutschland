@@ -2402,9 +2402,10 @@ function marcarConversacionLeida(correo, ladoPropio){
     if(esDeOtro && m.leido===false){ m.leido=true; cambiado=true; }
   });
   if(cambiado) guardarConversacion(correo, msgs);
-  // Guardar timestamp de lectura localmente para el usuario (más confiable que Firestore)
+  // Guardar índice del último mensaje leído localmente (no depende de Firestore)
   if(ladoPropio==="usuario"){
-    localStorage.setItem("chat_leido_"+correo, Date.now().toString());
+    const allMsgs=obtenerConversacion(correo);
+    localStorage.setItem("chat_leido_idx_"+correo, (allMsgs.length-1).toString());
   }
 }
 function contarNoLeidosParaAdmin(){
@@ -2417,14 +2418,15 @@ function contarNoLeidosParaAdmin(){
 }
 function contarNoLeidosParaUsuario(correo){
   const msgs=obtenerConversacion(correo)||[];
-  const ultimaLectura=parseInt(localStorage.getItem("chat_leido_"+correo)||"0",10);
-  return msgs.filter(m=>{
-    if(m.de==="usuario") return false;
-    // Mensajes con ts: comparar contra última lectura local
-    if(m.ts) return m.ts > ultimaLectura;
-    // Mensajes antiguos sin ts: respetar el campo "leido" de Firestore
-    return m.leido===false;
-  }).length;
+  // El badge del usuario se basa SOLO en el índice local del último mensaje leído.
+  // NO dependemos del campo "leido" de Firestore (que el admin puede cambiar).
+  const ultimoIdxLeido=parseInt(localStorage.getItem("chat_leido_idx_"+correo)||"-1",10);
+  // Contar mensajes del admin que están DESPUÉS del último leído
+  let count=0;
+  msgs.forEach((m,idx)=>{
+    if(m.de!=="usuario" && idx>ultimoIdxLeido) count++;
+  });
+  return count;
 }
 function formatoBadge(n){
   return n>99?"+99":String(n);
@@ -2542,6 +2544,25 @@ function iniciarListenersChat(){
     actualizarBadgeAdminGlobal();
     attachAdminChatsListener();
   } else {
+    // Si nunca se guardó índice de lectura local, inicializarlo:
+    // - Si hay mensajes con leido===false del admin → índice antes de ellos (para mostrar badge)
+    // - Si todos leídos según Firestore → índice al final (no mostrar badge)
+    const idxKey="chat_leido_idx_"+user.correo;
+    if(localStorage.getItem(idxKey)===null){
+      const msgs=obtenerConversacion(user.correo)||[];
+      // Encontrar el índice del primer mensaje del admin no leído
+      let primerNoLeido=-1;
+      for(let i=0;i<msgs.length;i++){
+        if(msgs[i].de!=="usuario" && msgs[i].leido===false){ primerNoLeido=i; break; }
+      }
+      if(primerNoLeido===-1){
+        // Todos leídos → guardar índice al final
+        localStorage.setItem(idxKey,(msgs.length-1).toString());
+      } else {
+        // Hay no leídos → guardar índice justo antes del primero no leído
+        localStorage.setItem(idxKey,(primerNoLeido-1).toString());
+      }
+    }
     actualizarBadgeUsuarioChat(user.correo);
     attachUserChatListener(user.correo);
   }
