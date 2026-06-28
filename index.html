@@ -805,11 +805,10 @@
   .chat-burbuja .hora{display:block;font-size:10px;opacity:.6;margin-top:4px;text-align:right}
   .chat-burbuja.admin .hora{text-align:left}
   /* Ticks de visto estilo WhatsApp */
-  .msg-meta{display:inline-flex;align-items:center;gap:3px;float:right;margin-left:8px;margin-top:3px}
-  .chat-burbuja.admin .msg-meta{float:left;margin-left:0;margin-right:8px}
-  .msg-hora{font-size:10px;opacity:.65;white-space:nowrap}
-  .msg-ticks{display:inline-flex;align-items:center;margin-left:2px}
-  .msg-ticks svg{width:15px;height:10px;display:block}
+  .msg-meta{display:inline-flex;align-items:center;gap:3px;float:right;margin-left:6px;margin-top:2px;vertical-align:bottom;line-height:1}
+  .msg-hora{font-size:10.5px;opacity:.7;white-space:nowrap}
+  .msg-ticks{display:inline-flex;align-items:center;margin-left:1px}
+  .msg-ticks svg{display:block}
   /* tick simple = enviado */
   .tick-enviado .tick-stroke{stroke:rgba(255,255,255,0.6)}
   /* tick doble = entregado (blanco semitransparente) */
@@ -2636,17 +2635,11 @@ function renderMensajes(msgs, contenedor, esAdminView){
     }
   }
   function metaMensaje(m, esAdminView){
-    // Solo mostrar ticks en mensajes del usuario (en vista admin) o del admin (en vista usuario)
-    // Ticks: solo para mensajes del remitente "propio" de cada vista
     const esMio = esAdminView ? m.de==="admin" : m.de==="usuario";
-    if(!esMio) return `<span class="msg-meta"><span class="msg-hora">${m.hora}</span></span>`;
-    let tickClase;
-    if(m.leido===true){
-      tickClase="tick-visto";
-    } else {
-      tickClase="tick-entregado";
-    }
-    return `<span class="msg-meta"><span class="msg-hora">${m.hora}</span>${svgTick(tickClase)}</span>`;
+    const tickClase = m.leido===true ? "tick-visto" : "tick-entregado";
+    const ticks = esMio ? svgTick(tickClase) : "";
+    // Float derecho dentro del texto: el span empuja el texto y queda pegado abajo-derecha
+    return `<span class="msg-meta"><span class="msg-hora">${m.hora}</span>${ticks}</span>`;
   }
 
   msgs.forEach(m=>{
@@ -2667,12 +2660,13 @@ function renderMensajes(msgs, contenedor, esAdminView){
       const claseAlign=m.de==="admin"?"admin":"usuario";
       contenedor.innerHTML+=`<div class="chat-burbuja ${claseAlign}">
         <img class="chat-img" src="${m.src}" alt="imagen" onclick="this.requestFullscreen&&this.requestFullscreen()">
-        ${metaMensaje(m, esAdminView)}
+        <div style="display:flex;justify-content:flex-end;margin-top:3px">${metaMensaje(m, esAdminView)}</div>
       </div>`;
     } else {
       const claseAlign=m.de==="admin"?"admin":"usuario";
       const textoConLinks=convertirURLsALinks(m.texto);
-      contenedor.innerHTML+=`<div class="chat-burbuja ${claseAlign}">${textoConLinks.replace(/\n/g,"<br>")}${metaMensaje(m, esAdminView)}</div>`;
+      // Spacer invisible para que el texto no se solape con hora+ticks (truco WhatsApp)
+      contenedor.innerHTML+=`<div class="chat-burbuja ${claseAlign}">${textoConLinks.replace(/\n/g,"<br>")}${metaMensaje(m, esAdminView)}<span style="display:inline-block;width:${m.de==="usuario"||m.de==="admin"?"54px":"36px"};height:1px"></span></div>`;
     }
   });
   contenedor.scrollTop=contenedor.scrollHeight;
