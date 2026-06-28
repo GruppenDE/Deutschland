@@ -885,6 +885,69 @@
   .notif-body span{font-size:12px;color:var(--sub);line-height:1.4}
   .notif-close{position:absolute;top:6px;right:8px;background:none;border:none;font-size:14px;cursor:pointer;color:var(--sub)}
 
+  /* ===== SELECTOR DE IDIOMA ===== */
+  .lang-selector{position:relative;display:flex;align-items:center}
+  .lang-btn{
+    background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);
+    color:#fff;border-radius:9px;cursor:pointer;
+    padding:6px 10px;display:flex;align-items:center;gap:6px;
+    font-size:14px;font-weight:600;transition:.2s;
+    white-space:nowrap;
+  }
+  .lang-btn:hover{background:rgba(255,255,255,.28)}
+  .lang-btn .lang-flag{font-size:18px;line-height:1}
+  .lang-btn .lang-chevron{
+    font-size:10px;opacity:.8;
+    transition:transform .25s;display:inline-block;
+  }
+  .lang-selector.open .lang-chevron{transform:rotate(180deg)}
+  .lang-dropdown{
+    position:absolute;top:calc(100% + 8px);right:0;
+    background:#fff;border-radius:13px;
+    box-shadow:0 10px 32px rgba(0,0,0,.18);
+    border:1px solid rgba(0,0,0,.08);
+    min-width:175px;overflow:hidden;z-index:200;
+    opacity:0;pointer-events:none;
+    transform:translateY(-8px) scale(.96);
+    transform-origin:top right;
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .lang-selector.open .lang-dropdown{
+    opacity:1;pointer-events:all;
+    transform:translateY(0) scale(1);
+  }
+  .lang-option{
+    display:flex;align-items:center;gap:10px;
+    padding:11px 16px;cursor:pointer;font-size:14px;font-weight:500;
+    color:#1c2422;transition:background .15s;
+  }
+  .lang-option:hover{background:#f0f7f3}
+  .lang-option.activa{background:#edf7f0;font-weight:700;color:var(--verde-d)}
+  .lang-option .lf{font-size:22px;line-height:1}
+  .lang-option .ln{flex:1}
+  .lang-option .lcheck{color:var(--verde);font-size:14px;opacity:0}
+  .lang-option.activa .lcheck{opacity:1}
+  body.dark .lang-dropdown{background:#1c2220;border-color:#2a332f}
+  body.dark .lang-option{color:#eef2f0}
+  body.dark .lang-option:hover{background:#252e2a}
+  body.dark .lang-option.activa{background:#1a2e22;color:#4ade80}
+
+  /* Spinner de traducción */
+  #langSpinner{
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+    background:rgba(0,0,0,.55);color:#fff;border-radius:14px;
+    padding:16px 26px;font-size:14px;font-weight:600;
+    display:none;align-items:center;gap:10px;z-index:9999;
+    backdrop-filter:blur(4px);
+  }
+  #langSpinner.visible{display:flex}
+  #langSpinner .spin{
+    width:18px;height:18px;border-radius:50%;
+    border:2.5px solid rgba(255,255,255,.3);
+    border-top-color:#fff;
+    animation:spin .75s linear infinite;
+  }
+
   /* Selector de conversación (admin) */
   .chat-conv-sel{
     padding:10px 12px;border-bottom:1px solid var(--borde);font-size:13px;
@@ -953,6 +1016,28 @@
           </div>
         </div>
       </button>
+      <!-- SELECTOR DE IDIOMA -->
+      <div class="lang-selector" id="langSelector">
+        <button class="lang-btn" onclick="toggleLangMenu()" id="langBtnActual" title="Sprache / Language / Idioma">
+          <span class="lang-flag" id="langFlagActual">🇩🇪</span>
+          <span id="langCodigoActual">DE</span>
+          <span class="lang-chevron">▼</span>
+        </button>
+        <div class="lang-dropdown" id="langDropdown">
+          <div class="lang-option activa" onclick="cambiarIdioma('de','🇩🇪','DE')" id="langOpt-de">
+            <span class="lf">🇩🇪</span><span class="ln">Deutsch</span><span class="lcheck">✓</span>
+          </div>
+          <div class="lang-option" onclick="cambiarIdioma('en','🇺🇸','EN')" id="langOpt-en">
+            <span class="lf">🇺🇸</span><span class="ln">English (US)</span><span class="lcheck">✓</span>
+          </div>
+          <div class="lang-option" onclick="cambiarIdioma('en-GB','🇬🇧','EN')" id="langOpt-en-GB">
+            <span class="lf">🇬🇧</span><span class="ln">English (UK)</span><span class="lcheck">✓</span>
+          </div>
+          <div class="lang-option" onclick="cambiarIdioma('es','🇪🇸','ES')" id="langOpt-es">
+            <span class="lf">🇪🇸</span><span class="ln">Español</span><span class="lcheck">✓</span>
+          </div>
+        </div>
+      </div>
       <div id="zonaSesion"></div>
     </nav>
   </div>
@@ -3129,6 +3214,164 @@ function renderMisGrupos(user){
   }).join("");
 }
 
+/* ===== SELECTOR DE IDIOMA ===== */
+const _traducciones = {
+  de: {
+    buscar: "Gruppen nach Name oder Plattform suchen …",
+    btnAgregar: "＋ Gruppe hinzufügen",
+    anmelden: "Anmelden",
+    abmelden: "Abmelden",
+    meineProfil: "Mein Profil",
+    meineGruppen: "Meine Gruppen",
+    footerDesc: "Das Verzeichnis für WhatsApp- und Telegram-Communitys – finde deine Community: Gamer, Entwickler, Reisende und vieles mehr, alles an einem Ort.",
+    bannerTitulo: "Hast du eine tolle Gruppe?",
+    bannerSub: "Teile sie mit Tausenden von Menschen auf Gruppen🇩🇪",
+    bannerBtn: "＋ Gruppe hinzufügen",
+    resultadoVacio: "Keine Gruppen gefunden",
+  },
+  en: {
+    buscar: "Search groups by name or platform …",
+    btnAgregar: "＋ Add Group",
+    anmelden: "Sign in",
+    abmelden: "Sign out",
+    meineProfil: "My Profile",
+    meineGruppen: "My Groups",
+    footerDesc: "The directory for WhatsApp and Telegram communities – find your community: Gamers, Developers, Travelers and much more, all in one place.",
+    bannerTitulo: "Do you have an awesome group?",
+    bannerSub: "Share it with thousands of people on Gruppen🇩🇪",
+    bannerBtn: "＋ Add Group",
+    resultadoVacio: "No groups found",
+  },
+  "en-GB": {
+    buscar: "Search groups by name or platform …",
+    btnAgregar: "＋ Add Group",
+    anmelden: "Sign in",
+    abmelden: "Sign out",
+    meineProfil: "My Profile",
+    meineGruppen: "My Groups",
+    footerDesc: "The directory for WhatsApp and Telegram communities – find your community: Gamers, Developers, Travellers and much more, all in one place.",
+    bannerTitulo: "Have you got a brilliant group?",
+    bannerSub: "Share it with thousands of people on Gruppen🇩🇪",
+    bannerBtn: "＋ Add Group",
+    resultadoVacio: "No groups found",
+  },
+  es: {
+    buscar: "Buscar grupos por nombre o plataforma …",
+    btnAgregar: "＋ Añadir grupo",
+    anmelden: "Iniciar sesión",
+    abmelden: "Cerrar sesión",
+    meineProfil: "Mi Perfil",
+    meineGruppen: "Mis Grupos",
+    footerDesc: "El directorio de comunidades de WhatsApp y Telegram – encuentra tu comunidad: Gamers, Desarrolladores, Viajeros y mucho más, todo en un solo lugar.",
+    bannerTitulo: "¿Tienes un grupo genial?",
+    bannerSub: "Compártelo con miles de personas en Gruppen🇩🇪",
+    bannerBtn: "＋ Añadir grupo",
+    resultadoVacio: "No se encontraron grupos",
+  }
+};
+
+let _idiomaActual = localStorage.getItem("lang") || "de";
+
+function toggleLangMenu(){
+  const sel = document.getElementById("langSelector");
+  sel.classList.toggle("open");
+  // cerrar al hacer click fuera
+  setTimeout(()=>{
+    document.addEventListener("click", _cerrarLangMenuFuera, {once:true});
+  },10);
+}
+
+function _cerrarLangMenuFuera(e){
+  const sel = document.getElementById("langSelector");
+  if(sel && !sel.contains(e.target)) sel.classList.remove("open");
+}
+
+function cambiarIdioma(lang, flag, codigo){
+  const sel = document.getElementById("langSelector");
+  sel.classList.remove("open");
+
+  if(lang === _idiomaActual) return;
+
+  // Mostrar spinner
+  document.getElementById("langSpinner").classList.add("visible");
+
+  setTimeout(()=>{
+    _idiomaActual = lang;
+    localStorage.setItem("lang", lang);
+
+    // Actualizar botón
+    document.getElementById("langFlagActual").textContent = flag;
+    document.getElementById("langCodigoActual").textContent = codigo;
+
+    // Marcar opción activa
+    document.querySelectorAll(".lang-option").forEach(o => o.classList.remove("activa"));
+    const optId = lang === "en-GB" ? "langOpt-en-GB" : `langOpt-${lang}`;
+    const el = document.getElementById(optId);
+    if(el) el.classList.add("activa");
+
+    // Aplicar traducciones
+    _aplicarIdioma(lang);
+
+    document.getElementById("langSpinner").classList.remove("visible");
+  }, 420);
+}
+
+function _aplicarIdioma(lang){
+  const t = _traducciones[lang] || _traducciones["de"];
+
+  // Buscador
+  const buscar = document.getElementById("buscar");
+  if(buscar) buscar.placeholder = t.buscar;
+
+  // Botones "Agregar"
+  document.querySelectorAll(".btn-agregar").forEach(b => b.textContent = t.btnAgregar);
+  document.querySelectorAll(".btn-agregar-banner").forEach(b => b.innerHTML = `<span class="plus">＋</span> ${t.btnAgregar.replace("＋ ","")}`);
+
+  // Banner
+  const bannerTitulo = document.querySelector(".banner-agregar-texto strong");
+  const bannerSub = document.querySelector(".banner-agregar-texto span");
+  if(bannerTitulo) bannerTitulo.textContent = t.bannerTitulo;
+  if(bannerSub) bannerSub.textContent = t.bannerSub;
+
+  // Footer descripción
+  const footerDesc = document.querySelector(".footer-marca p");
+  if(footerDesc) footerDesc.textContent = t.footerDesc;
+
+  // Zona sesión (botón Anmelden/iniciar)
+  const zonaSesion = document.getElementById("zonaSesion");
+  if(zonaSesion){
+    // Actualizar el botón de sesión si existe
+    const btnLogin = zonaSesion.querySelector("a[onclick*='abrirSesion'], button[onclick*='abrirSesion']");
+    if(btnLogin) btnLogin.textContent = t.anmelden;
+    const btnLogout = zonaSesion.querySelector("a[onclick*='cerrarSesion'], button[onclick*='cerrarSesion']");
+    if(btnLogout) btnLogout.textContent = t.abmelden;
+  }
+
+  // html lang attribute
+  document.documentElement.lang = lang;
+}
+
+// Inicializar idioma guardado al cargar
+(function(){
+  const lang = _idiomaActual;
+  const flags = {de:"🇩🇪",en:"🇺🇸","en-GB":"🇬🇧",es:"🇪🇸"};
+  const codes = {de:"DE",en:"EN","en-GB":"EN",es:"ES"};
+  const flag = flags[lang] || "🇩🇪";
+  const codigo = codes[lang] || "DE";
+
+  const flagEl = document.getElementById("langFlagActual");
+  const codeEl = document.getElementById("langCodigoActual");
+  if(flagEl) flagEl.textContent = flag;
+  if(codeEl) codeEl.textContent = codigo;
+
+  document.querySelectorAll(".lang-option").forEach(o => o.classList.remove("activa"));
+  const optId = lang === "en-GB" ? "langOpt-en-GB" : `langOpt-${lang}`;
+  const el = document.getElementById(optId);
+  if(el) el.classList.add("activa");
+
+  if(lang !== "de") _aplicarIdioma(lang);
+})();
+
 /* ===== SPLASH DISMISS ===== */
 (function(){
   const splash=document.getElementById("splash");
@@ -3157,6 +3400,12 @@ function renderMisGrupos(user){
 </script>
 <!-- FIREBASE LOADING OVERLAY -->
 <div id="fbLoading" style="display:none!important"></div>
+
+<!-- SPINNER CAMBIO DE IDIOMA -->
+<div id="langSpinner">
+  <div class="spin"></div>
+  <span id="langSpinnerTxt">Sprache wird geladen …</span>
+</div>
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
 </body>
