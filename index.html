@@ -4068,19 +4068,21 @@ function cerrarNotifGlobal(){
 }
 
 async function verificarNotificacionGlobal(){
-  try{
-    // Listener en tiempo real: se dispara en todos los usuarios al instante
-    _db.collection("notificaciones").doc("global").onSnapshot(snap=>{
+  async function chequear(){
+    try{
+      const snap = await _db.collection("notificaciones").doc("global").get();
       if(!snap.exists) return;
-      const notif=snap.data();
+      const notif = snap.data();
       if(!notif || !notif.mensaje || !notif.id) return;
-      const visto=localStorage.getItem("notif_global_vista_"+notif.id);
+      const visto = localStorage.getItem("notif_global_vista_"+notif.id);
       if(!visto){
         localStorage.setItem("notif_global_vista_"+notif.id,"1");
         mostrarNotificacionGlobal(notif.mensaje);
       }
-    });
-  }catch(e){console.warn("FB verificarNotif:",e);}
+    }catch(e){console.warn("FB verificarNotif:",e);}
+  }
+  chequear(); // comprobación inmediata al cargar
+  setInterval(chequear, 5000); // polling cada 5 segundos
 }
 
 /* ===== SPLASH DISMISS ===== */
