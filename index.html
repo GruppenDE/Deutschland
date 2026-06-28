@@ -2368,7 +2368,10 @@ function guardarConversacion(correo, msgs){
   const key=correoAKey(correo);
   _db.collection("chats").doc(key)
     .set({mensajes:msgs, correo:correo})
-    .catch(e=>console.warn("FB chat:",e));
+    .catch(e=>{
+      console.warn("FB chat:",e);
+      mostrarToast("⚠️ No se pudo guardar el mensaje en el servidor","⚠️");
+    });
 }
 function agregarMensajeChat(correo, msg){
   const msgs=obtenerConversacion(correo);
@@ -2538,14 +2541,38 @@ function cerrarNotif(){
 }
 
 /* --- IMÁGENES EN CHAT --- */
+function comprimirImagenChat(archivo, callback){
+  const lector=new FileReader();
+  lector.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      const MAX=900; // ancho/alto máximo en px
+      let {width,height}=img;
+      if(width>height && width>MAX){ height=Math.round(height*(MAX/width)); width=MAX; }
+      else if(height>MAX){ width=Math.round(width*(MAX/height)); height=MAX; }
+      const canvas=document.createElement("canvas");
+      canvas.width=width; canvas.height=height;
+      canvas.getContext("2d").drawImage(img,0,0,width,height);
+      // Intentar calidades decrecientes hasta quedar por debajo de ~600KB en base64
+      let calidad=0.75, dataUrl=canvas.toDataURL("image/jpeg",calidad);
+      while(dataUrl.length>600000 && calidad>0.2){
+        calidad-=0.1;
+        dataUrl=canvas.toDataURL("image/jpeg",calidad);
+      }
+      callback(dataUrl);
+    };
+    img.src=e.target.result;
+  };
+  lector.readAsDataURL(archivo);
+}
+
 function enviarImagen(input){
   const user=obtenerSesion();
   if(!user||!input.files[0]) return;
   const correo=esAdmin(user)?document.getElementById("chatConvSelect").value:user.correo;
   if(!correo) return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const msg={de:esAdmin(user)?"admin":"usuario",tipo:"imagen",src:e.target.result,hora:horaActual()};
+  comprimirImagenChat(input.files[0], dataUrl=>{
+    const msg={de:esAdmin(user)?"admin":"usuario",tipo:"imagen",src:dataUrl,hora:horaActual()};
     agregarMensajeChat(correo, msg);
     if(esAdmin(user)){
       renderMensajes(obtenerConversacion(correo),document.getElementById("chatMensajes"),true);
@@ -2555,26 +2582,21 @@ function enviarImagen(input){
     } else {
       renderMensajes(obtenerConversacion(user.correo),document.getElementById("chatMensajes"),false);
     }
-  };
-  reader.readAsDataURL(input.files[0]);
+  });
   input.value="";
 }
 
 function adminEnviarImagen(input){
   const correo=document.getElementById("adminChatSelect").value;
   if(!correo||!input.files[0]) return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const msg={de:"admin",tipo:"imagen",src:e.target.result,hora:horaActual()};
+  comprimirImagenChat(input.files[0], dataUrl=>{
+    const msg={de:"admin",tipo:"imagen",src:dataUrl,hora:horaActual()};
     agregarMensajeChat(correo, msg);
     renderMensajes(obtenerConversacion(correo),document.getElementById("adminChatMensajes"),true);
     actualizarBadgeChat(correo);
-    // notif al usuario (si el usuario tiene el chat abierto, se actualizará al refrescar)
-    // Ponemos badge en el flotante para que el usuario lo vea
     const badge=document.getElementById("chatBadge");
     badge.textContent="!";badge.classList.add("visible");
-  };
-  reader.readAsDataURL(input.files[0]);
+  });
   input.value="";
 }
 
