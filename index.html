@@ -2805,7 +2805,11 @@ function enviarMensaje(){
   } else {
     renderMensajes(obtenerConversacion(user.correo), document.getElementById("chatMensajes"), false);
     // Notificar al admin (badge en flotante, igual que antes)
-    mostrarNotif("📩","Nachricht an Admin gesendet","Wir antworten dir so schnell wie möglich.");
+    // Mostrar la notificación solo la primera vez que el usuario envía un mensaje
+    if(!localStorage.getItem("notif_enviado_una_vez")){
+      mostrarNotif("📩","Nachricht an Admin gesendet","Wir antworten dir so schnell wie möglich.");
+      localStorage.setItem("notif_enviado_una_vez","1");
+    }
   }
 }
 
