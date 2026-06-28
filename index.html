@@ -1332,7 +1332,7 @@
     <div class="campo">
       <label>Einladungslink</label>
       <input type="url" id="agLink" placeholder="https://chat.whatsapp.com/...">
-      <span class="ayuda">Füge den Einladungslink genau so ein, wie ihn WhatsApp oder Telegram erstellt.</span>
+      <span class="ayuda" id="agLinkAyuda">Muss mit https://chat.whatsapp.com/ beginnen.</span>
     </div>
 
     <div class="campo">
@@ -1566,9 +1566,21 @@ function elegirPlataformaForm(p){
   plataformaForm=p;
   document.getElementById("optWhatsApp").classList.toggle("activa",p==="WhatsApp");
   document.getElementById("optTelegram").classList.toggle("activa",p==="Telegram");
-  document.getElementById("agLink").placeholder=p==="WhatsApp"
-    ?"https://chat.whatsapp.com/..."
-    :"https://t.me/...";
+  const linkInput=document.getElementById("agLink");
+  const ayuda=document.getElementById("agLinkAyuda");
+  if(p==="WhatsApp"){
+    linkInput.placeholder="https://chat.whatsapp.com/AbCdEfG123...";
+    if(ayuda) ayuda.textContent="Muss mit https://chat.whatsapp.com/ beginnen.";
+    linkInput.style.borderColor="";
+  } else {
+    linkInput.placeholder="https://t.me/gruppenname";
+    if(ayuda) ayuda.textContent="Muss mit https://t.me/ beginnen.";
+    linkInput.style.borderColor="";
+  }
+  // Limpiar el campo y el error al cambiar plataforma
+  linkInput.value="";
+  const err=document.getElementById("errorAgregar");
+  if(err) err.textContent="";
 }
 
 function actualizarCategoriaForm(){
@@ -1598,7 +1610,18 @@ function publicarGrupo(){
   const err=document.getElementById("errorAgregar");
 
   if(!nombre||!categoria||!link){err.textContent="Bitte Name, Kategorie und Link ausfüllen.";return}
-  if(!/^https?:\/\//i.test(link)){err.textContent="Der Link muss mit http:// oder https:// beginnen.";return}
+  // Validar que el link corresponda a la plataforma seleccionada
+  if(plataformaForm==="WhatsApp"){
+    if(!/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+/i.test(link)){
+      err.textContent="⚠️ Für WhatsApp-Gruppen muss der Link das Format https://chat.whatsapp.com/... haben.";return;
+    }
+  } else if(plataformaForm==="Telegram"){
+    if(!/^https:\/\/(t\.me|telegram\.me|telegram\.dog)\/[A-Za-z0-9_+]+/i.test(link)){
+      err.textContent="⚠️ Für Telegram-Gruppen muss der Link das Format https://t.me/... haben.";return;
+    }
+  } else if(!/^https?:\/\//i.test(link)){
+    err.textContent="Der Link muss mit https:// beginnen.";return;
+  }
   if(grupos.some(g=>g.nombre.toLowerCase()===nombre.toLowerCase())){err.textContent="Eine Gruppe mit diesem Namen existiert bereits.";return}
   if(categoria==="+18" && !document.getElementById("agConfirma18").checked){
     err.textContent="Du musst bestätigen, dass die Gruppe für Personen über 18 Jahre geeignet ist.";
@@ -2166,7 +2189,18 @@ function adminPublicar(){
   const err=document.getElementById("errorAdmin");
 
   if(!nombre||!categoria||!link){err.textContent="Name, Kategorie und Link sind erforderlich.";return}
-  if(!/^https?:\/\//i.test(link)){err.textContent="Der Link muss mit https:// beginnen.";return}
+  // Validar que el link corresponda a la plataforma seleccionada
+  if(plataforma==="WhatsApp"){
+    if(!/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+/i.test(link)){
+      err.textContent="⚠️ WhatsApp-Links müssen das Format https://chat.whatsapp.com/... haben.";return;
+    }
+  } else if(plataforma==="Telegram"){
+    if(!/^https:\/\/(t\.me|telegram\.me|telegram\.dog)\/[A-Za-z0-9_+]+/i.test(link)){
+      err.textContent="⚠️ Telegram-Links müssen das Format https://t.me/... haben.";return;
+    }
+  } else if(!/^https?:\/\//i.test(link)){
+    err.textContent="Der Link muss mit https:// beginnen.";return;
+  }
   if(grupos.some(g=>g.nombre.toLowerCase()===nombre.toLowerCase())){err.textContent="Eine Gruppe mit diesem Namen existiert bereits.";return}
   if(categoria==="+18"&&!document.getElementById("adConfirma18").checked){
     err.textContent="Bitte bestätige, dass es sich um +18-Inhalte handelt.";return;
