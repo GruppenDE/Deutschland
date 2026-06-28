@@ -2296,6 +2296,10 @@ async function cargarDatosAdmin(){
     _solicitudesCache=snap.docs.map(d=>d.data());
   }catch(e){console.warn("FB cargarSolicitudes:",e);}
   try{
+    const snap=await _db.collection("usuarios").get();
+    _usuariosCache=snap.docs.map(d=>d.data());
+  }catch(e){console.warn("FB cargarUsuarios:",e);}
+  try{
     const snap=await _db.collection("chats").get();
     snap.forEach(d=>{
       const data=d.data();
@@ -2618,14 +2622,22 @@ function contarNoLeidosCorreo(correo){
   return (obtenerConversacion(correo)||[]).filter(m=>m.de==="usuario"&&m.leido===false).length;
 }
 
+function obtenerNombrePorCorreo(correo){
+  if(correo===ADMIN_CORREO) return "Cristhian (Admin)";
+  const soli=obtenerSolicitudes().find(s=>s.usuarioCorreo===correo);
+  if(soli&&soli.usuarioNombre) return soli.usuarioNombre;
+  const usuario=(_usuariosCache||[]).find(u=>u.correo===correo);
+  if(usuario&&usuario.nombre) return usuario.nombre;
+  return correo.split("@")[0];
+}
+
 function poblarSelectChat(){
   const sel=document.getElementById("chatConvSelect");
   const valorActual=sel.value;
   const correos=Object.keys(_chatsCache);
   sel.innerHTML=`<option value="">Selecciona usuario...</option>`;
   correos.forEach(correo=>{
-    const soli=obtenerSolicitudes().find(s=>s.usuarioCorreo===correo);
-    const label=soli?soli.usuarioNombre:correo;
+    const label=obtenerNombrePorCorreo(correo);
     const n=contarNoLeidosCorreo(correo);
     sel.innerHTML+=`<option value="${correo}">${label}${n>0?` 🔴(${n})`:""}</option>`;
   });
@@ -2876,8 +2888,7 @@ function poblarSelectAdminChats(){
   const correos=Object.keys(_chatsCache);
   sel.innerHTML=`<option value="">Benutzer auswählen...</option>`;
   correos.forEach(correo=>{
-    const soli=obtenerSolicitudes().find(s=>s.usuarioCorreo===correo);
-    const label=soli?soli.usuarioNombre:correo;
+    const label=obtenerNombrePorCorreo(correo);
     const n=contarNoLeidosCorreo(correo);
     sel.innerHTML+=`<option value="${correo}">${label}${n>0?` 🔴(${n})`:""}</option>`;
   });
