@@ -2385,6 +2385,7 @@ function guardarConversacion(correo, msgs){
 }
 function agregarMensajeChat(correo, msg){
   if(msg.leido===undefined) msg.leido=false;
+  if(msg.ts===undefined) msg.ts=Date.now(); // timestamp para comparar con última lectura local
   const msgs=obtenerConversacion(correo);
   msgs.push(msg);
   guardarConversacion(correo, msgs);
@@ -2401,6 +2402,10 @@ function marcarConversacionLeida(correo, ladoPropio){
     if(esDeOtro && m.leido===false){ m.leido=true; cambiado=true; }
   });
   if(cambiado) guardarConversacion(correo, msgs);
+  // Guardar timestamp de lectura localmente para el usuario (más confiable que Firestore)
+  if(ladoPropio==="usuario"){
+    localStorage.setItem("chat_leido_"+correo, Date.now().toString());
+  }
 }
 function contarNoLeidosParaAdmin(){
   let total=0;
@@ -2412,7 +2417,9 @@ function contarNoLeidosParaAdmin(){
 }
 function contarNoLeidosParaUsuario(correo){
   const msgs=obtenerConversacion(correo)||[];
-  return msgs.filter(m=>m.de!=="usuario"&&m.leido===false).length;
+  // Usar timestamp de última lectura guardado localmente, más confiable que el campo "leido" en Firestore
+  const ultimaLectura=parseInt(localStorage.getItem("chat_leido_"+correo)||"0",10);
+  return msgs.filter(m=>m.de!=="usuario" && (m.ts||0)>ultimaLectura).length;
 }
 function formatoBadge(n){
   return n>99?"+99":String(n);
@@ -2501,8 +2508,8 @@ function attachUserChatListener(correo){
       nuevos.forEach(m=>{
         if(m.de!=="usuario"){
           if(chatAbierto){
+            // Solo renderizar, NO marcar como leído automáticamente
             renderMensajes(mensajes,document.getElementById("chatMensajes"),false);
-            marcarConversacionLeida(correo,"usuario");
           } else {
             const texto=m.tipo==="imagen"?"📷 Bild":(m.texto||"Neue Nachricht");
             mostrarNotif("💬","Neue Nachricht vom Admin",texto.length>50?texto.slice(0,50)+"…":texto);
