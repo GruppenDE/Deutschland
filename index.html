@@ -1635,7 +1635,7 @@
       <div class="admin-tabla-wrap">
         <table class="admin-tabla" id="adminTabla">
           <thead><tr>
-            <th>Gruppe</th><th>Kat.</th><th>Plattform</th><th>Feste Seite</th><th>Aktionen</th>
+            <th>Gruppe</th><th>Kat.</th><th>Plattform</th><th>👥 Mitglieder</th><th>Feste Seite</th><th>Aktionen</th>
           </tr></thead>
           <tbody id="adminTablaBody"></tbody>
         </table>
@@ -2907,14 +2907,19 @@ function renderAdminTabla(){
   const body=document.getElementById("adminTablaBody");
   body.innerHTML=grupos.map((g,i)=>`
     <tr>
-      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.nombre}">${g.nombre}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.nombre}">${g.nombre}</td>
       <td>${g.categoria}</td>
       <td>${g.plataforma}</td>
-      <td style="font-size:12px;white-space:nowrap">
-        <span id="miembros-admin-${i}">${g.miembros>0?g.miembros.toLocaleString("de-DE"):"—"}</span>
-        ${g.link&&g.link.includes("t.me")?`
-          <button class="btn-admin-sm" style="margin-left:4px;background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7;font-size:11px;padding:2px 6px"
-            onclick="adminRefreshMiembros(${i},'${g.nombre}','${g.link}')" title="Mitglieder jetzt abrufen">🔄</button>`:""}
+      <td style="min-width:130px">
+        <div style="display:flex;align-items:center;gap:4px">
+          <input type="number" min="0" value="${g.miembros||0}"
+            id="mb_${i}" style="width:72px;padding:4px 6px;border:1.5px solid #d1fae5;border-radius:8px;font-size:13px;font-weight:600;color:#065f46;text-align:center"
+            placeholder="0">
+          <button class="btn-admin-sm save" style="padding:4px 8px;font-size:12px"
+            onclick="adminGuardarMiembros(${i},'${g.nombre}')">💾</button>
+          ${g.link&&g.link.includes("t.me")?`<button class="btn-admin-sm" style="padding:4px 6px;font-size:12px;background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7"
+            onclick="adminRefreshMiembros(${i},'${g.nombre}','${g.link}')" title="Automatisch abrufen (Telegram)">🔄</button>`:""}
+        </div>
       </td>
       <td>
         <input type="number" min="1" value="${pf[g.nombre]||''}" placeholder="Auto"
@@ -2942,6 +2947,23 @@ function adminGuardarPagina(i,nombre){
   guardarPaginasFijas(pf);
   mostrarToast(`Seite gespeichert für „${nombre}"`,"📌");
   filtrar();
+}
+
+function adminGuardarMiembros(i, nombre){
+  const input=document.getElementById(`mb_${i}`);
+  if(!input) return;
+  const val=Math.max(0, parseInt(input.value)||0);
+  // Actualizar en memoria
+  [grupos, gruposExtra].forEach(arr=>{
+    const g=arr.find(x=>x.nombre===nombre);
+    if(g){ g.miembros=val; g.miembrosActualizadoEn=Date.now(); }
+  });
+  // Guardar en Firestore
+  _db.collection("grupos_extra").where("nombre","==",nombre).get().then(snap=>{
+    snap.forEach(doc=>doc.ref.update({miembros:val, miembrosActualizadoEn:Date.now()}));
+  }).catch(()=>{});
+  filtrar(); // re-pintar cards públicas
+  mostrarToast(`👥 „${nombre}": ${val.toLocaleString("de-DE")} Mitglieder gespeichert`,"✅");
 }
 
 function adminEliminar(i,nombre){
