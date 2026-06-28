@@ -1223,24 +1223,28 @@
 
   /* ===== BANNER NOTIFICACIÓN GLOBAL ===== */
   #notifGlobalBanner{
-    position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
-    background:linear-gradient(120deg,var(--verde),var(--verde-d));
-    color:#fff;padding:14px 20px;border-radius:14px;
-    box-shadow:0 8px 28px rgba(31,175,85,.35);
-    z-index:9990;display:none;align-items:center;gap:16px;
-    max-width:min(520px,90vw);width:max-content;
-    animation:slideUpNotifGlobal .4s cubic-bezier(.22,1,.36,1) forwards;
+    position:fixed;top:64px;left:0;right:0;
+    background:rgba(255,255,255,.15);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    color:#fff;
+    padding:10px 20px;
+    box-shadow:0 2px 12px rgba(0,0,0,.15);
+    border-bottom:1.5px solid rgba(255,255,255,.25);
+    z-index:45;display:none;align-items:center;justify-content:center;gap:14px;
+    animation:slideDownNotifGlobal .35s cubic-bezier(.22,1,.36,1) forwards;
   }
   #notifGlobalBanner.visible{display:flex}
-  @keyframes slideUpNotifGlobal{
-    from{opacity:0;transform:translateX(-50%) translateY(20px)}
-    to{opacity:1;transform:translateX(-50%) translateY(0)}
+  @media(max-width:700px){#notifGlobalBanner{top:58px}}
+  @keyframes slideDownNotifGlobal{
+    from{opacity:0;transform:translateY(-100%)}
+    to{opacity:1;transform:translateY(0)}
   }
-  #notifGlobalBanner .notif-g-ico{font-size:22px;flex-shrink:0}
-  #notifGlobalBanner .notif-g-txt{font-size:14.5px;font-weight:500;flex:1}
+  #notifGlobalBanner .notif-g-ico{font-size:18px;flex-shrink:0}
+  #notifGlobalBanner .notif-g-txt{font-size:13.5px;font-weight:600;flex:1;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,.2)}
   #notifGlobalBanner .notif-g-close{
-    background:rgba(255,255,255,.2);border:none;border-radius:8px;
-    color:#fff;cursor:pointer;padding:6px 12px;font-size:13px;font-weight:600;
+    background:rgba(255,255,255,.2);border:none;border-radius:7px;
+    color:#fff;cursor:pointer;padding:4px 10px;font-size:13px;font-weight:700;
     flex-shrink:0;transition:.2s;
   }
   #notifGlobalBanner .notif-g-close:hover{background:rgba(255,255,255,.35)}
@@ -1633,18 +1637,19 @@
 
     <!-- TAB: NOTIFICACIÓN GLOBAL -->
     <div class="admin-seccion" id="adminNotificacion">
-      <p style="font-size:13px;color:var(--sub);margin-bottom:14px">Envía un banner de notificación a todos los usuarios que abran la página. Cada usuario lo ve <b>una sola vez</b>.</p>
+      <p style="font-size:13px;color:var(--sub);margin-bottom:14px">Envía un banner de notificación a todos los usuarios. Cada usuario lo ve <b>una sola vez</b> por envío.</p>
       <div class="admin-campo">
-        <label>Mensaje de notificación</label>
+        <label>Nuevo mensaje</label>
         <input type="text" id="notifAdminInput" placeholder="Ej: Un grupo nuevo ha sido añadido 🎉" maxlength="120">
       </div>
       <p style="font-size:11.5px;color:var(--sub);margin:-6px 0 12px">Máx. 120 caracteres.</p>
       <button class="btn-principal" style="margin-top:4px" onclick="enviarNotificacionGlobal()">📢 Enviar notificación a todos</button>
-      <div id="notifAdminPreview" style="margin-top:16px;display:none">
-        <p style="font-size:12px;color:var(--sub);margin-bottom:6px">Última notificación enviada:</p>
-        <div style="background:linear-gradient(120deg,var(--verde),var(--verde-d));color:#fff;padding:12px 16px;border-radius:10px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px">
-          <span>📢</span><span id="notifAdminPreviewTxt"></span>
-        </div>
+
+      <!-- Historial -->
+      <div style="margin-top:20px">
+        <p style="font-size:12.5px;font-weight:700;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Historial — clic para reenviar</p>
+        <div id="notifHistorialLista" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto"></div>
+        <p id="notifHistorialVacio" style="font-size:13px;color:var(--sub);text-align:center;padding:18px 0;display:none">Sin notificaciones enviadas aún.</p>
       </div>
     </div>
 
@@ -3966,20 +3971,30 @@ function _aplicarIdioma(lang){
 })();
 
 /* ===== NOTIFICACIONES GLOBALES ===== */
-async function enviarNotificacionGlobal(){
-  const msg=document.getElementById("notifAdminInput").value.trim();
+async function enviarNotificacionGlobal(mensajeDirecto){
+  const msg = mensajeDirecto || document.getElementById("notifAdminInput").value.trim();
   if(!msg){mostrarToast("Escribe un mensaje primero","⚠️");return;}
+
   const notif={
     mensaje:msg,
     id:Date.now().toString(),
     creadaEn:new Date().toISOString()
   };
+
   try{
+    // Guardar como notificación activa
     await _db.collection("notificaciones").doc("global").set(notif);
-    mostrarToast("✅ Notificación enviada a todos los usuarios","📢");
-    document.getElementById("notifAdminInput").value="";
-    document.getElementById("notifAdminPreviewTxt").textContent=msg;
-    document.getElementById("notifAdminPreview").style.display="block";
+
+    // Guardar en historial
+    const histSnap = await _db.collection("notificaciones").doc("historial").get();
+    const historial = histSnap.exists ? (histSnap.data().lista || []) : [];
+    historial.unshift({mensaje: msg, id: notif.id, creadaEn: notif.creadaEn});
+    if(historial.length > 20) historial.length = 20; // máx 20 entradas
+    await _db.collection("notificaciones").doc("historial").set({lista: historial});
+
+    mostrarToast("✅ Notificación enviada a todos","📢");
+    if(!mensajeDirecto) document.getElementById("notifAdminInput").value="";
+    renderNotifHistorial(historial);
   }catch(e){
     mostrarToast("Error al enviar: "+e.message,"⚠️");
     console.warn("FB notifGlobal:",e);
@@ -3988,13 +4003,42 @@ async function enviarNotificacionGlobal(){
 
 async function cargarPreviewNotificacion(){
   try{
-    const snap=await _db.collection("notificaciones").doc("global").get();
-    if(snap.exists){
-      const data=snap.data();
-      document.getElementById("notifAdminPreviewTxt").textContent=data.mensaje||"";
-      document.getElementById("notifAdminPreview").style.display="block";
-    }
+    const histSnap = await _db.collection("notificaciones").doc("historial").get();
+    const historial = histSnap.exists ? (histSnap.data().lista || []) : [];
+    renderNotifHistorial(historial);
   }catch(e){console.warn("FB cargarNotif:",e);}
+}
+
+function renderNotifHistorial(historial){
+  const lista = document.getElementById("notifHistorialLista");
+  const vacio = document.getElementById("notifHistorialVacio");
+  if(!lista) return;
+
+  if(!historial || historial.length === 0){
+    lista.innerHTML = "";
+    if(vacio) vacio.style.display = "block";
+    return;
+  }
+  if(vacio) vacio.style.display = "none";
+
+  lista.innerHTML = historial.map((n, i) => {
+    const fecha = n.creadaEn ? new Date(n.creadaEn).toLocaleString("es-PE",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) : "";
+    return `
+    <div onclick="enviarNotificacionGlobal('${n.mensaje.replace(/'/g,"\\'")}')"
+      title="Clic para reenviar"
+      style="display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:10px;
+             border:1.5px solid var(--borde);background:#fafbfa;cursor:pointer;
+             transition:border-color .18s,background .18s;user-select:none"
+      onmouseenter="this.style.borderColor='var(--verde)';this.style.background='#edf7f0'"
+      onmouseleave="this.style.borderColor='var(--borde)';this.style.background='#fafbfa'">
+      <span style="font-size:18px;flex-shrink:0">📢</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13.5px;font-weight:600;color:var(--texto);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${n.mensaje}</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:2px">${fecha}</div>
+      </div>
+      <span style="font-size:11px;color:var(--verde);font-weight:700;flex-shrink:0">↩ Reenviar</span>
+    </div>`;
+  }).join("");
 }
 
 function mostrarNotificacionGlobal(mensaje){
@@ -4009,7 +4053,7 @@ function mostrarNotificacionGlobal(mensaje){
       banner.style.opacity="";
       banner.style.transition="";
     },400);
-  },8000);
+  },2000);
 }
 
 function cerrarNotifGlobal(){
