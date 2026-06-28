@@ -223,20 +223,134 @@
   .btn-unirse:hover .flecha{transform:translateX(3px)}
 
   .btn-fav{
-    width:auto;min-width:42px;height:42px;border-radius:10px;border:1.5px solid var(--borde);
-    background:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;
-    gap:4px;padding:0 10px;transition:.18s ease;flex:0 0 auto;
+    position:absolute;bottom:10px;right:10px;
+    width:auto;min-width:38px;height:34px;border-radius:999px;border:none;
+    background:rgba(0,0,0,.45);backdrop-filter:blur(4px);
+    cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;
+    gap:4px;padding:0 10px;transition:background .2s ease, transform .18s ease, box-shadow .2s ease;flex:0 0 auto;color:#fff;
   }
-  .btn-fav .fav-num{font-size:12.5px;font-weight:700;color:var(--sub)}
+  .btn-fav .fav-num{font-size:12px;font-weight:700;color:rgba(255,255,255,.85);transition:color .2s}
   .btn-fav.activo .fav-num{color:var(--oro)}
-  .btn-fav:hover{border-color:var(--oro);transform:scale(1.06)}
-  .btn-fav.activo{background:#F5A6231a;border-color:var(--oro)}
+
+  /* animación del número al sumar */
+  @keyframes numSube{
+    0%  {transform:translateY(0)   scale(1);   opacity:1}
+    30% {transform:translateY(-8px) scale(1.35); opacity:.4}
+    60% {transform:translateY(6px)  scale(.8);  opacity:0}
+    61% {transform:translateY(6px)  scale(.8);  opacity:0}
+    100%{transform:translateY(0)   scale(1);   opacity:1}
+  }
+  @keyframes numBaja{
+    0%  {transform:translateY(0)   scale(1);   opacity:1}
+    30% {transform:translateY(8px)  scale(1.35); opacity:.4}
+    60% {transform:translateY(-6px) scale(.8);  opacity:0}
+    61% {transform:translateY(-6px) scale(.8);  opacity:0}
+    100%{transform:translateY(0)   scale(1);   opacity:1}
+  }
+  .fav-num.anim-sube{animation:numSube .42s cubic-bezier(.22,1,.36,1) forwards}
+  .fav-num.anim-baja{animation:numBaja .42s cubic-bezier(.22,1,.36,1) forwards}
+
+  /* partícula +1 flotante */
+  .fav-particle{
+    position:absolute;bottom:44px;right:10px;
+    font-size:13px;font-weight:800;color:#fff;
+    text-shadow:0 0 8px rgba(255,215,0,.9),0 0 2px #000;
+    pointer-events:none;z-index:10;
+    animation:particleUp .65s ease forwards;
+  }
+  @keyframes particleUp{
+    0%  {opacity:1;transform:translateY(0) scale(1)}
+    70% {opacity:1;transform:translateY(-24px) scale(1.15)}
+    100%{opacity:0;transform:translateY(-36px) scale(.8)}
+  }
+  .btn-fav:hover{
+    background:rgba(255,255,255,.28);
+    box-shadow:0 0 14px 4px rgba(255,255,255,.55);
+    transform:scale(1.1);
+  }
+  .btn-fav:active{
+    background:rgba(255,255,255,.55);
+    box-shadow:0 0 22px 8px rgba(255,255,255,.8);
+    transform:scale(1.18);
+  }
+  .btn-fav.activo{background:rgba(245,166,35,.25);border:1.5px solid var(--oro)}
+  .btn-fav.activo:hover{
+    background:rgba(255,255,255,.28);
+    box-shadow:0 0 14px 4px rgba(255,255,255,.55);
+  }
   .btn-fav.pulso{animation:pulso .35s ease}
   @keyframes pulso{0%{transform:scale(1)}45%{transform:scale(1.3)}100%{transform:scale(1)}}
-  .btn-fav.fav-bloqueado{opacity:.5;cursor:not-allowed}
-  .btn-fav.fav-bloqueado:hover{border-color:var(--borde);transform:none}
+  .btn-fav.fav-bloqueado{opacity:.6;cursor:not-allowed}
+  .btn-fav.fav-bloqueado:hover{transform:none;box-shadow:none;background:rgba(0,0,0,.45)}
 
-  /* PAGINACIÓN */
+/* ===== SPLASH SCREEN ===== */
+  #splash{
+    position:fixed;inset:0;z-index:9999;
+    background:linear-gradient(135deg,#1a6b3a 0%,#1FAF55 50%,#168a42 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    transition:opacity .5s ease, transform .5s ease;
+  }
+  #splash.oculto{opacity:0;pointer-events:none;transform:scale(1.04)}
+
+  .splash-logo{
+    display:flex;align-items:center;gap:14px;
+    opacity:0;transform:translateY(24px);
+    animation:splashLogo .6s cubic-bezier(.22,1,.36,1) .3s forwards;
+  }
+  .splash-icon{
+    width:56px;height:56px;border-radius:16px;
+    background:rgba(255,255,255,.2);
+    display:flex;align-items:center;justify-content:center;font-size:28px;
+    box-shadow:0 4px 20px rgba(0,0,0,.2);
+  }
+  .splash-titulo{
+    font-family:'Poppins',Arial,sans-serif;
+    font-size:38px;font-weight:800;color:#fff;
+    letter-spacing:-.5px;line-height:1;
+  }
+  .splash-titulo span{opacity:.85}
+
+  .splash-tagline{
+    font-family:'Inter',Arial,sans-serif;
+    font-size:14px;color:rgba(255,255,255,.75);
+    letter-spacing:.8px;text-transform:uppercase;font-weight:500;
+    opacity:0;
+    animation:splashFade .5s ease .9s forwards;
+  }
+
+  .splash-bar-wrap{
+    width:160px;height:3px;border-radius:999px;
+    background:rgba(255,255,255,.2);overflow:hidden;
+    opacity:0;animation:splashFade .4s ease 1s forwards;
+  }
+  .splash-bar{
+    height:100%;border-radius:999px;background:#fff;width:0;
+    animation:splashProgress 1.1s cubic-bezier(.4,0,.2,1) 1s forwards;
+  }
+
+  @keyframes splashLogo{
+    to{opacity:1;transform:translateY(0)}
+  }
+  @keyframes splashFade{
+    to{opacity:1}
+  }
+  @keyframes splashProgress{
+    to{width:100%}
+  }
+  @keyframes cardEntrada{
+    from{opacity:0;transform:translateY(18px)}
+    to  {opacity:1;transform:translateY(0)}
+  }
+  .grid.animando .card{
+    opacity:0;
+    animation:cardEntrada .38s ease forwards;
+  }
+  .grid.animando .card:nth-child(1){animation-delay:.00s}
+  .grid.animando .card:nth-child(2){animation-delay:.06s}
+  .grid.animando .card:nth-child(3){animation-delay:.12s}
+  .grid.animando .card:nth-child(4){animation-delay:.18s}
+  .grid.animando .card:nth-child(5){animation-delay:.24s}
+  .grid.animando .card:nth-child(6){animation-delay:.30s}
   .paginacion{
     display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap;
     padding:0 24px 50px;max-width:1100px;margin:0 auto;
@@ -344,8 +458,6 @@
   body.dark .card{background:#1a201e;border-color:#2e3835;color:#eef2f0}
   body.dark .card h3{color:#f0f4f2}
   body.dark .card .meta{color:#a8b8b4}
-  body.dark .btn-fav{background:#222a27;border-color:#3a4440;color:#d4deda}
-  body.dark .btn-fav .fav-num{color:#b0bfbb}
   body.dark .btn-fav.activo .fav-num{color:var(--oro)}
   body.dark .resultado-info{color:#a0aaa6}
   body.dark .tag{background:#1FAF5526;color:#5dd68c}
@@ -782,7 +894,20 @@
 </head>
 <body>
 
-<header>
+<!-- ===== SPLASH SCREEN ===== -->
+<div id="splash">
+  <div class="splash-logo">
+    <div class="splash-icon">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+    </div>
+    <div class="splash-titulo">Gruppen<span>🇩🇪</span></div>
+  </div>
+  <p class="splash-tagline">Finde deine Community</p>
+  <div class="splash-bar-wrap">
+    <div class="splash-bar"></div>
+  </div>
+</div>
+  <header>
   <div class="header-row">
     <div class="logo" onclick="reiniciar();return false;" style="cursor:pointer;text-decoration:none" title="Zur Startseite">
       <div class="mark">
@@ -1048,7 +1173,7 @@
 <!-- PANEL CHAT -->
 <div id="panelChat">
   <div class="chat-header">
-    <div class="avatar-admin"><img src="https://s67.erome.com/8391/25otK4Ph/KHyzTjkN.jpg?v=1782372656" alt="Soporte"></div>
+    <div class="avatar-admin"><img src="https://picsum.photos/seed/loresmitt/80/80" alt="Support"></div>
     <div class="chat-header-info">
       <strong id="chatNombreHeader">Support-Team</strong>
       <span id="chatSubHeader">Support</span>
@@ -1576,6 +1701,13 @@ function pintar(arr){
       <div class="img-wrap">
         <img src="${g.img}" alt="${g.nombre}" loading="lazy">
         <span class="plataforma-badge ${claseBtn}"><span class="circ">${icoPlat}</span>${g.plataforma}</span>
+        <button class="btn-fav ${esFav?'activo':''} ${bloqueado?'fav-bloqueado':''}"
+          onclick="alternarFavorito(this,'${g.nombre}')"
+          aria-label="${bloqueado?'Heute bereits abgestimmt':'Als Favorit speichern'}"
+          title="${bloqueado?'Du kannst in '+tiempoRestante(g.nombre)+' wieder abstimmen':'Als Favorit markieren'}">
+          <span class="fav-ico">${esFav?'⭐':'☆'}</span>
+          <span class="fav-num">${totalFavoritos(g)}</span>
+        </button>
       </div>
       <div class="card-body">
         <span class="tag ${g.categoria==='+18'?'plus18':''}">${categorias.find(c=>c.nombre===g.categoria)?.icono||""} ${categoriaLabel[g.categoria]||g.categoria}</span>
@@ -1585,13 +1717,6 @@ function pintar(arr){
           <a class="btn-unirse ${claseBtn}" target="_blank" rel="noopener" href="${g.link}">
             Gruppe beitreten <span class="flecha">→</span>
           </a>
-          <button class="btn-fav ${esFav?'activo':''} ${bloqueado?'fav-bloqueado':''}"
-            onclick="alternarFavorito(this,'${g.nombre}')"
-            aria-label="${bloqueado?'Heute bereits abgestimmt':'Als Favorit speichern'}"
-            title="${bloqueado?'Du kannst in '+tiempoRestante(g.nombre)+' wieder abstimmen':'Als Favorit markieren'}">
-            <span class="fav-ico">${esFav?'⭐':'☆'}</span>
-            <span class="fav-num">${totalFavoritos(g)}</span>
-          </button>
         </div>
       </div>
     </div>`;
@@ -1614,7 +1739,13 @@ function pintarPaginacion(totalPaginas){
 function irPagina(n){
   paginaActual=n;
   filtrar();
-  grid.scrollIntoView({behavior:"smooth",block:"start"});
+  // animación de entrada
+  const g=document.getElementById("grid");
+  g.classList.remove("animando");
+  void g.offsetWidth;
+  g.classList.add("animando");
+  setTimeout(()=>g.classList.remove("animando"),600);
+  window.scrollTo({top:g.offsetTop-140,behavior:"smooth"});
 }
 
 /* =========================================================
@@ -1648,6 +1779,37 @@ function tiempoRestante(nombre){
   return `${h}h ${m}m`;
 }
 
+function animarNumero(btn, nuevoVal, subiendo){
+  const numEl=btn.querySelector(".fav-num");
+  const icoEl=btn.querySelector(".fav-ico");
+  if(!numEl) return;
+
+  // clase de animación
+  const animClass=subiendo?"anim-sube":"anim-baja";
+  numEl.classList.remove("anim-sube","anim-baja");
+  void numEl.offsetWidth; // reflow
+  numEl.classList.add(animClass);
+
+  // cambiar valor en el punto medio de la animación
+  setTimeout(()=>{ numEl.textContent=nuevoVal; },200);
+  numEl.addEventListener("animationend",()=>numEl.classList.remove(animClass),{once:true});
+
+  // ícono
+  if(icoEl) icoEl.textContent=subiendo?"⭐":"☆";
+
+  // partícula flotante solo al sumar
+  if(subiendo){
+    const wrap=btn.closest(".img-wrap");
+    if(wrap){
+      const p=document.createElement("span");
+      p.className="fav-particle";
+      p.textContent="+1";
+      wrap.appendChild(p);
+      setTimeout(()=>p.remove(),700);
+    }
+  }
+}
+
 function alternarFavorito(btn,nombre){
   if(!puedeVotar(nombre)){
     const resta=tiempoRestante(nombre);
@@ -1655,22 +1817,35 @@ function alternarFavorito(btn,nombre){
     return;
   }
   const votos=obtenerVotosFav();
+  let subiendo;
   if(favoritos.has(nombre)){
     favoritos.delete(nombre);
     ajustesFavoritos[nombre]=(ajustesFavoritos[nombre]||0)-1;
     delete votos[nombre];
+    subiendo=false;
     mostrarToast(`Aus Favoriten entfernt · ${nombre}`,"➖");
   }else{
     favoritos.add(nombre);
     ajustesFavoritos[nombre]=(ajustesFavoritos[nombre]||0)+1;
     votos[nombre]=Date.now();
+    subiendo=true;
     mostrarToast(`+1 Favoritenbonus · ${nombre}`,"⭐");
   }
   guardarVotosFav(votos);
-  btn.classList.add("pulso");
   guardarFavoritos();
   guardarAjustes();
-  filtrar();
+
+  // calcular nuevo total sin re-renderizar todo
+  const g=grupos.find(x=>x.nombre===nombre)||gruposExtra.find(x=>x.nombre===nombre);
+  if(g){
+    const nuevoTotal=totalFavoritos(g);
+    btn.classList.toggle("activo",subiendo);
+    btn.classList.add("pulso");
+    animarNumero(btn, nuevoTotal, subiendo);
+    btn.addEventListener("animationend",()=>btn.classList.remove("pulso"),{once:true});
+  } else {
+    filtrar();
+  }
 }
 
 let toastTimer;
@@ -1705,14 +1880,14 @@ function filtrar(){
     const coincideCategoria=categoriaActiva==="Todos"||g.categoria===categoriaActiva;
     return coincideTexto&&coincideCategoria;
   });
-
+  
   // Ordenar por favoritos (descendente) - más favoritos primero
   filtrados.sort((a,b)=>{
     const favA=a.favoritos||a.favoritosBase||0;
     const favB=b.favoritos||b.favoritosBase||0;
     return favB-favA;
   });
-
+  
   pintar(filtrados);
 }
 
@@ -2094,7 +2269,7 @@ async function cargarDatosAdmin(){
 }
 
 async function initFirebase(){
-  document.getElementById("fbLoading").style.display="flex";
+  // El splash ya cubre la pantalla — no necesitamos fbLoading
   try{
     // 1. Grupos extra
     const gruposSnap=await _db.collection("grupos_extra").get();
@@ -2116,11 +2291,16 @@ async function initFirebase(){
     console.warn("Firebase init error:",e);
     mostrarToast("⚠️ Firebase-Verbindung fehlgeschlagen — prüfe Firestore-Regeln","⚠️");
   }
-  document.getElementById("fbLoading").style.display="none";
   pintarSesion();
   pintarCategorias();
   poblarSelectCategorias();
   pintar(grupos);
+  // Asegurarse de que el splash desaparezca tras Firebase (mínimo 2.1s ya garantizado)
+  const splash=document.getElementById("splash");
+  if(splash && !splash.classList.contains("oculto")){
+    splash.classList.add("oculto");
+    setTimeout(()=>splash.remove(),520);
+  }
 }
 
 // Iniciar cuando el DOM esté listo
@@ -2169,7 +2349,7 @@ function renderMensajes(msgs, contenedor, esAdminView){
     contenedor.innerHTML=`<div style="text-align:center;color:var(--sub);font-size:13px;margin:auto">Sin mensajes aún.</div>`;
     return;
   }
-
+  
   // Función para convertir URLs en links clicables
   function convertirURLsALinks(texto){
     const urlRegex=/https?:\/\/[^\s<>]+/gi;
@@ -2177,7 +2357,7 @@ function renderMensajes(msgs, contenedor, esAdminView){
       return `<a href="${url}" target="_blank" rel="noopener" style="color:var(--verde);text-decoration:underline;word-break:break-all;font-weight:500">${url}</a>`;
     });
   }
-
+  
   msgs.forEach(m=>{
     if(m.de==="sistema"){
       const soli=obtenerSolicitudes().find(s=>s.id===m.solicitudId);
@@ -2224,7 +2404,7 @@ function toggleChat(){
   if(chatAbierto){
     if(esAdmin(user)){
       document.getElementById("chatNombreHeader").textContent="Loresmitt (Telegram)";
-      document.getElementById("chatSubHeader").textContent="Soporte · Admin";
+      document.getElementById("chatSubHeader").textContent="Support · Admin";
       document.getElementById("chatConvSel").style.display="flex";
       // Recargar chats frescos de Firestore antes de mostrar
       cargarDatosAdmin().then(()=>{
@@ -2237,7 +2417,7 @@ function toggleChat(){
       });
     } else {
       document.getElementById("chatNombreHeader").textContent="Loresmitt (Telegram)";
-      document.getElementById("chatSubHeader").textContent="Soporte";
+      document.getElementById("chatSubHeader").textContent="Support";
       document.getElementById("chatConvSel").style.display="none";
       renderMensajes(obtenerConversacion(user.correo), document.getElementById("chatMensajes"), false);
     }
@@ -2381,15 +2561,15 @@ function renderAdminSolicitudes(){
 
 function _pintarSolicitudes(){
   let solis=obtenerSolicitudes();
-
+  
   // Separar por estado y luego concatenar en el orden correcto
   const pendientes=solis.filter(s=>s.estado==="pendiente");
   const aprobadas=solis.filter(s=>s.estado==="aprobado");
   const rechazadas=solis.filter(s=>s.estado==="rechazado");
-
+  
   // Concatenar en orden: Pendientes PRIMERO, luego aprobadas, luego rechazadas
   let solisOrdenadas=[...pendientes, ...aprobadas, ...rechazadas];
-
+  
   const body=document.getElementById("adminSolicitudesBody");
   if(solisOrdenadas.length===0){
     body.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--sub);padding:20px">Noch keine Anfragen vorhanden.</td></tr>`;
@@ -2436,7 +2616,7 @@ function adminAprobarSolicitud(id){
     favoritos:0,
     fechaAprobacion:new Date().getTime()
   };
-
+  
   // Agregar a ambos arrays (gruposExtra y grupos)
   gruposExtra.push(nuevoGrupo);
   grupos.push(nuevoGrupo);
@@ -2586,7 +2766,18 @@ function renderMisGrupos(user){
   }).join("");
 }
 
-/* Mostrar botón flotante cuando hay sesión */
+/* ===== SPLASH DISMISS ===== */
+(function(){
+  const splash=document.getElementById("splash");
+  // El splash se oculta cuando Firebase termina (initFirebase lo hace).
+  // Este timer es el mínimo garantizado de 2.1s en caso de que Firebase sea ultra-rápido.
+  setTimeout(()=>{
+    if(splash && !splash.classList.contains("oculto")){
+      splash.classList.add("oculto");
+      setTimeout(()=>splash.remove(),520);
+    }
+  },2100);
+})();
 (function inicializarChat(){
   const user=obtenerSesion();
   if(user){
@@ -2602,11 +2793,7 @@ function renderMisGrupos(user){
 })();
 </script>
 <!-- FIREBASE LOADING OVERLAY -->
-<div id="fbLoading" style="display:none;position:fixed;inset:0;background:rgba(15,19,17,.82);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:18px;color:#fff;font-family:'Inter',sans-serif">
-  <div style="width:52px;height:52px;border-radius:50%;border:4px solid #1FAF5540;border-top-color:#1FAF55;animation:spin .8s linear infinite"></div>
-  <p style="margin:0;font-size:16px;font-weight:600;letter-spacing:.3px">Verbinde mit Firebase…</p>
-  <p style="margin:0;font-size:12px;opacity:.65">Daten werden geladen</p>
-</div>
+<div id="fbLoading" style="display:none!important"></div>
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
 </body>
