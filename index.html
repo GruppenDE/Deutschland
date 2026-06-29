@@ -1,92 +1,624 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gruppen🇩🇪</title>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>Gruppen🇩🇪</title>
+ <!-- ===== FIREBASE SDK v8 (compat — funciona con scripts normales) ===== -->
+ <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
+ <!-- ===== /FIREBASE SDK ===== -->
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
 
-<!-- ===== FIREBASE SDK v8 (compat — funciona con scripts normales) ===== -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyA3GpW1N7i9YNdw7KtZXx5VFgWyWoyoBYM",
-    authDomain: "gruppende-94f00.firebaseapp.com",
-    projectId: "gruppende-94f00",
-    storageBucket: "gruppende-94f00.firebasestorage.app",
-    messagingSenderId: "902209990512",
-    appId: "1:902209990512:web:eee7151f40ac41c70ba9b5",
-    measurementId: "G-WD6PVR87MR"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const _VAPID_KEY = "BFmNPitSEll1GhsDKYTw6bpb2QJgb9tq_fgjokel_lADAlBKMALlf9UGhuIWT2sr0v9Cs3mbX7lYLdKKRA7QuLs";
-  const _db  = firebase.firestore();
-  const _auth = firebase.auth();
-  const _googleProvider = new firebase.auth.GoogleAuthProvider();
+<body>
+ <!-- ===== SPLASH SCREEN ===== -->
+ <div id="splash">
+  <div class="splash-logo">
+   <div class="splash-icon">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+   </div>
+   <div class="splash-titulo">Gruppen<span>🇩🇪</span></div>
+  </div>
+  <p class="splash-tagline">Finde deine Community</p>
+  <div class="splash-bar-wrap">
+   <div class="splash-bar"></div>
+  </div>
+ </div>
+ <header>
+  <div class="header-row">
+   <div class="logo" onclick="reiniciar();return false;" style="cursor:pointer;text-decoration:none" title="Zur Startseite">
+    <div class="mark">
+     <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+    </div>
+    <h1>Gruppen🇩🇪</h1>
+   </div>
+   <!-- Controles flotantes: modo + idioma (fuera del nav) -->
+   <div class="header-utils">
+    <!-- Toggle día/noche -->
+    <button class="modo util-btn" id="btnModo" onclick="modo()" aria-label="Dunkel-/Hellmodus wechseln" title="Nachtmodus">
+<div class="tg-toggle">
+<div class="tg-track">
+<div class="tg-stars">
+<div class="tg-star"></div>
+<div class="tg-star"></div>
+<div class="tg-star"></div>
+</div>
+</div>
+<div class="tg-thumb">
+<div class="tg-icons">
+<div class="tg-sol">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0-4a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zM4.22 4.22a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zm13.44 13.44a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zM3 11h1a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2zm17 0h1a1 1 0 0 1 0 2h-1a1 1 0 0 1 0-2zM5.64 17.66l-.7.7a1 1 0 1 1-1.42-1.42l.7-.7a1 1 0 0 1 1.42 1.42zm13.44-13.44.7-.7a1 1 0 1 1 1.42 1.42l-.7.7a1 1 0 0 1-1.42-1.42z"/></svg>
+</div>
+<div class="tg-luna">
+<svg width="12" height="12" viewBox="0 0 24 24" fill="#818cf8"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+</div>
+</div>
+</div>
+</div>
+</button>
+    <!-- Separador -->
+    <span class="util-sep"></span>
+    <!-- Selector de idioma -->
+    <div class="lang-selector" id="langSelector">
+     <button class="lang-btn util-btn" onclick="toggleLangMenu()" id="langBtnActual" title="Sprache / Language / Idioma">
+<span class="lang-flag" id="langFlagActual">🇩🇪</span>
+<span class="lang-chevron">▼</span>
+</button>
+     <div class="lang-dropdown" id="langDropdown">
+      <div class="lang-option activa" onclick="cambiarIdioma('de','🇩🇪','DE')" id="langOpt-de">
+       <span class="lf">🇩🇪</span><span class="ln">Deutsch</span><span class="lcheck">✓</span>
+      </div>
+      <div class="lang-option" onclick="cambiarIdioma('en','🇺🇸','EN')" id="langOpt-en">
+       <span class="lf">🇺🇸</span><span class="ln">English (US)</span><span class="lcheck">✓</span>
+      </div>
+      <div class="lang-option" onclick="cambiarIdioma('en-GB','🇬🇧','EN')" id="langOpt-en-GB">
+       <span class="lf">🇬🇧</span><span class="ln">English (UK)</span><span class="lcheck">✓</span>
+      </div>
+      <div class="lang-option" onclick="cambiarIdioma('es','🇪🇸','ES')" id="langOpt-es">
+       <span class="lf">🇪🇸</span><span class="ln">Español</span><span class="lcheck">✓</span>
+      </div>
+     </div>
+    </div>
+   </div>
+   <!-- NAV principal: solo Agregar + Sesión -->
+   <nav>
+    <button class="btn-agregar" onclick="abrirAgregar()">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+<span id="navBtnAgregarLabel">Gruppe hinzufügen</span>
+</button>
+    <div id="zonaSesion"></div>
+   </nav>
+   <!-- Botón hamburguesa (solo móvil) -->
+   <button class="btn-hamburger" id="btnHamburger" onclick="toggleDrawer()" aria-label="Menü öffnen">
+<span></span><span></span><span></span>
+</button>
+  </div>
+ </header>
+ <!-- Overlay fondo oscuro -->
+ <div class="nav-overlay" id="navOverlay" onclick="cerrarDrawer()"></div>
+ <!-- Drawer menú móvil -->
+ <nav class="nav-drawer" id="navDrawer">
+  <div class="drawer-seccion" style="border-top:none;padding-top:0">Menü</div>
+  <button class="drawer-item" onclick="abrirAgregar();cerrarDrawer()">
+<span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span> <span id="drawerBtnAgregar">Gruppe hinzufügen</span>
+</button>
+  <button class="drawer-item" id="drawerBtnSesion" onclick="cerrarDrawer()">
+<span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> <span id="drawerSesionLabel">Anmelden</span>
+</button>
+  <button class="drawer-item" id="drawerBtnAdmin" style="display:none;color:#ffd9a0" onclick="abrirAdmin();cerrarDrawer()">
+<span class="d-ico">⚙️</span> <span>Admin-Panel</span>
+</button>
+  <button class="drawer-item" id="drawerBtnMisGrupos" style="display:none" onclick="abrirMisGrupos();cerrarDrawer()">
+<span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span> <span>Meine Gruppen</span>
+</button>
+  <div class="drawer-seccion">Darstellung</div>
+  <div class="drawer-controls">
+   <span class="dc-label" id="drawerModoLabel">Nachtmodus</span>
+   <button class="modo" id="btnModoDrawer" onclick="modo()" aria-label="Modus wechseln" title="Nachtmodus" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center">
+<div class="tg-toggle">
+<div class="tg-track">
+<div class="tg-stars">
+<div class="tg-star"></div><div class="tg-star"></div><div class="tg-star"></div>
+</div>
+</div>
+<div class="tg-thumb">
+<div class="tg-icons">
+<div class="tg-sol"><svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0-4a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zM4.22 4.22a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zm13.44 13.44a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zM3 11h1a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2zm17 0h1a1 1 0 0 1 0 2h-1a1 1 0 0 1 0-2zM5.64 17.66l-.7.7a1 1 0 1 1-1.42-1.42l.7-.7a1 1 0 0 1 1.42 1.42zm13.44-13.44.7-.7a1 1 0 1 1 1.42 1.42l-.7.7a1 1 0 0 1-1.42-1.42z"/></svg></div>
+<div class="tg-luna"><svg width="12" height="12" viewBox="0 0 24 24" fill="#818cf8"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg></div>
+</div>
+</div>
+</div>
+</button>
+  </div>
+  <div class="drawer-seccion">Sprache / Language / Idioma</div>
+  <div class="drawer-lang-opts">
+   <button class="drawer-lang-opt activa" id="dLangOpt-de" onclick="cambiarIdioma('de','🇩🇪','DE');cerrarDrawer()">
+<span class="dlf">🇩🇪</span><span>Deutsch</span><span class="dlcheck">✓</span>
+</button>
+   <button class="drawer-lang-opt" id="dLangOpt-en" onclick="cambiarIdioma('en','🇺🇸','EN');cerrarDrawer()">
+<span class="dlf">🇺🇸</span><span>English (US)</span><span class="dlcheck">✓</span>
+</button>
+   <button class="drawer-lang-opt" id="dLangOpt-en-GB" onclick="cambiarIdioma('en-GB','🇬🇧','EN');cerrarDrawer()">
+<span class="dlf">🇬🇧</span><span>English (UK)</span><span class="dlcheck">✓</span>
+</button>
+   <button class="drawer-lang-opt" id="dLangOpt-es" onclick="cambiarIdioma('es','🇪🇸','ES');cerrarDrawer()">
+<span class="dlf">🇪🇸</span><span>Español</span><span class="dlcheck">✓</span>
+</button>
+  </div>
+ </nav>
+ <div class="cat-bar">
+  <div class="cat-row" id="catRow"></div>
+ </div>
+ <div class="banner-agregar">
+  <div class="banner-agregar-inner">
+   <div class="banner-agregar-texto">
+    <strong>Hast du eine tolle Gruppe?</strong>
+    <span>Teile sie mit Tausenden von Menschen auf Gruppen🇩🇪</span>
+   </div>
+   <button class="btn-agregar-banner" onclick="abrirAgregar()">
+<span class="plus">＋</span> Gruppe hinzufügen
+</button>
+  </div>
+ </div>
+ <input id="buscar" placeholder="Gruppen nach Name oder Plattform suchen …" onkeyup="buscarCambio()">
+ <div class="plat-wrap">
+  <div class="plat-selector" id="platSelector">
+   <button class="plat-btn" onclick="togglePlatMenu()" type="button">
+<span class="plat-ico" id="platIcoActual"><span class="po-ico-logo g"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 0 1 0 18a13 13 0 0 1 0-18"/></svg></span></span>
+<span id="platTextoActual">Alle Plattformen</span>
+<span class="plat-chevron">▾</span>
+</button>
+   <div class="plat-dropdown" id="platDropdown">
+    <div class="plat-option activa" id="platOpt-Todos" onclick="elegirPlataforma('Todos')">
+     <span class="po-ico-logo g"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 0 1 0 18a13 13 0 0 1 0-18"/></svg></span><span class="po-nombre" id="platLbl-Todos">Alle Plattformen</span><span class="po-check">✓</span>
+    </div>
+    <div class="plat-option" id="platOpt-WhatsApp" onclick="elegirPlataforma('WhatsApp')">
+     <span class="po-ico-logo w"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></span><span class="po-nombre">WhatsApp</span><span class="po-check">✓</span>
+    </div>
+    <div class="plat-option" id="platOpt-Telegram" onclick="elegirPlataforma('Telegram')">
+     <span class="po-ico-logo t"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></span><span class="po-nombre">Telegram</span><span class="po-check">✓</span>
+    </div>
+    <div class="plat-option" id="platOpt-Signal" onclick="elegirPlataforma('Signal')">
+     <span class="po-ico-logo s"><svg width="14" height="14" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="18.5" fill="none" stroke="white" stroke-width="2.6" stroke-dasharray="4.8 3.2" stroke-linecap="round"/><path d="M24 11.5c-6.9 0-12.5 5.3-12.5 11.85 0 2.9 1.1 5.54 2.91 7.57l-1.91 7.08 7.23-2.34A12.7 12.7 0 0 0 24 36.35c6.9 0 12.5-5.3 12.5-11.85S30.9 11.5 24 11.5z" fill="white"/></svg></span><span class="po-nombre">Signal</span><span class="po-check">✓</span>
+    </div>
+   </div>
+  </div>
+ </div>
+ <p class="resultado-info" id="resultadoInfo"></p>
+ <div class="grid" id="grid"></div>
+ <div class="paginacion" id="paginacion"></div>
+ <footer>
+  <div class="footer-top">
+   <div class="footer-marca">
+    <div class="logo">
+     <div class="mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="#1FAF55"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></div>
+     <h1 style="color:#fff;font-size:20px">Gruppen🇩🇪</h1>
+    </div>
+    <p>Das Verzeichnis für WhatsApp- und Telegram-Communitys – finde deine Community: Gamer, Entwickler, Reisende und vieles mehr, alles an einem Ort.</p>
+    <div class="footer-redes">
+     <a href="https://chat.whatsapp.com/G2VKiNpfByB7dFGY8MFAbX" aria-label="WhatsApp" title="WhatsApp" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+     </a>
+     <a href="https://t.me/gruppendeofficial" aria-label="Telegram" title="Telegram" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+     </a>
+     <a href="https://www.facebook.com/share/1EEarBdA33/" aria-label="Facebook" title="Facebook">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+     </a>
+     <a href="#" aria-label="Instagram" title="Instagram">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+     </a>
+    </div>
+   </div>
+   <div class="footer-col">
+    <h4>Erkunden</h4>
+    <ul>
+     <li><a href="" onclick="reiniciar();return false;">✨ Alle Gruppen</a></li>
+     <li><a href="#" onclick="elegirCategoria('+18');return false;">🔞 +18</a></li>
+     <li><a href="#" onclick="elegirCategoria('Singles');return false;">💘 Singles</a></li>
+     <li><a href="#" onclick="elegirCategoria('Gaming');return false;">🎮 Gaming</a></li>
+     <li><a href="#" onclick="elegirCategoria('Programación');return false;">💻 Programmierung</a></li>
+     <li><a href="#" onclick="elegirCategoria('Música');return false;">🎵 Musik</a></li>
+     <li><a href="#" onclick="elegirCategoria('Viajes');return false;">🌍 Reisen</a></li>
+     <li><a href="#" onclick="elegirCategoria('Estudio');return false;">📚 Lernen</a></li>
+     <li><a href="#" onclick="elegirCategoria('Empleo');return false;">💼 Jobs</a></li>
+    </ul>
+   </div>
+   <div class="footer-col">
+    <h4>Community</h4>
+    <ul>
+     <li>
+      <a href="https://t.me/gruppendeofficial" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;background:#229ED9;color:#fff;padding:8px 14px;border-radius:9px;font-weight:600;font-size:13px;transition:opacity .18s;text-decoration:none" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+       <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Telegram-Kanal
+      </a>
+     </li>
+    </ul>
+    <h4 style="margin-top:22px">Support</h4>
+    <ul>
+     <li><a href="#">Hilfezentrum</a></li>
+     <li><a href="#">Gruppe melden</a></li>
+     <li><a href="#">Deine Community veröffentlichen</a></li>
+     <li><a href="#">Kontakt</a></li>
+    </ul>
+   </div>
+  </div>
+  <div class="footer-bottom">
+   <span>© 2026 <b>Gruppen🇩🇪</b>. Alle Rechte vorbehalten.</span>
+   <div class="footer-legal">
+    <a href="#">Nutzungsbedingungen</a>
+    <a href="#">Datenschutz</a>
+    <a href="#">Cookies</a>
+   </div>
+  </div>
+ </footer>
+ <!-- SECCIÓN USUARIO — Meine Gruppen (inline) -->
+ <div id="panelMisGrupos">
+  <div class="mis-grupos-seccion">
+   <div class="mis-grupos-header">
+    <div style="display:flex;align-items:center;gap:10px">
+     <div style="width:36px;height:36px;border-radius:10px;background:var(--verde);display:flex;align-items:center;justify-content:center;font-size:18px">👤</div>
+     <div>
+      <h2 style="font-size:20px;margin:0">Meine Gruppen</h2>
+      <p style="font-size:12.5px;color:var(--sub);margin:0" id="misGruposSubtitle">Deine eingereichten Gruppen</p>
+     </div>
+    </div>
+    <button onclick="cerrarMisGrupos()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub);line-height:1;padding:4px" title="Schließen">✕</button>
+   </div>
+   <div id="misGruposGrid" class="mis-grupos-grid"></div>
+  </div>
+ </div>
+ <!-- PANEL ADMINISTRADOR -->
+ <div id="panelAdmin">
+  <div class="admin-modal">
+   <button class="cerrar" onclick="cerrarAdmin()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub)">✕</button>
+   <h2>⚙️ Administrator-Panel <span class="admin-badge">ADMIN</span></h2>
+   <p style="color:var(--sub);font-size:13px;margin-bottom:0">Vollständige Kontrolle über Gruppen und Paginierung · Gruppen🇩🇪</p>
+   <div class="admin-tabs">
+    <button class="admin-tab activo" onclick="adminTab('agregar')">➕ Gruppe hinzufügen</button>
+    <button class="admin-tab" onclick="adminTab('gestionar')">📋 Gruppen verwalten</button>
+    <button class="admin-tab" onclick="adminTab('solicitudes')" id="tabSolicitudes">🕐 Anfragen<span id="badgeSolicitudes" style="display:none;margin-left:6px;background:#ef4444;color:#fff;border-radius:99px;font-size:11px;font-weight:700;padding:1px 7px;vertical-align:middle"></span></button>
+    <button class="admin-tab" onclick="adminTab('chats')" id="tabChats">💬 Chats</button>
+    <button class="admin-tab" onclick="adminTab('notificacion')">📢 Notificación</button>
+   </div>
+   <!-- TAB: AGREGAR -->
+   <div class="admin-seccion activa" id="adminAgregar">
+    <div class="admin-form-grid">
+     <div class="admin-campo">
+      <label>Gruppenname *</label>
+      <input type="text" id="adNombre" placeholder="z. B. Fitness Deutschland">
+     </div>
+     <div class="admin-campo">
+      <label>Kategorie *</label>
+      <select id="adCategoria" onchange="adminActualizar18()">
+<option value="" disabled selected>Auswählen</option>
+</select>
+     </div>
+     <div class="admin-campo">
+      <label>Plattform *</label>
+      <select id="adPlataforma">
+<option value="WhatsApp">WhatsApp</option>
+<option value="Telegram">Telegram</option>
+<option value="Signal">Signal</option>
+</select>
+     </div>
+     <div class="admin-campo">
+      <label>Mitglieder</label>
+      <input type="number" id="adMiembros" placeholder="z. B. 250" min="0">
+     </div>
+     <div class="admin-campo admin-full">
+      <label>Einladungslink *</label>
+      <input type="url" id="adLink" placeholder="https://chat.whatsapp.com/...">
+     </div>
+     <div class="admin-campo admin-full">
+      <label>Bild (Foto hochladen)</label>
+      <input type="file" id="adImagenFile" accept="image/*" onchange="adminImagenSeleccionada(event)">
+      <input type="hidden" id="adImagen">
+      <div id="adImagenPreviewWrap" style="display:none;margin-top:8px;align-items:center;gap:10px">
+       <img id="adImagenPreview" src="" alt="Vorschau" style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--borde)">
+       <button type="button" onclick="adminImagenQuitar()" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;text-decoration:underline">Entfernen</button>
+      </div>
+     </div>
+     <div class="admin-campo">
+      <label>Feste Seite (optional)</label>
+      <input type="number" id="adPagina" placeholder="z. B. 1" min="1">
+      <span style="font-size:11px;color:var(--sub);margin-top:3px">Erzwingt das Erscheinen auf dieser Seite</span>
+     </div>
+     <div class="admin-campo">
+      <label>Basispopularität (Favoriten)</label>
+      <input type="number" id="adFavoritos" placeholder="z. B. 50" min="0">
+     </div>
+    </div>
+    <div class="campo-checkbox" id="adminCaja18" style="display:none">
+     <input type="checkbox" id="adConfirma18">
+     <label for="adConfirma18">Ich bestätige, dass diese Gruppe für Personen über 18 Jahre geeignet ist.</label>
+    </div>
+    <p class="error-campo" id="errorAdmin" style="margin-top:4px"></p>
+    <button class="btn-principal" style="margin-top:8px" onclick="adminPublicar()">Gruppe veröffentlichen</button>
+   </div>
+   <!-- TAB: GESTIONAR -->
+   <div class="admin-seccion" id="adminGestionar">
+    <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Bearbeite die Seite, auf der jede Gruppe erscheint, oder lösche sie. Änderungen werden beim Klicken auf <b>Speichern</b> übernommen.</p>
+    <div class="admin-tabla-wrap">
+     <table class="admin-tabla" id="adminTabla">
+      <thead>
+       <tr>
+        <th>Gruppe</th>
+        <th>Kat.</th>
+        <th>Plattform</th>
+        <th>👥 Mitglieder</th>
+        <th>Feste Seite</th>
+        <th>Aktionen</th>
+       </tr>
+      </thead>
+      <tbody id="adminTablaBody"></tbody>
+     </table>
+    </div>
+   </div>
+   <!-- TAB: SOLICITUDES -->
+   <div class="admin-seccion" id="adminSolicitudes">
+    <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Von Benutzern eingereichte Gruppen, die deine Genehmigung benötigen.</p>
+    <div class="admin-tabla-wrap" id="adminSolicitudesWrap">
+     <table class="admin-tabla">
+      <thead>
+       <tr>
+        <th>Gruppe</th>
+        <th>Kat.</th>
+        <th>Plattform</th>
+        <th>Benutzer</th>
+        <th>Enlace del grupo</th>
+        <th>Status</th>
+        <th>Aktionen</th>
+       </tr>
+      </thead>
+      <tbody id="adminSolicitudesBody"></tbody>
+     </table>
+    </div>
+   </div>
+   <!-- TAB: CHATS -->
+   <div class="admin-seccion" id="adminChats">
+    <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Kommuniziere mit Benutzern über ihre Anfragen.</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+     <div style="display:flex;gap:10px;align-items:center">
+      <label style="font-size:13px;font-weight:700;color:var(--sub)">Gespräch mit:</label>
+      <select id="adminChatSelect" onchange="adminCambiarChat()" style="flex:1;padding:8px 10px;border-radius:8px;border:1.5px solid var(--borde);font-size:13px;outline:none;background:#fafbfa;color:var(--texto)">
+<option value="">Benutzer auswählen...</option>
+</select>
+     </div>
+     <div id="adminChatMensajes" style="background:#f7f9f8;border-radius:12px;padding:12px;min-height:180px;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;border:1px solid var(--borde)"></div>
+     <div style="display:flex;gap:8px;align-items:center">
+      <label class="btn-galeria" title="Enviar imagen" style="flex:0 0 auto">
+<input type="file" id="adminChatImgInput" accept="image/*" style="display:none" onchange="adminEnviarImagen(this)">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+</label>
+      <input type="text" id="adminChatInput" placeholder="Antwort schreiben..." onkeydown="if(event.key==='Enter')adminEnviarMensaje()" style="flex:1;padding:10px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:13.5px;outline:none;background:#fafbfa">
+      <button onclick="adminEnviarMensaje()" style="padding:10px 18px;border-radius:9px;border:none;background:var(--verde);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer">Senden</button>
+     </div>
+    </div>
+   </div>
+   <!-- TAB: NOTIFICACIÓN GLOBAL -->
+   <div class="admin-seccion" id="adminNotificacion">
+    <p style="font-size:13px;color:var(--sub);margin-bottom:14px">Envía un banner de notificación a todos los usuarios. Cada usuario lo ve <b>una sola vez</b> por envío.</p>
+    <div class="admin-campo">
+     <label>Nuevo mensaje</label>
+     <input type="text" id="notifAdminInput" placeholder="Ej: Un grupo nuevo ha sido añadido 🎉" maxlength="120">
+    </div>
+    <p style="font-size:11.5px;color:var(--sub);margin:-6px 0 12px">Máx. 120 caracteres.</p>
+    <button class="btn-principal" style="margin-top:4px" onclick="enviarNotificacionGlobal()">📢 Enviar notificación a todos</button>
+    <!-- Historial -->
+    <div style="margin-top:20px">
+     <p style="font-size:12.5px;font-weight:700;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Historial — clic para reenviar</p>
+     <div id="notifHistorialLista" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto"></div>
+     <p id="notifHistorialVacio" style="font-size:13px;color:var(--sub);text-align:center;padding:18px 0;display:none">Sin notificaciones enviadas aún.</p>
+    </div>
+   </div>
+  </div>
+  <!-- /admin-modal -->
+ </div>
+ <!-- /panelAdmin -->
+ <div id="toast"></div>
+ <!-- BANNER NOTIFICACIÓN GLOBAL -->
+ <div id="notifGlobalBanner">
+  <span class="notif-g-ico">📢</span>
+  <span class="notif-g-txt" id="notifGlobalTxt"></span>
+  <button class="notif-g-close" onclick="cerrarNotifGlobal()">✕</button>
+ </div>
+ <!-- NOTIFICACIÓN PUSH -->
+ <div id="notifPush">
+  <button class="notif-close" onclick="cerrarNotif()">✕</button>
+  <div class="notif-ico" id="notifIco">💬</div>
+  <div class="notif-body">
+   <strong id="notifTitulo">Neue Nachricht</strong>
+   <span id="notifTexto"></span>
+  </div>
+ </div>
+ <!-- BOTÓN FLOTANTE CHAT -->
+ <button id="chatFlotante" onclick="toggleChat()" title="Chat con soporte">
+💬
+<span id="chatBadge">0</span>
+</button>
+ <!-- PANEL CHAT -->
+ <div id="panelChat">
+  <div class="chat-header">
+   <div class="avatar-admin"><img src="https://s67.erome.com/8391/25otK4Ph/KHyzTjkN.jpg?v=1782372656" alt="Support"></div>
+   <div class="chat-header-info">
+    <strong id="chatNombreHeader">Support-Team</strong>
+    <span id="chatSubHeader">Support</span>
+   </div>
+   <button onclick="toggleChat()">✕</button>
+  </div>
+  <!-- Selector de conversación (solo admin) -->
+  <div class="chat-conv-sel" id="chatConvSel" style="display:none">
+   <span style="color:var(--sub);white-space:nowrap">Chat von:</span>
+   <select id="chatConvSelect" onchange="cambiarConversacion()">
+<option value="">Benutzer auswählen...</option>
+</select>
+  </div>
+  <div class="chat-mensajes" id="chatMensajes"></div>
+  <div class="chat-input-row">
+   <label class="btn-galeria" title="Enviar imagen">
+<input type="file" id="chatImgInput" accept="image/*" style="display:none" onchange="enviarImagen(this)">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+</label>
+   <input type="text" id="chatInput" placeholder="Nachricht schreiben..." onkeydown="if(event.key==='Enter')enviarMensaje()">
+   <button onclick="enviarMensaje()">➤</button>
+  </div>
+ </div>
+ <!-- MODAL DE INICIO DE SESIÓN / REGISTRO -->
+ <div class="overlay" id="overlayAuth">
+  <div class="modal">
+   <button class="cerrar" onclick="cerrarAuth()">✕</button>
+   <div class="tabs-auth">
+    <button id="tabLogin" class="activo" onclick="cambiarTab('login')">Anmelden</button>
+    <button id="tabRegistro" onclick="cambiarTab('registro')">Konto erstellen</button>
+   </div>
+   <!-- LOGIN -->
+   <div id="vistaLogin">
+    <h2>Willkommen zurück</h2>
+    <p class="sub">Melde dich an, um deine Lieblingsgruppen zu speichern.</p>
+    <div class="campo">
+     <label>E-Mail-Adresse</label>
+     <input type="email" id="loginCorreo" placeholder="deine@gmail.com">
+    </div>
+    <div class="campo">
+     <label>Passwort</label>
+     <input type="password" id="loginPass" placeholder="••••••••">
+    </div>
+    <p class="error-campo" id="errorLogin"></p>
+    <button class="btn-principal" onclick="iniciarSesion()">Anmelden</button>
+    <div class="divisor">oder</div>
+    <button class="btn-google" onclick="googleSignIn()">
+<svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
+Mit Google fortfahren
+</button>
+    <p class="pie-auth">Noch kein Konto? <a onclick="cambiarTab('registro')">Jetzt registrieren</a></p>
+   </div>
+   <!-- REGISTRO -->
+   <div id="vistaRegistro" style="display:none">
+    <h2>Konto erstellen</h2>
+    <p class="sub">Tritt bei und speichere die Gruppen, die dich interessieren.</p>
+    <div class="campo">
+     <label>Name</label>
+     <input type="text" id="regNombre" placeholder="Dein Name">
+    </div>
+    <div class="campo">
+     <label>E-Mail-Adresse</label>
+     <input type="email" id="regCorreo" placeholder="deine@gmail.com">
+    </div>
+    <div class="campo">
+     <label>Passwort</label>
+     <input type="password" id="regPass" placeholder="Mindestens 6 Zeichen">
+    </div>
+    <p class="error-campo" id="errorRegistro"></p>
+    <button class="btn-principal" onclick="registrar()">Konto erstellen</button>
+    <div class="divisor">oder</div>
+    <button class="btn-google" onclick="googleSignIn()">
+<svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
+Mit Google fortfahren
+</button>
+    <p class="pie-auth">Bereits ein Konto? <a onclick="cambiarTab('login')">Jetzt anmelden</a></p>
+   </div>
+  </div>
+ </div>
+ <!-- MODAL AVISO FOTO — todas las demás categorías -->
+ <div class="overlay" id="overlayFotoAviso">
+  <div class="modal modal-edad">
+   <span class="e">📷</span>
+   <h2>Hinweis für deine Gruppe</h2>
+   <p class="sub">Es wird empfohlen, beim Hinzufügen Ihrer Gruppen eigene Fotos hochzuladen.</p>
+   <div class="acciones-edad">
+    <button class="no" onclick="cerrarFotoAviso()">Schließen</button>
+    <button class="si" onclick="confirmarFotoAviso()">Verstanden</button>
+   </div>
+  </div>
+ </div>
+ <div class="overlay" id="overlayEdad">
+  <div class="modal modal-edad">
+   <span class="e">🔒</span>
+   <h2>Inhalt nur für Erwachsene</h2>
+   <p class="sub">Sind Sie über 18 Jahre alt? Es wird empfohlen, beim Hinzufügen von Gruppen eigene Fotos hochzuladen +18.</p>
+   <div class="acciones-edad">
+    <button class="no" onclick="rechazarEdad()">Nein, zurück</button>
+    <button class="si" onclick="confirmarEdad()">Ja, ich bin über 18</button>
+   </div>
+  </div>
+ </div>
+ <!-- MODAL — AÑADIR GRUPO -->
+ <div class="overlay" id="overlayAgregar">
+  <div class="modal modal-grande">
+   <button class="cerrar" onclick="cerrarAgregar()">✕</button>
+   <h2>Deine Gruppe hinzufügen</h2>
+   <p class="sub">Teile deine WhatsApp- oder Telegram-Community mit Tausenden von Menschen.</p>
+   <div class="plataforma-toggle">
+    <div class="opcion-plataforma activa w" id="optWhatsApp" onclick="elegirPlataformaForm('WhatsApp')">
+     <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></span><span class="nombre">WhatsApp</span>
+    </div>
+    <div class="opcion-plataforma t" id="optTelegram" onclick="elegirPlataformaForm('Telegram')">
+     <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="#229ED9"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></span><span class="nombre">Telegram</span>
+    </div>
+    <div class="opcion-plataforma s" id="optSignal" onclick="elegirPlataformaForm('Signal')">
+     <span class="ic"><svg width="26" height="26" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<circle cx="24" cy="24" r="24" fill="#3A76F0"/>
+<circle cx="24" cy="24" r="18.5" fill="none" stroke="white" stroke-width="2.6" stroke-dasharray="4.8 3.2" stroke-linecap="round"/>
+<path d="M24 11.5c-6.9 0-12.5 5.3-12.5 11.85 0 2.9 1.1 5.54 2.91 7.57l-1.91 7.08 7.23-2.34A12.7 12.7 0 0 0 24 36.35c6.9 0 12.5-5.3 12.5-11.85S30.9 11.5 24 11.5z" fill="white"/>
+</svg></span><span class="nombre">Signal</span>
+    </div>
+   </div>
+   <div class="campo">
+    <label>Gruppenname</label>
+    <input type="text" id="agNombre" placeholder="z. B. Deutsche Entwickler">
+   </div>
+   <div class="campo">
+    <label>Kategorie</label>
+    <select id="agCategoria" onchange="actualizarCategoriaForm()">
+<option value="" disabled selected>Kategorie auswählen</option>
+</select>
+   </div>
+   <div class="campo">
+    <label>Einladungslink</label>
+    <input type="url" id="agLink" placeholder="https://chat.whatsapp.com/...">
+    <span class="ayuda" id="agLinkAyuda">Muss mit https://chat.whatsapp.com/ beginnen.</span>
+   </div>
+   <div class="campo">
+    <label>Gruppenbeschreibung</label>
+    <textarea id="agDescripcion" placeholder="Beschreibe kurz, worum es in deiner Gruppe geht, welche Regeln gelten und welche Mitglieder ihr sucht …" rows="3" style="padding:11px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:14px;outline:none;background:#fafbfa;resize:vertical;transition:border-color .18s;font-family:inherit;line-height:1.5;width:100%;box-sizing:border-box" onfocus="this.style.borderColor='var(--verde)'" onblur="this.style.borderColor='var(--borde)'"></textarea>
+   </div>
+   <div class="campo">
+    <label>Gruppenfoto hochladen</label>
+    <label id="agFotoLabel" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:11px 13px;border-radius:9px;border:1.5px dashed var(--borde);background:#fafbfa;transition:border-color .18s" onmouseenter="this.style.borderColor='var(--verde)'" onmouseleave="this.style.borderColor='var(--borde)'">
+<input type="file" id="agFotoInput" accept="image/*" style="display:none" onchange="previsualizarFoto(this)">
+<span id="agFotoIco" style="font-size:26px">📷</span>
+<div>
+<span id="agFotoTexto" style="font-size:14px;font-weight:600;color:var(--texto);display:block">Foto auswählen</span>
+<span style="font-size:11.5px;color:var(--sub)">JPG, PNG oder GIF · max. 5 MB</span>
+</div>
+<img id="agFotoPreview" src="" alt="" style="display:none;width:56px;height:56px;object-fit:cover;border-radius:8px;margin-left:auto;border:1.5px solid var(--borde)">
+</label>
+   </div>
+   <div class="campo-checkbox" id="cajaConfirma18" style="display:none">
+    <input type="checkbox" id="agConfirma18">
+    <label for="agConfirma18">Ich bestätige, dass diese Gruppe für Personen über 18 Jahre ist und die Regeln von WhatsApp/Telegram einhält.</label>
+   </div>
+   <p class="error-campo" id="errorAgregar"></p>
+   <button class="btn-principal" onclick="publicarGrupo()">Anfrage senden</button>
+   <p style="font-size:12px;color:var(--sub);text-align:center;margin-top:8px">Deine Gruppe wird vom Administrator geprüft, bevor sie auf der Seite erscheint.</p>
+  </div>
+ </div>
+ <!-- FIREBASE LOADING OVERLAY -->
+ <div id="fbLoading" style="display:none!important"></div>
+ <!-- SPINNER CAMBIO DE IDIOMA -->
+ <div id="langSpinner">
+  <div class="spin"></div>
+  <span id="langSpinnerTxt">Sprache wird geladen …</span>
+ </div>
+</body>
 
-  /* ===== FIREBASE CLOUD MESSAGING (FCM) ===== */
-  let _messaging = null;
-
-  async function iniciarFCM(){
-    // 1. Verificar soporte del navegador
-    if(!("Notification" in window) || !("serviceWorker" in navigator)){
-      console.log("[FCM] Este navegador no soporta notificaciones push.");
-      return;
-    }
-    if(!firebase.messaging.isSupported()){
-      console.log("[FCM] Firebase Messaging no es soportado en este navegador.");
-      return;
-    }
-
-    try{
-      // 2. Registrar el Service Worker (debe estar en la raíz del sitio)
-      const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-      console.log("[FCM] Service Worker registrado correctamente:", registration);
-
-      _messaging = firebase.messaging();
-
-      // 3. Solicitar permiso de notificaciones al usuario
-      const permiso = await Notification.requestPermission();
-      if(permiso !== "granted"){
-        console.log("[FCM] Permiso de notificaciones NO concedido. Estado:", permiso);
-        return;
-      }
-      console.log("[FCM] Permiso de notificaciones concedido.");
-
-      // 4. Obtener el token de FCM usando la clave VAPID
-      const token = await _messaging.getToken({
-        vapidKey: _VAPID_KEY,
-        serviceWorkerRegistration: registration
-      });
-
-      if(token){
-        console.log("[FCM] Token obtenido correctamente:", token);
-        // Aquí puedes guardar el token en Firestore, p. ej.:
-        // _db.collection("fcm_tokens").doc(token).set({ creadoEn: new Date().toISOString() });
-      } else {
-        console.log("[FCM] No se pudo obtener el token. El usuario puede necesitar conceder permiso nuevamente.");
-      }
-
-      // 5. Escuchar mensajes mientras la pestaña está en primer plano
-      _messaging.onMessage(payload=>{
-        console.log("[FCM] Mensaje recibido en primer plano:", payload);
-      });
-
-    }catch(err){
-      console.log("[FCM] Error al configurar las notificaciones:", err);
-    }
-  }
-
-</script>
-<!-- ===== /FIREBASE SDK ===== -->
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
+<style>:root{
     --verde:#1FAF55;
     --verde-d:#168a42;
     --tele:#229ED9;
@@ -1346,625 +1878,73 @@
     color:#1c2422;cursor:pointer;padding:4px 10px;font-size:13px;font-weight:700;
     flex-shrink:0;transition:.2s;
   }
-  #notifGlobalBanner .notif-g-close:hover{background:rgba(0,0,0,.18)}
-</style>
-</head>
-<body>
+  #notifGlobalBanner .notif-g-close:hover{background:rgba(0,0,0,.18)}@keyframes spin{to{transform:rotate(360deg)}}</style><script>const firebaseConfig = {
+    apiKey: "AIzaSyA3GpW1N7i9YNdw7KtZXx5VFgWyWoyoBYM",
+    authDomain: "gruppende-94f00.firebaseapp.com",
+    projectId: "gruppende-94f00",
+    storageBucket: "gruppende-94f00.firebasestorage.app",
+    messagingSenderId: "902209990512",
+    appId: "1:902209990512:web:eee7151f40ac41c70ba9b5",
+    measurementId: "G-WD6PVR87MR"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const _VAPID_KEY = "BFmNPitSEll1GhsDKYTw6bpb2QJgb9tq_fgjokel_lADAlBKMALlf9UGhuIWT2sr0v9Cs3mbX7lYLdKKRA7QuLs";
+  const _db  = firebase.firestore();
+  const _auth = firebase.auth();
+  const _googleProvider = new firebase.auth.GoogleAuthProvider();
 
-<!-- ===== SPLASH SCREEN ===== -->
-<div id="splash">
-  <div class="splash-logo">
-    <div class="splash-icon">
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-    </div>
-    <div class="splash-titulo">Gruppen<span>🇩🇪</span></div>
-  </div>
-  <p class="splash-tagline">Finde deine Community</p>
-  <div class="splash-bar-wrap">
-    <div class="splash-bar"></div>
-  </div>
-</div>
-  <header>
-  <div class="header-row">
-    <div class="logo" onclick="reiniciar();return false;" style="cursor:pointer;text-decoration:none" title="Zur Startseite">
-      <div class="mark">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-      </div>
-      <h1>Gruppen🇩🇪</h1>
-    </div>
-    <!-- Controles flotantes: modo + idioma (fuera del nav) -->
-    <div class="header-utils">
-      <!-- Toggle día/noche -->
-      <button class="modo util-btn" id="btnModo" onclick="modo()" aria-label="Dunkel-/Hellmodus wechseln" title="Nachtmodus">
-        <div class="tg-toggle">
-          <div class="tg-track">
-            <div class="tg-stars">
-              <div class="tg-star"></div>
-              <div class="tg-star"></div>
-              <div class="tg-star"></div>
-            </div>
-          </div>
-          <div class="tg-thumb">
-            <div class="tg-icons">
-              <div class="tg-sol">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0-4a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zM4.22 4.22a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zm13.44 13.44a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zM3 11h1a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2zm17 0h1a1 1 0 0 1 0 2h-1a1 1 0 0 1 0-2zM5.64 17.66l-.7.7a1 1 0 1 1-1.42-1.42l.7-.7a1 1 0 0 1 1.42 1.42zm13.44-13.44.7-.7a1 1 0 1 1 1.42 1.42l-.7.7a1 1 0 0 1-1.42-1.42z"/></svg>
-              </div>
-              <div class="tg-luna">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="#818cf8"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
-              </div>
-            </div>
-          </div>
-        </div>
-      </button>
+  /* ===== FIREBASE CLOUD MESSAGING (FCM) ===== */
+  let _messaging = null;
 
-      <!-- Separador -->
-      <span class="util-sep"></span>
+  async function iniciarFCM(){
+    // 1. Verificar soporte del navegador
+    if(!("Notification" in window) || !("serviceWorker" in navigator)){
+      console.log("[FCM] Este navegador no soporta notificaciones push.");
+      return;
+    }
+    if(!firebase.messaging.isSupported()){
+      console.log("[FCM] Firebase Messaging no es soportado en este navegador.");
+      return;
+    }
 
-      <!-- Selector de idioma -->
-      <div class="lang-selector" id="langSelector">
-        <button class="lang-btn util-btn" onclick="toggleLangMenu()" id="langBtnActual" title="Sprache / Language / Idioma">
-          <span class="lang-flag" id="langFlagActual">🇩🇪</span>
-          <span class="lang-chevron">▼</span>
-        </button>
-        <div class="lang-dropdown" id="langDropdown">
-          <div class="lang-option activa" onclick="cambiarIdioma('de','🇩🇪','DE')" id="langOpt-de">
-            <span class="lf">🇩🇪</span><span class="ln">Deutsch</span><span class="lcheck">✓</span>
-          </div>
-          <div class="lang-option" onclick="cambiarIdioma('en','🇺🇸','EN')" id="langOpt-en">
-            <span class="lf">🇺🇸</span><span class="ln">English (US)</span><span class="lcheck">✓</span>
-          </div>
-          <div class="lang-option" onclick="cambiarIdioma('en-GB','🇬🇧','EN')" id="langOpt-en-GB">
-            <span class="lf">🇬🇧</span><span class="ln">English (UK)</span><span class="lcheck">✓</span>
-          </div>
-          <div class="lang-option" onclick="cambiarIdioma('es','🇪🇸','ES')" id="langOpt-es">
-            <span class="lf">🇪🇸</span><span class="ln">Español</span><span class="lcheck">✓</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    try{
+      // 2. Registrar el Service Worker (debe estar en la raíz del sitio)
+      const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+      console.log("[FCM] Service Worker registrado correctamente:", registration);
 
-    <!-- NAV principal: solo Agregar + Sesión -->
-    <nav>
-      <button class="btn-agregar" onclick="abrirAgregar()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <span id="navBtnAgregarLabel">Gruppe hinzufügen</span>
-      </button>
-      <div id="zonaSesion"></div>
-    </nav>
+      _messaging = firebase.messaging();
 
-    <!-- Botón hamburguesa (solo móvil) -->
-    <button class="btn-hamburger" id="btnHamburger" onclick="toggleDrawer()" aria-label="Menü öffnen">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
-</header>
+      // 3. Solicitar permiso de notificaciones al usuario
+      const permiso = await Notification.requestPermission();
+      if(permiso !== "granted"){
+        console.log("[FCM] Permiso de notificaciones NO concedido. Estado:", permiso);
+        return;
+      }
+      console.log("[FCM] Permiso de notificaciones concedido.");
 
-<!-- Overlay fondo oscuro -->
-<div class="nav-overlay" id="navOverlay" onclick="cerrarDrawer()"></div>
+      // 4. Obtener el token de FCM usando la clave VAPID
+      const token = await _messaging.getToken({
+        vapidKey: _VAPID_KEY,
+        serviceWorkerRegistration: registration
+      });
 
-<!-- Drawer menú móvil -->
-<nav class="nav-drawer" id="navDrawer">
-  <div class="drawer-seccion" style="border-top:none;padding-top:0">Menü</div>
+      if(token){
+        console.log("[FCM] Token obtenido correctamente:", token);
+        // Aquí puedes guardar el token en Firestore, p. ej.:
+        // _db.collection("fcm_tokens").doc(token).set({ creadoEn: new Date().toISOString() });
+      } else {
+        console.log("[FCM] No se pudo obtener el token. El usuario puede necesitar conceder permiso nuevamente.");
+      }
 
-  <button class="drawer-item" onclick="abrirAgregar();cerrarDrawer()">
-    <span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span> <span id="drawerBtnAgregar">Gruppe hinzufügen</span>
-  </button>
-  <button class="drawer-item" id="drawerBtnSesion" onclick="cerrarDrawer()">
-    <span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> <span id="drawerSesionLabel">Anmelden</span>
-  </button>
-  <button class="drawer-item" id="drawerBtnAdmin" style="display:none;color:#ffd9a0" onclick="abrirAdmin();cerrarDrawer()">
-    <span class="d-ico">⚙️</span> <span>Admin-Panel</span>
-  </button>
-  <button class="drawer-item" id="drawerBtnMisGrupos" style="display:none" onclick="abrirMisGrupos();cerrarDrawer()">
-    <span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span> <span>Meine Gruppen</span>
-  </button>
+      // 5. Escuchar mensajes mientras la pestaña está en primer plano
+      _messaging.onMessage(payload=>{
+        console.log("[FCM] Mensaje recibido en primer plano:", payload);
+      });
 
-  <div class="drawer-seccion">Darstellung</div>
-  <div class="drawer-controls">
-    <span class="dc-label" id="drawerModoLabel">Nachtmodus</span>
-    <button class="modo" id="btnModoDrawer" onclick="modo()" aria-label="Modus wechseln" title="Nachtmodus" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center">
-      <div class="tg-toggle">
-        <div class="tg-track">
-          <div class="tg-stars">
-            <div class="tg-star"></div><div class="tg-star"></div><div class="tg-star"></div>
-          </div>
-        </div>
-        <div class="tg-thumb">
-          <div class="tg-icons">
-            <div class="tg-sol"><svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0-4a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zM4.22 4.22a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zm13.44 13.44a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zM3 11h1a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2zm17 0h1a1 1 0 0 1 0 2h-1a1 1 0 0 1 0-2zM5.64 17.66l-.7.7a1 1 0 1 1-1.42-1.42l.7-.7a1 1 0 0 1 1.42 1.42zm13.44-13.44.7-.7a1 1 0 1 1 1.42 1.42l-.7.7a1 1 0 0 1-1.42-1.42z"/></svg></div>
-            <div class="tg-luna"><svg width="12" height="12" viewBox="0 0 24 24" fill="#818cf8"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg></div>
-          </div>
-        </div>
-      </div>
-    </button>
-  </div>
-
-  <div class="drawer-seccion">Sprache / Language / Idioma</div>
-  <div class="drawer-lang-opts">
-    <button class="drawer-lang-opt activa" id="dLangOpt-de" onclick="cambiarIdioma('de','🇩🇪','DE');cerrarDrawer()">
-      <span class="dlf">🇩🇪</span><span>Deutsch</span><span class="dlcheck">✓</span>
-    </button>
-    <button class="drawer-lang-opt" id="dLangOpt-en" onclick="cambiarIdioma('en','🇺🇸','EN');cerrarDrawer()">
-      <span class="dlf">🇺🇸</span><span>English (US)</span><span class="dlcheck">✓</span>
-    </button>
-    <button class="drawer-lang-opt" id="dLangOpt-en-GB" onclick="cambiarIdioma('en-GB','🇬🇧','EN');cerrarDrawer()">
-      <span class="dlf">🇬🇧</span><span>English (UK)</span><span class="dlcheck">✓</span>
-    </button>
-    <button class="drawer-lang-opt" id="dLangOpt-es" onclick="cambiarIdioma('es','🇪🇸','ES');cerrarDrawer()">
-      <span class="dlf">🇪🇸</span><span>Español</span><span class="dlcheck">✓</span>
-    </button>
-  </div>
-</nav>
-
-<div class="cat-bar">
-  <div class="cat-row" id="catRow"></div>
-</div>
-
-<div class="banner-agregar">
-  <div class="banner-agregar-inner">
-    <div class="banner-agregar-texto">
-      <strong>Hast du eine tolle Gruppe?</strong>
-      <span>Teile sie mit Tausenden von Menschen auf Gruppen🇩🇪</span>
-    </div>
-    <button class="btn-agregar-banner" onclick="abrirAgregar()">
-      <span class="plus">＋</span> Gruppe hinzufügen
-    </button>
-  </div>
-</div>
-
-<input id="buscar" placeholder="Gruppen nach Name oder Plattform suchen …" onkeyup="buscarCambio()">
-
-<div class="plat-wrap">
-  <div class="plat-selector" id="platSelector">
-    <button class="plat-btn" onclick="togglePlatMenu()" type="button">
-      <span class="plat-ico" id="platIcoActual"><span class="po-ico-logo g"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 0 1 0 18a13 13 0 0 1 0-18"/></svg></span></span>
-      <span id="platTextoActual">Alle Plattformen</span>
-      <span class="plat-chevron">▾</span>
-    </button>
-    <div class="plat-dropdown" id="platDropdown">
-      <div class="plat-option activa" id="platOpt-Todos" onclick="elegirPlataforma('Todos')">
-        <span class="po-ico-logo g"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 0 1 0 18a13 13 0 0 1 0-18"/></svg></span><span class="po-nombre" id="platLbl-Todos">Alle Plattformen</span><span class="po-check">✓</span>
-      </div>
-      <div class="plat-option" id="platOpt-WhatsApp" onclick="elegirPlataforma('WhatsApp')">
-        <span class="po-ico-logo w"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></span><span class="po-nombre">WhatsApp</span><span class="po-check">✓</span>
-      </div>
-      <div class="plat-option" id="platOpt-Telegram" onclick="elegirPlataforma('Telegram')">
-        <span class="po-ico-logo t"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></span><span class="po-nombre">Telegram</span><span class="po-check">✓</span>
-      </div>
-      <div class="plat-option" id="platOpt-Signal" onclick="elegirPlataforma('Signal')">
-        <span class="po-ico-logo s"><svg width="14" height="14" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="18.5" fill="none" stroke="white" stroke-width="2.6" stroke-dasharray="4.8 3.2" stroke-linecap="round"/><path d="M24 11.5c-6.9 0-12.5 5.3-12.5 11.85 0 2.9 1.1 5.54 2.91 7.57l-1.91 7.08 7.23-2.34A12.7 12.7 0 0 0 24 36.35c6.9 0 12.5-5.3 12.5-11.85S30.9 11.5 24 11.5z" fill="white"/></svg></span><span class="po-nombre">Signal</span><span class="po-check">✓</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<p class="resultado-info" id="resultadoInfo"></p>
-
-<div class="grid" id="grid"></div>
-<div class="paginacion" id="paginacion"></div>
-
-<footer>
-  <div class="footer-top">
-    <div class="footer-marca">
-      <div class="logo"><div class="mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="#1FAF55"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></div><h1 style="color:#fff;font-size:20px">Gruppen🇩🇪</h1></div>
-      <p>Das Verzeichnis für WhatsApp- und Telegram-Communitys – finde deine Community: Gamer, Entwickler, Reisende und vieles mehr, alles an einem Ort.</p>
-      <div class="footer-redes">
-        <a href="#" aria-label="WhatsApp" title="WhatsApp">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-        </a>
-        <a href="#" aria-label="Telegram" title="Telegram">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-        </a>
-        <a href="#" aria-label="Facebook" title="Facebook">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-        </a>
-        <a href="#" aria-label="Instagram" title="Instagram">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
-        </a>
-      </div>
-    </div>
-    <div class="footer-col">
-      <h4>Erkunden</h4>
-      <ul>
-        <li><a href="" onclick="reiniciar();return false;">✨ Alle Gruppen</a></li>
-        <li><a href="#" onclick="elegirCategoria('+18');return false;">🔞 +18</a></li>
-        <li><a href="#" onclick="elegirCategoria('Singles');return false;">💘 Singles</a></li>
-        <li><a href="#" onclick="elegirCategoria('Gaming');return false;">🎮 Gaming</a></li>
-        <li><a href="#" onclick="elegirCategoria('Programación');return false;">💻 Programmierung</a></li>
-        <li><a href="#" onclick="elegirCategoria('Música');return false;">🎵 Musik</a></li>
-        <li><a href="#" onclick="elegirCategoria('Viajes');return false;">🌍 Reisen</a></li>
-        <li><a href="#" onclick="elegirCategoria('Estudio');return false;">📚 Lernen</a></li>
-        <li><a href="#" onclick="elegirCategoria('Empleo');return false;">💼 Jobs</a></li>
-
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h4>Support</h4>
-      <ul>
-        <li><a href="#">Hilfezentrum</a></li>
-        <li><a href="#">Gruppe melden</a></li>
-        <li><a href="#">Deine Community veröffentlichen</a></li>
-        <li><a href="#">Kontakt</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <span>© 2026 <b>Gruppen🇩🇪</b>. Alle Rechte vorbehalten.</span>
-    <div class="footer-legal">
-      <a href="#">Nutzungsbedingungen</a>
-      <a href="#">Datenschutz</a>
-      <a href="#">Cookies</a>
-    </div>
-  </div>
-</footer>
-
-<!-- SECCIÓN USUARIO — Meine Gruppen (inline) -->
-<div id="panelMisGrupos">
-  <div class="mis-grupos-seccion">
-    <div class="mis-grupos-header">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:36px;height:36px;border-radius:10px;background:var(--verde);display:flex;align-items:center;justify-content:center;font-size:18px">👤</div>
-        <div>
-          <h2 style="font-size:20px;margin:0">Meine Gruppen</h2>
-          <p style="font-size:12.5px;color:var(--sub);margin:0" id="misGruposSubtitle">Deine eingereichten Gruppen</p>
-        </div>
-      </div>
-      <button onclick="cerrarMisGrupos()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub);line-height:1;padding:4px" title="Schließen">✕</button>
-    </div>
-    <div id="misGruposGrid" class="mis-grupos-grid"></div>
-  </div>
-</div>
-
-<!-- PANEL ADMINISTRADOR -->
-<div id="panelAdmin">
-  <div class="admin-modal">
-    <button class="cerrar" onclick="cerrarAdmin()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub)">✕</button>
-    <h2>⚙️ Administrator-Panel <span class="admin-badge">ADMIN</span></h2>
-    <p style="color:var(--sub);font-size:13px;margin-bottom:0">Vollständige Kontrolle über Gruppen und Paginierung · Gruppen🇩🇪</p>
-
-    <div class="admin-tabs">
-      <button class="admin-tab activo" onclick="adminTab('agregar')">➕ Gruppe hinzufügen</button>
-      <button class="admin-tab" onclick="adminTab('gestionar')">📋 Gruppen verwalten</button>
-      <button class="admin-tab" onclick="adminTab('solicitudes')" id="tabSolicitudes">🕐 Anfragen<span id="badgeSolicitudes" style="display:none;margin-left:6px;background:#ef4444;color:#fff;border-radius:99px;font-size:11px;font-weight:700;padding:1px 7px;vertical-align:middle"></span></button>
-      <button class="admin-tab" onclick="adminTab('chats')" id="tabChats">💬 Chats</button>
-      <button class="admin-tab" onclick="adminTab('notificacion')">📢 Notificación</button>
-    </div>
-
-    <!-- TAB: AGREGAR -->
-    <div class="admin-seccion activa" id="adminAgregar">
-      <div class="admin-form-grid">
-        <div class="admin-campo">
-          <label>Gruppenname *</label>
-          <input type="text" id="adNombre" placeholder="z. B. Fitness Deutschland">
-        </div>
-        <div class="admin-campo">
-          <label>Kategorie *</label>
-          <select id="adCategoria" onchange="adminActualizar18()">
-            <option value="" disabled selected>Auswählen</option>
-          </select>
-        </div>
-        <div class="admin-campo">
-          <label>Plattform *</label>
-          <select id="adPlataforma">
-            <option value="WhatsApp">WhatsApp</option>
-            <option value="Telegram">Telegram</option>
-            <option value="Signal">Signal</option>
-          </select>
-        </div>
-        <div class="admin-campo">
-          <label>Mitglieder</label>
-          <input type="number" id="adMiembros" placeholder="z. B. 250" min="0">
-        </div>
-        <div class="admin-campo admin-full">
-          <label>Einladungslink *</label>
-          <input type="url" id="adLink" placeholder="https://chat.whatsapp.com/...">
-        </div>
-        <div class="admin-campo admin-full">
-          <label>Bild (Foto hochladen)</label>
-          <input type="file" id="adImagenFile" accept="image/*" onchange="adminImagenSeleccionada(event)">
-          <input type="hidden" id="adImagen">
-          <div id="adImagenPreviewWrap" style="display:none;margin-top:8px;align-items:center;gap:10px">
-            <img id="adImagenPreview" src="" alt="Vorschau" style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--borde)">
-            <button type="button" onclick="adminImagenQuitar()" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;text-decoration:underline">Entfernen</button>
-          </div>
-        </div>
-        <div class="admin-campo">
-          <label>Feste Seite (optional)</label>
-          <input type="number" id="adPagina" placeholder="z. B. 1" min="1">
-          <span style="font-size:11px;color:var(--sub);margin-top:3px">Erzwingt das Erscheinen auf dieser Seite</span>
-        </div>
-        <div class="admin-campo">
-          <label>Basispopularität (Favoriten)</label>
-          <input type="number" id="adFavoritos" placeholder="z. B. 50" min="0">
-        </div>
-      </div>
-      <div class="campo-checkbox" id="adminCaja18" style="display:none">
-        <input type="checkbox" id="adConfirma18">
-        <label for="adConfirma18">Ich bestätige, dass diese Gruppe für Personen über 18 Jahre geeignet ist.</label>
-      </div>
-      <p class="error-campo" id="errorAdmin" style="margin-top:4px"></p>
-      <button class="btn-principal" style="margin-top:8px" onclick="adminPublicar()">Gruppe veröffentlichen</button>
-    </div>
-
-    <!-- TAB: GESTIONAR -->
-    <div class="admin-seccion" id="adminGestionar">
-      <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Bearbeite die Seite, auf der jede Gruppe erscheint, oder lösche sie. Änderungen werden beim Klicken auf <b>Speichern</b> übernommen.</p>
-      <div class="admin-tabla-wrap">
-        <table class="admin-tabla" id="adminTabla">
-          <thead><tr>
-            <th>Gruppe</th><th>Kat.</th><th>Plattform</th><th>👥 Mitglieder</th><th>Feste Seite</th><th>Aktionen</th>
-          </tr></thead>
-          <tbody id="adminTablaBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB: SOLICITUDES -->
-    <div class="admin-seccion" id="adminSolicitudes">
-      <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Von Benutzern eingereichte Gruppen, die deine Genehmigung benötigen.</p>
-      <div class="admin-tabla-wrap" id="adminSolicitudesWrap">
-        <table class="admin-tabla">
-          <thead><tr>
-            <th>Gruppe</th><th>Kat.</th><th>Plattform</th><th>Benutzer</th><th>Enlace del grupo</th><th>Status</th><th>Aktionen</th>
-          </tr></thead>
-          <tbody id="adminSolicitudesBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB: CHATS -->
-    <div class="admin-seccion" id="adminChats">
-      <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Kommuniziere mit Benutzern über ihre Anfragen.</p>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="display:flex;gap:10px;align-items:center">
-          <label style="font-size:13px;font-weight:700;color:var(--sub)">Gespräch mit:</label>
-          <select id="adminChatSelect" onchange="adminCambiarChat()" style="flex:1;padding:8px 10px;border-radius:8px;border:1.5px solid var(--borde);font-size:13px;outline:none;background:#fafbfa;color:var(--texto)">
-            <option value="">Benutzer auswählen...</option>
-          </select>
-        </div>
-        <div id="adminChatMensajes" style="background:#f7f9f8;border-radius:12px;padding:12px;min-height:180px;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;border:1px solid var(--borde)"></div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <label class="btn-galeria" title="Enviar imagen" style="flex:0 0 auto">
-            <input type="file" id="adminChatImgInput" accept="image/*" style="display:none" onchange="adminEnviarImagen(this)">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          </label>
-          <input type="text" id="adminChatInput" placeholder="Antwort schreiben..." onkeydown="if(event.key==='Enter')adminEnviarMensaje()"
-            style="flex:1;padding:10px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:13.5px;outline:none;background:#fafbfa">
-          <button onclick="adminEnviarMensaje()" style="padding:10px 18px;border-radius:9px;border:none;background:var(--verde);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer">Senden</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: NOTIFICACIÓN GLOBAL -->
-    <div class="admin-seccion" id="adminNotificacion">
-      <p style="font-size:13px;color:var(--sub);margin-bottom:14px">Envía un banner de notificación a todos los usuarios. Cada usuario lo ve <b>una sola vez</b> por envío.</p>
-      <div class="admin-campo">
-        <label>Nuevo mensaje</label>
-        <input type="text" id="notifAdminInput" placeholder="Ej: Un grupo nuevo ha sido añadido 🎉" maxlength="120">
-      </div>
-      <p style="font-size:11.5px;color:var(--sub);margin:-6px 0 12px">Máx. 120 caracteres.</p>
-      <button class="btn-principal" style="margin-top:4px" onclick="enviarNotificacionGlobal()">📢 Enviar notificación a todos</button>
-
-      <!-- Historial -->
-      <div style="margin-top:20px">
-        <p style="font-size:12.5px;font-weight:700;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Historial — clic para reenviar</p>
-        <div id="notifHistorialLista" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto"></div>
-        <p id="notifHistorialVacio" style="font-size:13px;color:var(--sub);text-align:center;padding:18px 0;display:none">Sin notificaciones enviadas aún.</p>
-      </div>
-    </div>
-
-  </div><!-- /admin-modal -->
-</div><!-- /panelAdmin -->
-
-<div id="toast"></div>
-
-<!-- BANNER NOTIFICACIÓN GLOBAL -->
-<div id="notifGlobalBanner">
-  <span class="notif-g-ico">📢</span>
-  <span class="notif-g-txt" id="notifGlobalTxt"></span>
-  <button class="notif-g-close" onclick="cerrarNotifGlobal()">✕</button>
-</div>
-
-<!-- NOTIFICACIÓN PUSH -->
-<div id="notifPush">
-  <button class="notif-close" onclick="cerrarNotif()">✕</button>
-  <div class="notif-ico" id="notifIco">💬</div>
-  <div class="notif-body">
-    <strong id="notifTitulo">Neue Nachricht</strong>
-    <span id="notifTexto"></span>
-  </div>
-</div>
-
-<!-- BOTÓN FLOTANTE CHAT -->
-<button id="chatFlotante" onclick="toggleChat()" title="Chat con soporte">
-  💬
-  <span id="chatBadge">0</span>
-</button>
-
-<!-- PANEL CHAT -->
-<div id="panelChat">
-  <div class="chat-header">
-    <div class="avatar-admin"><img src="https://s67.erome.com/8391/25otK4Ph/KHyzTjkN.jpg?v=1782372656" alt="Support"></div>
-    <div class="chat-header-info">
-      <strong id="chatNombreHeader">Support-Team</strong>
-      <span id="chatSubHeader">Support</span>
-    </div>
-    <button onclick="toggleChat()">✕</button>
-  </div>
-  <!-- Selector de conversación (solo admin) -->
-  <div class="chat-conv-sel" id="chatConvSel" style="display:none">
-    <span style="color:var(--sub);white-space:nowrap">Chat von:</span>
-    <select id="chatConvSelect" onchange="cambiarConversacion()">
-      <option value="">Benutzer auswählen...</option>
-    </select>
-  </div>
-  <div class="chat-mensajes" id="chatMensajes"></div>
-  <div class="chat-input-row">
-    <label class="btn-galeria" title="Enviar imagen">
-      <input type="file" id="chatImgInput" accept="image/*" style="display:none" onchange="enviarImagen(this)">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-    </label>
-    <input type="text" id="chatInput" placeholder="Nachricht schreiben..." onkeydown="if(event.key==='Enter')enviarMensaje()">
-    <button onclick="enviarMensaje()">➤</button>
-  </div>
-</div>
-
-<!-- MODAL DE INICIO DE SESIÓN / REGISTRO -->
-<div class="overlay" id="overlayAuth">
-  <div class="modal">
-    <button class="cerrar" onclick="cerrarAuth()">✕</button>
-    <div class="tabs-auth">
-      <button id="tabLogin" class="activo" onclick="cambiarTab('login')">Anmelden</button>
-      <button id="tabRegistro" onclick="cambiarTab('registro')">Konto erstellen</button>
-    </div>
-
-    <!-- LOGIN -->
-    <div id="vistaLogin">
-      <h2>Willkommen zurück</h2>
-      <p class="sub">Melde dich an, um deine Lieblingsgruppen zu speichern.</p>
-      <div class="campo">
-        <label>E-Mail-Adresse</label>
-        <input type="email" id="loginCorreo" placeholder="deine@gmail.com">
-      </div>
-      <div class="campo">
-        <label>Passwort</label>
-        <input type="password" id="loginPass" placeholder="••••••••">
-      </div>
-      <p class="error-campo" id="errorLogin"></p>
-      <button class="btn-principal" onclick="iniciarSesion()">Anmelden</button>
-      <div class="divisor">oder</div>
-      <button class="btn-google" onclick="googleSignIn()">
-        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
-        Mit Google fortfahren
-      </button>
-      <p class="pie-auth">Noch kein Konto? <a onclick="cambiarTab('registro')">Jetzt registrieren</a></p>
-    </div>
-
-    <!-- REGISTRO -->
-    <div id="vistaRegistro" style="display:none">
-      <h2>Konto erstellen</h2>
-      <p class="sub">Tritt bei und speichere die Gruppen, die dich interessieren.</p>
-      <div class="campo">
-        <label>Name</label>
-        <input type="text" id="regNombre" placeholder="Dein Name">
-      </div>
-      <div class="campo">
-        <label>E-Mail-Adresse</label>
-        <input type="email" id="regCorreo" placeholder="deine@gmail.com">
-      </div>
-      <div class="campo">
-        <label>Passwort</label>
-        <input type="password" id="regPass" placeholder="Mindestens 6 Zeichen">
-      </div>
-      <p class="error-campo" id="errorRegistro"></p>
-      <button class="btn-principal" onclick="registrar()">Konto erstellen</button>
-      <div class="divisor">oder</div>
-      <button class="btn-google" onclick="googleSignIn()">
-        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
-        Mit Google fortfahren
-      </button>
-      <p class="pie-auth">Bereits ein Konto? <a onclick="cambiarTab('login')">Jetzt anmelden</a></p>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL AVISO FOTO — todas las demás categorías -->
-<div class="overlay" id="overlayFotoAviso">
-  <div class="modal modal-edad">
-    <span class="e">📷</span>
-    <h2>Hinweis für deine Gruppe</h2>
-    <p class="sub">Es wird empfohlen, beim Hinzufügen Ihrer Gruppen eigene Fotos hochzuladen.</p>
-    <div class="acciones-edad">
-      <button class="no" onclick="cerrarFotoAviso()">Schließen</button>
-      <button class="si" onclick="confirmarFotoAviso()">Verstanden</button>
-    </div>
-  </div>
-</div>
-<div class="overlay" id="overlayEdad">
-  <div class="modal modal-edad">
-    <span class="e">🔒</span>
-    <h2>Inhalt nur für Erwachsene</h2>
-    <p class="sub">Sind Sie über 18 Jahre alt? Es wird empfohlen, beim Hinzufügen von Gruppen eigene Fotos hochzuladen +18.</p>
-    <div class="acciones-edad">
-      <button class="no" onclick="rechazarEdad()">Nein, zurück</button>
-      <button class="si" onclick="confirmarEdad()">Ja, ich bin über 18</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL — AÑADIR GRUPO -->
-<div class="overlay" id="overlayAgregar">
-  <div class="modal modal-grande">
-    <button class="cerrar" onclick="cerrarAgregar()">✕</button>
-    <h2>Deine Gruppe hinzufügen</h2>
-    <p class="sub">Teile deine WhatsApp- oder Telegram-Community mit Tausenden von Menschen.</p>
-
-    <div class="plataforma-toggle">
-      <div class="opcion-plataforma activa w" id="optWhatsApp" onclick="elegirPlataformaForm('WhatsApp')">
-        <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></span><span class="nombre">WhatsApp</span>
-      </div>
-      <div class="opcion-plataforma t" id="optTelegram" onclick="elegirPlataformaForm('Telegram')">
-        <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="#229ED9"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></span><span class="nombre">Telegram</span>
-      </div>
-      <div class="opcion-plataforma s" id="optSignal" onclick="elegirPlataformaForm('Signal')">
-        <span class="ic"><svg width="26" height="26" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="24" cy="24" r="24" fill="#3A76F0"/>
-  <circle cx="24" cy="24" r="18.5" fill="none" stroke="white" stroke-width="2.6" stroke-dasharray="4.8 3.2" stroke-linecap="round"/>
-  <path d="M24 11.5c-6.9 0-12.5 5.3-12.5 11.85 0 2.9 1.1 5.54 2.91 7.57l-1.91 7.08 7.23-2.34A12.7 12.7 0 0 0 24 36.35c6.9 0 12.5-5.3 12.5-11.85S30.9 11.5 24 11.5z" fill="white"/>
-</svg></span><span class="nombre">Signal</span>
-      </div>
-    </div>
-
-    <div class="campo">
-      <label>Gruppenname</label>
-      <input type="text" id="agNombre" placeholder="z. B. Deutsche Entwickler">
-    </div>
-
-    <div class="campo">
-      <label>Kategorie</label>
-      <select id="agCategoria" onchange="actualizarCategoriaForm()">
-        <option value="" disabled selected>Kategorie auswählen</option>
-      </select>
-    </div>
-
-    <div class="campo">
-      <label>Einladungslink</label>
-      <input type="url" id="agLink" placeholder="https://chat.whatsapp.com/...">
-      <span class="ayuda" id="agLinkAyuda">Muss mit https://chat.whatsapp.com/ beginnen.</span>
-    </div>
-
-    <div class="campo">
-      <label>Gruppenbeschreibung</label>
-      <textarea id="agDescripcion" placeholder="Beschreibe kurz, worum es in deiner Gruppe geht, welche Regeln gelten und welche Mitglieder ihr sucht …" rows="3" style="padding:11px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:14px;outline:none;background:#fafbfa;resize:vertical;transition:border-color .18s;font-family:inherit;line-height:1.5;width:100%;box-sizing:border-box" onfocus="this.style.borderColor='var(--verde)'" onblur="this.style.borderColor='var(--borde)'"></textarea>
-    </div>
-
-    <div class="campo">
-      <label>Gruppenfoto hochladen</label>
-      <label id="agFotoLabel" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:11px 13px;border-radius:9px;border:1.5px dashed var(--borde);background:#fafbfa;transition:border-color .18s" onmouseenter="this.style.borderColor='var(--verde)'" onmouseleave="this.style.borderColor='var(--borde)'">
-        <input type="file" id="agFotoInput" accept="image/*" style="display:none" onchange="previsualizarFoto(this)">
-        <span id="agFotoIco" style="font-size:26px">📷</span>
-        <div>
-          <span id="agFotoTexto" style="font-size:14px;font-weight:600;color:var(--texto);display:block">Foto auswählen</span>
-          <span style="font-size:11.5px;color:var(--sub)">JPG, PNG oder GIF · max. 5 MB</span>
-        </div>
-        <img id="agFotoPreview" src="" alt="" style="display:none;width:56px;height:56px;object-fit:cover;border-radius:8px;margin-left:auto;border:1.5px solid var(--borde)">
-      </label>
-    </div>
-
-    <div class="campo-checkbox" id="cajaConfirma18" style="display:none">
-      <input type="checkbox" id="agConfirma18">
-      <label for="agConfirma18">Ich bestätige, dass diese Gruppe für Personen über 18 Jahre ist und die Regeln von WhatsApp/Telegram einhält.</label>
-    </div>
-
-    <p class="error-campo" id="errorAgregar"></p>
-    <button class="btn-principal" onclick="publicarGrupo()">Anfrage senden</button>
-    <p style="font-size:12px;color:var(--sub);text-align:center;margin-top:8px">Deine Gruppe wird vom Administrator geprüft, bevor sie auf der Seite erscheint.</p>
-  </div>
-</div>
-
-
-<script>
-const categorias=[
+    }catch(err){
+      console.log("[FCM] Error al configurar las notificaciones:", err);
+    }
+  }const categorias=[
   {nombre:"Todos",icono:"✨"},
   {nombre:"+18",icono:"🔞"},
   {nombre:"Singles",icono:"💘"},
@@ -4392,17 +4372,4 @@ async function verificarNotificacionGlobal(){
       document.getElementById("chatBadge").classList.add("visible");
     }
   }
-})();
-</script>
-<!-- FIREBASE LOADING OVERLAY -->
-<div id="fbLoading" style="display:none!important"></div>
-
-<!-- SPINNER CAMBIO DE IDIOMA -->
-<div id="langSpinner">
-  <div class="spin"></div>
-  <span id="langSpinnerTxt">Sprache wird geladen …</span>
-</div>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-
-</body>
-</html>
+})();</script></html>
