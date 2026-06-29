@@ -2038,7 +2038,9 @@ Mit Google fortfahren
   };
   firebase.initializeApp(firebaseConfig);
   const _VAPID_KEY = "BFmNPitSEll1GhsDKYTw6bpb2QJgb9tq_fgjokel_lADAlBKMALlf9UGhuIWT2sr0v9Cs3mbX7lYLdKKRA7QuLs";
-  const _db  = firebase.firestore();
+  // Fix: declarar _db en window para garantizar acceso global desde cualquier función
+  window._db  = firebase.firestore();
+  var _db = window._db;
 
   // ═══ FIRESTORE OFFLINE PERSISTENCE (caché local) ═══════════════
   _db.enablePersistence({ synchronizeTabs: true })
@@ -2054,8 +2056,10 @@ Mit Google fortfahren
     });
   // ════════════════════════════════════════════════════════════════
 
-  const _auth = firebase.auth();
-  const _googleProvider = new firebase.auth.GoogleAuthProvider();
+  window._auth = firebase.auth();
+  var _auth = window._auth;
+  window._googleProvider = new firebase.auth.GoogleAuthProvider();
+  var _googleProvider = window._googleProvider;
 
   /* ===== FIREBASE CLOUD MESSAGING (FCM) ===== */
   let _messaging = null;
@@ -2228,7 +2232,7 @@ async function guardarGrupoUsuario(g){
 const GRUPOS_POR_PAGINA=6;
 let paginaActual=1;
 let _cargandoGrupos=true;
-const _splashInicio=Date.now();
+const _splashInicio=Date.now(); window._splashInicio=_splashInicio;
 
 const grid=document.getElementById("grid");
 const catRow=document.getElementById("catRow");
@@ -3376,73 +3380,96 @@ async function cargarDatosAdmin(){
 }
 
 async function initFirebase(){
-  // 1. Renderizar los grupos base INMEDIATAMENTE — sin esperar a Firebase
-  pintarSesion();
-  pintarCategorias();
-  poblarSelectCategorias();
-  pintar(grupos);
-
-  // 2. Quitar el splash dejando que se vea su animación completa (mínimo 2.2s desde que empezó a cargar)
+  // Fix: funcion robusta de quitar splash — se llama siempre, pase lo que pase
   function quitarSplash(){
-    const splash=document.getElementById("splash");
-    if(splash && !splash.classList.contains("oculto")){
-      document.querySelectorAll("body>*:not(#splash)").forEach(el=>el.style.visibility="");
-      splash.classList.add("oculto");
-      setTimeout(()=>{ if(splash.parentNode) splash.parentNode.removeChild(splash); },400);
-    }
+    try{
+      var splash=document.getElementById("splash");
+      if(splash && !splash.classList.contains("oculto")){
+        document.querySelectorAll("body>*:not(#splash)").forEach(function(el){ el.style.visibility=""; });
+        splash.classList.add("oculto");
+        setTimeout(function(){ if(splash && splash.parentNode) splash.parentNode.removeChild(splash); },520);
+      }
+    }catch(err){ console.warn("quitarSplash error:",err); }
   }
-  const _tiempoMinimoSplash=2200;
-  const _transcurrido=Date.now()-_splashInicio;
-  setTimeout(quitarSplash, Math.max(0,_tiempoMinimoSplash-_transcurrido));
+
+  // 1. Renderizar los grupos base INMEDIATAMENTE — sin esperar a Firebase
+  try{ pintarSesion(); }catch(e){ console.warn("pintarSesion:",e); }
+  try{ pintarCategorias(); }catch(e){ console.warn("pintarCategorias:",e); }
+  try{ poblarSelectCategorias(); }catch(e){ console.warn("poblarSelectCategorias:",e); }
+  try{ pintar(grupos); }catch(e){ console.warn("pintar:",e); }
+
+  // 2. Quitar el splash respetando minimo de 2.2s, con doble garantia de ejecucion
+  var _tiempoMinimoSplash=2200;
+  var _transcurrido=Date.now()-(window._splashInicio||Date.now());
+  var _demoraSplash=Math.max(0,_tiempoMinimoSplash-_transcurrido);
+  setTimeout(quitarSplash, _demoraSplash);
+  // Fallback extra: si por algun motivo no se quito, forzar a los 4s
+  setTimeout(quitarSplash, Math.max(_demoraSplash+1000, 4000));
 
   // 3. Cargar Firebase en paralelo (Promise.all) — no bloquea la UI
   try{
+    // Fix: verificar que _db este disponible (window._db como respaldo)
+    var db = (typeof _db !== "undefined" && _db) ? _db : window._db;
+    if(!db){ console.error("_db no disponible — revisa la configuracion de Firebase"); _cargandoGrupos=false; try{filtrar();}catch(fe){} return; }
     const user=obtenerSesion();
     const promesas=[
-      _db.collection("grupos_extra").get(),
-      _db.collection("config").doc("paginas_fijas").get(),
+      db.collection("grupos_extra").get(),
+      db.collection("config").doc("paginas_fijas").get(),
       user ? cargarDatosUsuario(user.correo) : Promise.resolve(),
       user && esAdmin(user) ? cargarDatosAdmin() : Promise.resolve()
     ];
     const [gruposSnap, pfSnap] = await Promise.all(promesas);
 
     // Grupos extra
-    let hayNuevos=false;
     if(gruposSnap){
       gruposSnap.forEach(d=>{
         const g={...d.data()}; delete g.creadoEn;
         // Evitar duplicados si ya existe
         if(!gruposExtra.some(e=>e.nombre===g.nombre)){
-          gruposExtra.push(g); grupos.push(g); hayNuevos=true;
+          gruposExtra.push(g); grupos.push(g);
         }
       });
     }
 
-    // Páginas fijas
+    // Paginas fijas
     if(pfSnap && pfSnap.exists){
       _paginasFijasCache=pfSnap.data();
       aplicarPaginasFijasLocal();
     }
 
-    // Ya terminó de cargar: repintar siempre (haya o no grupos nuevos)
+    // Ya termino de cargar: repintar siempre (haya o no grupos nuevos)
     _cargandoGrupos=false;
     filtrar();
 
   }catch(e){
     console.warn("Firebase init error:",e);
     _cargandoGrupos=false;
-    filtrar();
+    // Fix: pintar igual para no dejar skeletons infinitos
+    try{ filtrar(); }catch(fe){ console.warn("filtrar fallback:",fe); }
   }
 
-  iniciarListenersChat();
-  iniciarListenerPopularidad();
-  verificarNotificacionGlobal();
+  try{ iniciarListenersChat(); }catch(e){ console.warn("iniciarListenersChat:",e); }
+  try{ iniciarListenerPopularidad(); }catch(e){ console.warn("iniciarListenerPopularidad:",e); }
+  try{ verificarNotificacionGlobal(); }catch(e){ console.warn("verificarNotif:",e); }
   setTimeout(iniciarAutoRefreshMiembros, 3000);
-  iniciarFCM();
+  try{ iniciarFCM(); }catch(e){ console.warn("iniciarFCM:",e); }
 }
 
-// Iniciar cuando el DOM esté listo
-document.addEventListener("DOMContentLoaded", initFirebase);
+// Iniciar cuando el DOM esté listo — con manejo de error para garantizar que el splash siempre se quite
+document.addEventListener("DOMContentLoaded", function(){
+  initFirebase().catch(function(err){
+    console.error("initFirebase falló completamente:", err);
+    // Garantía: quitar splash aunque todo falle
+    setTimeout(function(){
+      var splash=document.getElementById("splash");
+      if(splash && !splash.classList.contains("oculto")){
+        document.querySelectorAll("body>*:not(#splash)").forEach(function(el){ el.style.visibility=""; });
+        splash.classList.add("oculto");
+        setTimeout(function(){ if(splash && splash.parentNode) splash.parentNode.removeChild(splash); },520);
+      }
+    }, 500);
+  });
+});
 
 /* ═══════════════════════════════════════════════════════════════
    PWA — INSTALACIÓN: banner propio con beforeinstallprompt
@@ -4840,17 +4867,23 @@ async function verificarNotificacionGlobal(){
   setInterval(chequear, 5000); // polling cada 5 segundos
 }
 
-/* ===== SPLASH DISMISS ===== */
-/* El splash se quita en initFirebase al terminar de renderizar. Este bloque es solo fallback. */
+/* ===== SPLASH DISMISS FALLBACK ===== */
+/* El splash se quita en initFirebase. Este bloque es fallback de emergencia. */
 (function(){
-  const splash=document.getElementById("splash");
-  setTimeout(()=>{
-    if(splash && !splash.classList.contains("oculto")){
-      document.querySelectorAll("body>*:not(#splash)").forEach(el=>el.style.visibility="");
-      splash.classList.add("oculto");
-      setTimeout(()=>{ if(splash.parentNode) splash.parentNode.removeChild(splash); },520);
-    }
-  },2200);
+  function forzarQuitarSplash(){
+    try{
+      var splash=document.getElementById("splash");
+      if(splash && !splash.classList.contains("oculto")){
+        document.querySelectorAll("body>*:not(#splash)").forEach(function(el){ el.style.visibility=""; });
+        splash.classList.add("oculto");
+        setTimeout(function(){ if(splash && splash.parentNode) splash.parentNode.removeChild(splash); },520);
+      }
+    }catch(e){ console.warn("fallback splash error:",e); }
+  }
+  // Intento a los 3.5s
+  setTimeout(forzarQuitarSplash, 3500);
+  // Intento final a los 6s — garantía absoluta
+  setTimeout(forzarQuitarSplash, 6000);
 })();
 (function inicializarChat(){
   const user=obtenerSesion();
