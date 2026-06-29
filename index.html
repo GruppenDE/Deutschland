@@ -3437,6 +3437,7 @@ document.addEventListener("DOMContentLoaded", initFirebase);
    ═══════════════════════════════════════════════════════════════ */
 let _deferredPrompt = null;
 const _PWA_DISMISSED_KEY = "pwa_banner_dismissed";
+const _PWA_DISMISSED_TTL = 3 * 24 * 60 * 60 * 1000; // 3 días en ms
 let _bannerShown = false;
 
 function _yaInstalada(){
@@ -3444,7 +3445,15 @@ function _yaInstalada(){
          window.navigator.standalone === true;
 }
 function _yaCerrado(){
-  return !!localStorage.getItem(_PWA_DISMISSED_KEY);
+  const val = localStorage.getItem(_PWA_DISMISSED_KEY);
+  if(!val) return false;
+  // Si ya pasaron 3 días desde que lo cerró, volver a mostrar
+  const guardadoEn = parseInt(val, 10);
+  if(isNaN(guardadoEn) || Date.now() - guardadoEn > _PWA_DISMISSED_TTL){
+    localStorage.removeItem(_PWA_DISMISSED_KEY);
+    return false;
+  }
+  return true;
 }
 function _mostrarPwaBanner(){
   if(_bannerShown || _yaInstalada() || _yaCerrado()) return;
@@ -3526,19 +3535,19 @@ document.addEventListener("DOMContentLoaded", ()=>{
       }
       alert(instrucciones);
       document.getElementById("pwaBanner").classList.remove("visible");
-      localStorage.setItem(_PWA_DISMISSED_KEY, "1");
+      localStorage.setItem(_PWA_DISMISSED_KEY, Date.now().toString());
     }
   });
 
   btnLater.addEventListener("click", ()=>{
     document.getElementById("pwaBanner").classList.remove("visible");
-    localStorage.setItem(_PWA_DISMISSED_KEY, "1");
+    localStorage.setItem(_PWA_DISMISSED_KEY, Date.now().toString());
   });
 });
 
 function cerrarIosBanner(){
   document.getElementById("iosBanner").classList.remove("visible");
-  localStorage.setItem(_PWA_DISMISSED_KEY, "1");
+  localStorage.setItem(_PWA_DISMISSED_KEY, Date.now().toString());
 }
 
 // Ocultar el banner si la app ya se instaló
