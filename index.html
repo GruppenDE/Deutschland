@@ -2061,7 +2061,8 @@ function guardarAjustes(){
   guardarFavoritos();
 }
 function totalFavoritos(g){
-  return g.favoritosBase+(ajustesFavoritos[g.nombre]||0);
+  // Usar popularidad global de Firestore si existe, sino favoritosBase local
+  return g.popularidad!==undefined ? g.popularidad : (g.favoritosBase+(ajustesFavoritos[g.nombre]||0));
 }
 
 function pintarCategorias(){
@@ -2532,38 +2533,51 @@ function animarNumero(btn, nuevoVal, subiendo){
 function alternarFavorito(btn,nombre){
   if(!puedeVotar(nombre)){
     const resta=tiempoRestante(nombre);
-    mostrarToast(`Heute bereits abgestimmt · Wieder in ${resta}`,"⏳");
+    mostrarToast(`Du hast bereits heute für „${nombre}" gestimmt · Wieder in ${resta}`,"⏳");
     return;
   }
-  const votos=obtenerVotosFav();
-  let subiendo;
-  if(favoritos.has(nombre)){
-    favoritos.delete(nombre);
-    ajustesFavoritos[nombre]=(ajustesFavoritos[nombre]||0)-1;
-    delete votos[nombre];
-    subiendo=false;
-    mostrarToast(`Aus Favoriten entfernt · ${nombre}`,"➖");
-  }else{
-    favoritos.add(nombre);
-    ajustesFavoritos[nombre]=(ajustesFavoritos[nombre]||0)+1;
-    votos[nombre]=Date.now();
-    subiendo=true;
-    mostrarToast(`+1 Favoritenbonus · ${nombre}`,"⭐");
-  }
-  guardarVotosFav(votos);
-  guardarFavoritos();
-  guardarAjustes();
 
-  // calcular nuevo total sin re-renderizar todo
+  // Registrar timestamp del voto (para el límite 24h)
+  const votos=obtenerVotosFav();
+  votos[nombre]=Date.now();
+  guardarVotosFav(votos);
+
+  // Marcar como favorito localmente (solo para mostrar ⭐ al usuario actual)
+  favoritos.add(nombre);
+  guardarFavoritos();
+
+  // Incrementar popularidad global en Firestore (FieldValue.increment — atómico)
   const g=grupos.find(x=>x.nombre===nombre)||gruposExtra.find(x=>x.nombre===nombre);
   if(g){
+    // Actualizar en grupos_extra (grupos de usuarios)
+    _db.collection("grupos_extra").where("nombre","==",nombre).get().then(snap=>{
+      snap.forEach(doc=>{
+        doc.ref.update({
+          popularidad: firebase.firestore.FieldValue.increment(1)
+        });
+      });
+    }).catch(()=>{});
+    // Actualizar en grupos_admin (grupos del admin, si existe esa colección)
+    _db.collection("grupos_admin").where("nombre","==",nombre).get().then(snap=>{
+      snap.forEach(doc=>{
+        doc.ref.update({
+          popularidad: firebase.firestore.FieldValue.increment(1)
+        });
+      });
+    }).catch(()=>{});
+    // Actualizar en popularidad_global (contador maestro compartido)
+    _db.collection("popularidad").doc(nombre.replace(/[.#$[\]/]/g,"_")).set({
+      nombre,
+      popularidad: firebase.firestore.FieldValue.increment(1)
+    },{merge:true}).catch(()=>{});
+
+    // Actualizar UI inmediatamente (optimistic update)
+    g.popularidad=(g.popularidad||g.favoritosBase||0)+1;
     const nuevoTotal=totalFavoritos(g);
-    btn.classList.toggle("activo",subiendo);
-    btn.classList.add("pulso");
-    animarNumero(btn, nuevoTotal, subiendo);
+    btn.classList.add("activo","pulso");
+    animarNumero(btn, nuevoTotal, true);
     btn.addEventListener("animationend",()=>btn.classList.remove("pulso"),{once:true});
-  } else {
-    filtrar();
+    mostrarToast(`+1 ⭐ · ${nombre} — Danke für deine Stimme!`,"⭐");
   }
 }
 
@@ -3281,6 +3295,56 @@ function actualizarBadgeUsuarioChat(correo){
   }
 }
 
+/* ─── POPULARIDAD EN TIEMPO REAL ────────────────────────────── */
+let _listenerPopularidad=null;
+function iniciarListenerPopularidad(){
+  if(_listenerPopularidad) return;
+  _listenerPopularidad=_db.collection("popularidad").onSnapshot(snap=>{
+    let huboActualizacion=false;
+    snap.docChanges().forEach(change=>{
+      if(change.type==="removed") return;
+      const data=change.doc.data();
+      if(!data.nombre||data.popularidad===undefined) return;
+      // Actualizar en ambos arrays
+      [grupos,gruposExtra].forEach(arr=>{
+        const g=arr.find(x=>x.nombre===data.nombre);
+        if(g&&g.popularidad!==data.popularidad){
+          g.popularidad=data.popularidad;
+          huboActualizacion=true;
+          // Actualizar SOLO el número en el botón sin re-renderizar toda la página
+          actualizarBtnPopularidadEnVivo(g.nombre, data.popularidad);
+        }
+      });
+    });
+    // Si hubo cambios importantes reordenar (sin re-render total)
+    if(huboActualizacion) reordenarPopularidadEnVivo();
+  },e=>console.warn("Listener popularidad:",e));
+}
+
+// Actualiza solo el número del botón ⭐ en el DOM sin refrescar toda la grid
+function actualizarBtnPopularidadEnVivo(nombre, total){
+  const btns=document.querySelectorAll(`.fav-btn`);
+  btns.forEach(btn=>{
+    if(btn.dataset.nombre===nombre){
+      const numEl=btn.querySelector(".fav-num");
+      if(numEl&&parseInt(numEl.textContent)!==total){
+        numEl.classList.remove("anim-sube");
+        void numEl.offsetWidth;
+        numEl.classList.add("anim-sube");
+        setTimeout(()=>{ numEl.textContent=total; },200);
+        numEl.addEventListener("animationend",()=>numEl.classList.remove("anim-sube"),{once:true});
+      }
+    }
+  });
+}
+
+// Reordena las cards por popularidad sin hacer un filtrar() completo
+function reordenarPopularidadEnVivo(){
+  // Solo re-render silencioso en background, no si el usuario está filtrando activamente
+  clearTimeout(window._reorderTimer);
+  window._reorderTimer=setTimeout(()=>filtrar(),2000);
+}
+
 /* --- LISTENERS EN TIEMPO REAL (Firestore onSnapshot) --- */
 let _ultimoConteoMsj={};
 let _listenerChatsAdmin=null;
@@ -3774,6 +3838,7 @@ function adminAprobarSolicitud(id){
     miembros:s.miembros||0,
     favoritosBase:0,
     favoritos:0,
+    popularidad:0,
     fechaAprobacion:new Date().getTime()
   };
 
