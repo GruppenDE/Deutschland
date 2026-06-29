@@ -3747,43 +3747,18 @@ function iniciarListenerPopularidad(){
   },e=>console.warn("Listener popularidad:",e));
 }
 
-// Actualiza el botón ⭐ en el DOM con animación completa en tiempo real (para todos los usuarios)
+// Actualiza solo el número del botón ⭐ en el DOM sin refrescar toda la grid
 function actualizarBtnPopularidadEnVivo(nombre, total){
   const btns=document.querySelectorAll(`.fav-btn`);
   btns.forEach(btn=>{
     if(btn.dataset.nombre===nombre){
       const numEl=btn.querySelector(".fav-num");
-      const icoEl=btn.querySelector(".fav-ico");
-      if(!numEl) return;
-      const anterior=parseInt(numEl.textContent)||0;
-      // Si el DOM ya muestra el valor correcto (update optimista del usuario local), no animar de nuevo
-      if(anterior===total) return;
-      const subiendo=total>anterior;
-
-      // 1. Animación del número (anim-sube / anim-baja)
-      numEl.classList.remove("anim-sube","anim-baja");
-      void numEl.offsetWidth; // reflow para reiniciar la animación
-      numEl.classList.add(subiendo?"anim-sube":"anim-baja");
-      setTimeout(()=>{ numEl.textContent=total; },200);
-      numEl.addEventListener("animationend",()=>numEl.classList.remove("anim-sube","anim-baja"),{once:true});
-
-      // 2. Icono ⭐ si el usuario ya votó por este grupo
-      if(icoEl && favoritos.has(nombre)) icoEl.textContent="⭐";
-
-      // 3. Pulso en el botón (mismo efecto que al hacer clic)
-      if(subiendo){
-        btn.classList.add("pulso");
-        btn.addEventListener("animationend",()=>btn.classList.remove("pulso"),{once:true});
-
-        // 4. Partícula flotante "+1" visible para todos los usuarios en tiempo real
-        const wrap=btn.closest(".img-wrap");
-        if(wrap){
-          const p=document.createElement("span");
-          p.className="fav-particle";
-          p.textContent="+1";
-          wrap.appendChild(p);
-          setTimeout(()=>p.remove(),700);
-        }
+      if(numEl&&parseInt(numEl.textContent)!==total){
+        numEl.classList.remove("anim-sube");
+        void numEl.offsetWidth;
+        numEl.classList.add("anim-sube");
+        setTimeout(()=>{ numEl.textContent=total; },200);
+        numEl.addEventListener("animationend",()=>numEl.classList.remove("anim-sube"),{once:true});
       }
     }
   });
@@ -4865,35 +4840,17 @@ async function verificarNotificacionGlobal(){
   setInterval(chequear, 5000); // polling cada 5 segundos
 }
 
-/* ===== SPLASH DISMISS — MULTI-CAPA ===== */
-/* Garantiza que el contenido nunca quede invisible si Firebase o initFirebase fallan */
+/* ===== SPLASH DISMISS ===== */
+/* El splash se quita en initFirebase al terminar de renderizar. Este bloque es solo fallback. */
 (function(){
-  function forzarVisible(){
-    document.querySelectorAll("body>*").forEach(el=>{ el.style.visibility=""; el.style.opacity=""; });
-    const splash=document.getElementById("splash");
-    if(splash){ splash.style.display="none"; if(splash.parentNode) splash.parentNode.removeChild(splash); }
-  }
-
-  // Capa 1: fallback normal a los 2.2s (igual que antes)
-  setTimeout(function(){
-    const splash=document.getElementById("splash");
+  const splash=document.getElementById("splash");
+  setTimeout(()=>{
     if(splash && !splash.classList.contains("oculto")){
       document.querySelectorAll("body>*:not(#splash)").forEach(el=>el.style.visibility="");
       splash.classList.add("oculto");
       setTimeout(()=>{ if(splash.parentNode) splash.parentNode.removeChild(splash); },520);
     }
   },2200);
-
-  // Capa 2: si a los 4s el body sigue oculto, forzar visibilidad sin condiciones
-  setTimeout(function(){
-    const anyHidden=[...document.querySelectorAll("body>*")].some(el=>
-      el.id!=="splash" && (el.style.visibility==="hidden" || getComputedStyle(el).visibility==="hidden")
-    );
-    if(anyHidden) forzarVisible();
-  },4000);
-
-  // Capa 3: red de seguridad total a los 7s
-  setTimeout(forzarVisible, 7000);
 })();
 (function inicializarChat(){
   const user=obtenerSesion();
