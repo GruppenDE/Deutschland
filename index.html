@@ -27,6 +27,8 @@
  <link rel="icon" type="image/png" sizes="192x192" href="icon-192x192.png">
  <link rel="icon" type="image/png" sizes="32x32"  href="icon-96x96.png">
  <!-- ═══ /PWA ═══ -->
+ <!-- Anti-flash: fondo verde inmediato + contenido oculto hasta splash -->
+ <style>html{background:#1FAF55}body>*:not(#splash){visibility:hidden}</style>
 
  <!-- ===== FIREBASE SDK v8 (compat — funciona con scripts normales) ===== -->
  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -3384,6 +3386,7 @@ async function initFirebase(){
   function quitarSplash(){
     const splash=document.getElementById("splash");
     if(splash && !splash.classList.contains("oculto")){
+      document.querySelectorAll("body>*:not(#splash)").forEach(el=>el.style.visibility="");
       splash.classList.add("oculto");
       setTimeout(()=>{ if(splash.parentNode) splash.parentNode.removeChild(splash); },400);
     }
@@ -3567,8 +3570,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
         localStorage.setItem(_PWA_INSTALLED_KEY, "1");
         localStorage.removeItem(_PWA_DISMISSED_KEY);
       } else {
-        // Rechazó el diálogo nativo → tratar como "Später"
-        localStorage.setItem(_PWA_DISMISSED_KEY, Date.now().toString());
+        // Rechazó el diálogo nativo → no guardar nada, el banner reaparece en próxima visita
       }
       _deferredPrompt = null;
     } else {
@@ -3584,20 +3586,19 @@ document.addEventListener("DOMContentLoaded", ()=>{
       }
       alert(instrucciones);
       document.getElementById("pwaBanner").classList.remove("visible");
-      localStorage.setItem(_PWA_DISMISSED_KEY, Date.now().toString());
+      // No se guarda nada → reaparece en próxima visita
     }
   });
 
   btnLater.addEventListener("click", ()=>{
     document.getElementById("pwaBanner").classList.remove("visible");
-    // "Später" solo suprime por 3 días, no limpia la marca de instalación
-    localStorage.setItem(_PWA_DISMISSED_KEY, Date.now().toString());
+    // No se guarda nada → el banner reaparece en cada recarga/visita
   });
 });
 
 function cerrarIosBanner(){
   document.getElementById("iosBanner").classList.remove("visible");
-  localStorage.setItem(_PWA_DISMISSED_KEY, Date.now().toString());
+  // No se guarda nada → el banner reaparece en cada recarga/visita
 }
 
 // Ocultar el banner y marcar como instalada cuando el SO confirma la instalación
@@ -3746,18 +3747,43 @@ function iniciarListenerPopularidad(){
   },e=>console.warn("Listener popularidad:",e));
 }
 
-// Actualiza solo el número del botón ⭐ en el DOM sin refrescar toda la grid
+// Actualiza el botón ⭐ en el DOM con animación completa en tiempo real (para todos los usuarios)
 function actualizarBtnPopularidadEnVivo(nombre, total){
   const btns=document.querySelectorAll(`.fav-btn`);
   btns.forEach(btn=>{
     if(btn.dataset.nombre===nombre){
       const numEl=btn.querySelector(".fav-num");
-      if(numEl&&parseInt(numEl.textContent)!==total){
-        numEl.classList.remove("anim-sube");
-        void numEl.offsetWidth;
-        numEl.classList.add("anim-sube");
-        setTimeout(()=>{ numEl.textContent=total; },200);
-        numEl.addEventListener("animationend",()=>numEl.classList.remove("anim-sube"),{once:true});
+      const icoEl=btn.querySelector(".fav-ico");
+      if(!numEl) return;
+      const anterior=parseInt(numEl.textContent)||0;
+      // Si el DOM ya muestra el valor correcto (update optimista del usuario local), no animar de nuevo
+      if(anterior===total) return;
+      const subiendo=total>anterior;
+
+      // 1. Animación del número (anim-sube / anim-baja)
+      numEl.classList.remove("anim-sube","anim-baja");
+      void numEl.offsetWidth; // reflow para reiniciar la animación
+      numEl.classList.add(subiendo?"anim-sube":"anim-baja");
+      setTimeout(()=>{ numEl.textContent=total; },200);
+      numEl.addEventListener("animationend",()=>numEl.classList.remove("anim-sube","anim-baja"),{once:true});
+
+      // 2. Icono ⭐ si el usuario ya votó por este grupo
+      if(icoEl && favoritos.has(nombre)) icoEl.textContent="⭐";
+
+      // 3. Pulso en el botón (mismo efecto que al hacer clic)
+      if(subiendo){
+        btn.classList.add("pulso");
+        btn.addEventListener("animationend",()=>btn.classList.remove("pulso"),{once:true});
+
+        // 4. Partícula flotante "+1" visible para todos los usuarios en tiempo real
+        const wrap=btn.closest(".img-wrap");
+        if(wrap){
+          const p=document.createElement("span");
+          p.className="fav-particle";
+          p.textContent="+1";
+          wrap.appendChild(p);
+          setTimeout(()=>p.remove(),700);
+        }
       }
     }
   });
@@ -4845,6 +4871,7 @@ async function verificarNotificacionGlobal(){
   const splash=document.getElementById("splash");
   setTimeout(()=>{
     if(splash && !splash.classList.contains("oculto")){
+      document.querySelectorAll("body>*:not(#splash)").forEach(el=>el.style.visibility="");
       splash.classList.add("oculto");
       setTimeout(()=>{ if(splash.parentNode) splash.parentNode.removeChild(splash); },520);
     }
