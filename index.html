@@ -39,6 +39,29 @@
  <link rel="preconnect" href="https://fonts.googleapis.com">
  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<noscript><style>body>*{visibility:visible!important}</style></noscript>
+<style id="visibilityFix">/* Garantía: si JS tarda más de 5s, mostrar todo */</style>
+<script>
+// Fix crítico: restaurar visibilidad de forma garantizada
+(function(){
+  // Limpiar el CSS de anti-flash lo antes posible tras el splash
+  function restaurarVisibilidad(){
+    try{
+      document.querySelectorAll("body>*:not(#splash)").forEach(function(el){
+        el.style.visibility="";
+        el.style.display!=="none" && (el.style.visibility="");
+      });
+      // Forzar via CSS también como doble seguro
+      var fix=document.getElementById("visibilityFix");
+      if(fix) fix.textContent="body>*{visibility:visible!important}";
+    }catch(e){}
+  }
+  // Intentar a los 2.5s, 4s y 6s
+  setTimeout(restaurarVisibilidad, 2500);
+  setTimeout(restaurarVisibilidad, 4000);
+  setTimeout(restaurarVisibilidad, 6000);
+})();
+</script>
 </head>
 
 <body>
@@ -4360,14 +4383,17 @@ async function adminRefreshMiembros(idx, nombre, link){
 function iniciarAutoRefreshMiembros(){
   const INTERVALO=6*60*60*1000; // 6h
   async function ciclo(){
-    const telegramGrupos=grupos.filter(g=>g.link&&g.link.includes("t.me"));
-    for(const g of telegramGrupos){
-      await actualizarMiembrosGrupo(g.nombre, g.link);
-      await new Promise(r=>setTimeout(r,2000)); // pausa entre requests
-    }
-    filtrar();
+    try{
+      const telegramGrupos=grupos.filter(g=>g.link&&g.link.includes("t.me"));
+      for(const g of telegramGrupos){
+        try{ await actualizarMiembrosGrupo(g.nombre, g.link); }
+        catch(e){ console.warn("actualizarMiembrosGrupo skip:",e); }
+        await new Promise(r=>setTimeout(r,2000));
+      }
+      try{ filtrar(); }catch(e){}
+    }catch(e){ console.warn("ciclo miembros error:",e); }
   }
-  ciclo(); // primera ejecución al cargar
+  ciclo();
   setInterval(ciclo, INTERVALO);
 }
 
