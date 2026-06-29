@@ -352,6 +352,7 @@
         <th>Kat.</th>
         <th>Plattform</th>
         <th>👥 Mitglieder</th>
+        <th>⭐ Popularität</th>
         <th>Feste Seite</th>
         <th>Aktionen</th>
        </tr>
@@ -2981,6 +2982,15 @@ function renderAdminTabla(){
             onclick="adminRefreshMiembros(${i},'${g.nombre}','${g.link}')" title="Automatisch abrufen (Telegram)">🔄</button>`:""}
         </div>
       </td>
+      <td style="min-width:120px">
+        <div style="display:flex;align-items:center;gap:4px">
+          <input type="number" min="0" value="${totalFavoritos(g)}"
+            id="pop_${i}" style="width:72px;padding:4px 6px;border:1.5px solid #fde68a;border-radius:8px;font-size:13px;font-weight:700;color:#92400e;text-align:center"
+            placeholder="0">
+          <button class="btn-admin-sm save" style="padding:4px 8px;font-size:12px;background:#fef3c7;color:#92400e;border:1px solid #fde68a"
+            onclick="adminGuardarPopularidad(${i},'${g.nombre}')">⭐</button>
+        </div>
+      </td>
       <td>
         <input type="number" min="1" value="${pf[g.nombre]||''}" placeholder="Auto"
           id="pf_${i}" style="width:60px">
@@ -3024,6 +3034,40 @@ function adminGuardarMiembros(i, nombre){
   }).catch(()=>{});
   filtrar(); // re-pintar cards públicas
   mostrarToast(`👥 „${nombre}": ${val.toLocaleString("de-DE")} Mitglieder gespeichert`,"✅");
+}
+
+function adminGuardarPopularidad(i, nombre){
+  const input=document.getElementById(`pop_${i}`);
+  if(!input) return;
+  const val=Math.max(0, parseInt(input.value)||0);
+
+  // 1. Actualizar en memoria (ambos arrays)
+  [grupos, gruposExtra].forEach(arr=>{
+    const g=arr.find(x=>x.nombre===nombre);
+    if(g){
+      g.popularidad=val;
+      g.favoritosBase=val; // también actualizar la base
+    }
+  });
+
+  // 2. Guardar en colección "popularidad" (fuente de verdad en tiempo real)
+  const popKey=nombre.replace(/[.#$[\]/]/g,"_");
+  _db.collection("popularidad").doc(popKey).set({
+    nombre,
+    popularidad: val
+  }).catch(e=>console.warn("FB popularidad:",e));
+
+  // 3. Actualizar también en grupos_extra para que la base persista
+  _db.collection("grupos_extra").where("nombre","==",nombre).get().then(snap=>{
+    snap.forEach(doc=>doc.ref.update({ popularidad:val, favoritosBase:val }));
+  }).catch(()=>{});
+
+  // 4. Actualizar el input con el valor guardado
+  input.value=val;
+
+  // 5. Re-pintar cards públicas en tiempo real
+  filtrar();
+  mostrarToast(`⭐ „${nombre}": Popularität auf ${val.toLocaleString("de-DE")} gesetzt`,"⭐");
 }
 
 function adminEliminar(i,nombre){
