@@ -2566,13 +2566,22 @@ function alternarFavorito(btn,nombre){
       });
     }).catch(()=>{});
     // Actualizar en popularidad_global (contador maestro compartido)
-    _db.collection("popularidad").doc(nombre.replace(/[.#$[\]/]/g,"_")).set({
-      nombre,
-      popularidad: firebase.firestore.FieldValue.increment(1)
-    },{merge:true}).catch(()=>{});
+    const _popKey=nombre.replace(/[.#$[\]/]/g,"_");
+    const _popRef=_db.collection("popularidad").doc(_popKey);
+    _popRef.get().then(docSnap=>{
+      if(docSnap.exists){
+        // Documento ya existe: solo incrementar
+        return _popRef.update({ popularidad: firebase.firestore.FieldValue.increment(1) });
+      } else {
+        // Primera vez: inicializar con favoritosBase + 1
+        const base=(g.favoritosBase||0);
+        return _popRef.set({ nombre, popularidad: base+1 });
+      }
+    }).catch(()=>{});
 
     // Actualizar UI inmediatamente (optimistic update)
-    g.popularidad=(g.popularidad||g.favoritosBase||0)+1;
+    const baseActual=g.popularidad!==undefined ? g.popularidad : (g.favoritosBase||0);
+    g.popularidad=baseActual+1;
     const nuevoTotal=totalFavoritos(g);
     btn.classList.add("activo","pulso");
     animarNumero(btn, nuevoTotal, true);
@@ -3309,7 +3318,7 @@ function iniciarListenerPopularidad(){
       [grupos,gruposExtra].forEach(arr=>{
         const g=arr.find(x=>x.nombre===data.nombre);
         if(g&&g.popularidad!==data.popularidad){
-          g.popularidad=data.popularidad;
+          g.popularidad=Math.max(data.popularidad, g.favoritosBase||0);
           huboActualizacion=true;
           // Actualizar SOLO el número en el botón sin re-renderizar toda la página
           actualizarBtnPopularidadEnVivo(g.nombre, data.popularidad);
@@ -3838,7 +3847,7 @@ function adminAprobarSolicitud(id){
     miembros:s.miembros||0,
     favoritosBase:0,
     favoritos:0,
-    popularidad:0,
+    popularidad: s.favoritosBase||0,
     fechaAprobacion:new Date().getTime()
   };
 
