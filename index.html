@@ -3445,25 +3445,49 @@ document.addEventListener("DOMContentLoaded", initFirebase);
    PWA — INSTALACIÓN: banner propio con beforeinstallprompt
    ═══════════════════════════════════════════════════════════════ */
 let _deferredPrompt = null;
-const _PWA_DISMISSED_KEY = "pwa_banner_dismissed";
-const _PWA_DISMISSED_TTL = 3 * 24 * 60 * 60 * 1000; // 3 días en ms
+const _PWA_DISMISSED_KEY  = "pwa_banner_dismissed";
+const _PWA_INSTALLED_KEY  = "pwa_was_installed";   // marca que el usuario instaló alguna vez
+const _PWA_DISMISSED_TTL  = 3 * 24 * 60 * 60 * 1000; // 3 días en ms (solo aplica al botón "Später")
 let _bannerShown = false;
 
 function _yaInstalada(){
   return window.matchMedia("(display-mode: standalone)").matches ||
          window.navigator.standalone === true;
 }
+
+/**
+ * Devuelve true solo si el usuario pulsó "Später" hace menos de 3 días
+ * Y la app sigue instalada (o nunca se instaló).
+ * Si detectamos que se desinstaló (beforeinstallprompt volvió a dispararse
+ * o no está en standalone), borramos la marca para que el banner reaparezca.
+ */
 function _yaCerrado(){
   const val = localStorage.getItem(_PWA_DISMISSED_KEY);
   if(!val) return false;
-  // Si ya pasaron 3 días desde que lo cerró, volver a mostrar
   const guardadoEn = parseInt(val, 10);
+  // TTL expirado → borrar y mostrar
   if(isNaN(guardadoEn) || Date.now() - guardadoEn > _PWA_DISMISSED_TTL){
     localStorage.removeItem(_PWA_DISMISSED_KEY);
     return false;
   }
   return true;
 }
+
+/**
+ * Cuando el navegador vuelve a disparar beforeinstallprompt significa que
+ * la app NO está instalada (o fue desinstalada). En ese caso limpiamos la
+ * marca "dismissed" para que el banner vuelva a aparecer sin importar
+ * el tiempo transcurrido desde que el usuario pulsó "Später".
+ */
+function _limpiarSiDesinstalada(){
+  const fueInstalada = localStorage.getItem(_PWA_INSTALLED_KEY);
+  if(fueInstalada && !_yaInstalada()){
+    // El usuario la instaló antes, ahora no está en standalone → desinstalada
+    localStorage.removeItem(_PWA_DISMISSED_KEY);
+    localStorage.removeItem(_PWA_INSTALLED_KEY);
+  }
+}
+
 function _mostrarPwaBanner(){
   if(_bannerShown || _yaInstalada() || _yaCerrado()) return;
   _bannerShown = true;
@@ -3471,9 +3495,14 @@ function _mostrarPwaBanner(){
 }
 
 // ── Android / Chrome Desktop: capturar el evento nativo ──
+// Si este evento se dispara, significa que la app NO está instalada ahora mismo.
+// Limpiamos la marca "dismissed" para que el banner reaparezca siempre.
 window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
   _deferredPrompt = e;
+  // Si antes fue instalada y ahora no → fue desinstalada; resetear dismissal
+  localStorage.removeItem(_PWA_DISMISSED_KEY);
+  localStorage.removeItem(_PWA_INSTALLED_KEY);
   setTimeout(_mostrarPwaBanner, 1500);
 });
 
@@ -3489,6 +3518,9 @@ function estaInstalada(){
 // ── FALLBACK universal: si en 2.5s no se disparó beforeinstallprompt ──
 // Cubre Samsung Internet, Firefox, Opera, Chrome sin trigger, etc.
 window.addEventListener("load", ()=>{
+  // Comprobar si fue desinstalada antes de decidir qué mostrar
+  _limpiarSiDesinstalada();
+
   if(_yaInstalada() || _yaCerrado()) return;
 
   // iOS → instrucciones share
@@ -3530,6 +3562,14 @@ document.addEventListener("DOMContentLoaded", ()=>{
       _deferredPrompt.prompt();
       const { outcome } = await _deferredPrompt.userChoice;
       console.log("[PWA] Resultado:", outcome);
+      if(outcome === "accepted"){
+        // El usuario aceptó instalar
+        localStorage.setItem(_PWA_INSTALLED_KEY, "1");
+        localStorage.removeItem(_PWA_DISMISSED_KEY);
+      } else {
+        // Rechazó el diálogo nativo → tratar como "Später"
+        localStorage.setItem(_PWA_DISMISSED_KEY, Date.now().toString());
+      }
       _deferredPrompt = null;
     } else {
       // Fallback: mostrar instrucciones según navegador
@@ -3550,6 +3590,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   btnLater.addEventListener("click", ()=>{
     document.getElementById("pwaBanner").classList.remove("visible");
+    // "Später" solo suprime por 3 días, no limpia la marca de instalación
     localStorage.setItem(_PWA_DISMISSED_KEY, Date.now().toString());
   });
 });
@@ -3559,11 +3600,13 @@ function cerrarIosBanner(){
   localStorage.setItem(_PWA_DISMISSED_KEY, Date.now().toString());
 }
 
-// Ocultar el banner si la app ya se instaló
+// Ocultar el banner y marcar como instalada cuando el SO confirma la instalación
 window.addEventListener("appinstalled", ()=>{
   document.getElementById("pwaBanner").classList.remove("visible");
   document.getElementById("iosBanner").classList.remove("visible");
   mostrarToast("✅ App erfolgreich installiert! 🎉", "📲");
+  localStorage.setItem(_PWA_INSTALLED_KEY, "1");
+  localStorage.removeItem(_PWA_DISMISSED_KEY);
   _deferredPrompt = null;
 });
 
