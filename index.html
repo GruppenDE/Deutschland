@@ -7,7 +7,7 @@
  <title>Gruppen🇩🇪 – WhatsApp & Telegram Gruppen finden</title>
 
  <!-- ═══ PWA — Manifest & Meta Tags ═══ -->
- <link rel="manifest" href="/manifest.json">
+ <link rel="manifest" href="manifest.json">
  <meta name="theme-color" content="#1FAF55">
  <meta name="mobile-web-app-capable" content="yes">
  <meta name="apple-mobile-web-app-capable" content="yes">
@@ -17,15 +17,15 @@
  <meta name="description" content="Das Verzeichnis für WhatsApp- und Telegram-Communitys – finde deine Community.">
 
  <!-- Apple Touch Icons (iOS) -->
- <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
- <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png">
+ <link rel="apple-touch-icon" sizes="152x152" href="icon-152x152.png">
+ <link rel="apple-touch-icon" sizes="192x192" href="icon-192x192.png">
 
  <!-- Splash screens iOS (opcionales pero recomendados) -->
- <link rel="apple-touch-startup-image" href="/icons/icon-512x512.png">
+ <link rel="apple-touch-startup-image" href="icon-512x512.png">
 
  <!-- Favicon estándar -->
- <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
- <link rel="icon" type="image/png" sizes="32x32"  href="/icons/icon-96x96.png">
+ <link rel="icon" type="image/png" sizes="192x192" href="icon-192x192.png">
+ <link rel="icon" type="image/png" sizes="32x32"  href="icon-96x96.png">
  <!-- ═══ /PWA ═══ -->
 
  <!-- ===== FIREBASE SDK v8 (compat — funciona con scripts normales) ===== -->
@@ -2061,7 +2061,7 @@ Mit Google fortfahren
   // ═══ REGISTRO SERVICE WORKER PWA (sw.js) ═══════════════════════
   if("serviceWorker" in navigator){
     window.addEventListener("load", ()=>{
-      navigator.serviceWorker.register("/sw.js")
+      navigator.serviceWorker.register("sw.js")
         .then(reg=>{
           console.log("[PWA] Service Worker registrado:", reg.scope);
           // Notificar al SW que se actualice si hay una versión nueva
@@ -2094,7 +2094,7 @@ Mit Google fortfahren
 
     try{
       // 2. Registrar el Service Worker (debe estar en la raíz del sitio)
-      const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+      const registration = await navigator.serviceWorker.register("firebase-messaging-sw.js");
       console.log("[FCM] Service Worker registrado correctamente:", registration);
 
       _messaging = firebase.messaging();

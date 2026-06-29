@@ -1,124 +1,95 @@
-// ═══════════════════════════════════════════════════════════════
-//  sw.js  —  Service Worker PWA para Gruppen🇩🇪
-//  Estrategia: Cache-First para assets estáticos +
-//              Network-First para HTML/API de Firestore
-// ═══════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
+   sw.js — Service Worker para Gruppen🇩🇪
+   Estrategia: Cache-First para assets, Network-First para HTML/API
+   ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_NAME    = "gruppen-v1";          // 🔁 Cambia el número al actualizar
-const CACHE_OFFLINE = "gruppen-offline-v1";
-
-// Recursos que se guardan en caché al instalar el SW
-const ASSETS_PRECACHE = [
-  "/",
-  "/index.html",
-  "/manifest.json",
-  "/icons/icon-192x192.png",
-  "/icons/icon-512x512.png",
-  // Fuentes (opcionales si quieres soporte offline total)
-  "https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap"
+const CACHE_NAME = "gruppen-de-v2";
+const CACHE_STATIC = [
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./icon-72x72.png",
+  "./icon-96x96.png",
+  "./icon-128x128.png",
+  "./icon-144x144.png",
+  "./icon-152x152.png",
+  "./icon-192x192.png",
+  "./icon-384x384.png",
+  "./icon-512x512.png"
 ];
 
-// ── INSTALL: pre-cachear assets esenciales ──────────────────────
+/* ── INSTALL: precachear assets estáticos ── */
 self.addEventListener("install", event => {
-  console.log("[SW] Instalando…");
+  console.log("[SW] Instalando v2…");
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS_PRECACHE);
-    }).then(() => self.skipWaiting())   // activa el SW inmediatamente
+      return cache.addAll(CACHE_STATIC).catch(err => {
+        console.warn("[SW] Error precacheando:", err);
+      });
+    })
   );
+  self.skipWaiting(); // Activar inmediatamente sin esperar
 });
 
-// ── ACTIVATE: limpiar cachés antiguas ───────────────────────────
+/* ── ACTIVATE: borrar caches antiguos ── */
 self.addEventListener("activate", event => {
-  console.log("[SW] Activado");
+  console.log("[SW] Activando…");
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(k => k !== CACHE_NAME && k !== CACHE_OFFLINE)
-          .map(k => {
-            console.log("[SW] Borrando caché antigua:", k);
-            return caches.delete(k);
+          .filter(key => key !== CACHE_NAME)
+          .map(key => {
+            console.log("[SW] Borrando cache antiguo:", key);
+            return caches.delete(key);
           })
       )
-    ).then(() => self.clients.claim())  // toma control de todas las pestañas
+    ).then(() => self.clients.claim())
   );
 });
 
-// ── FETCH: estrategia según tipo de recurso ─────────────────────
+/* ── FETCH: estrategia mixta ── */
 self.addEventListener("fetch", event => {
-  const { request } = event;
-  const url = new URL(request.url);
+  const url = new URL(event.request.url);
 
-  // ❌ Ignorar peticiones que no son GET o son de extensiones de Chrome
-  if (request.method !== "GET") return;
-  if (url.protocol === "chrome-extension:") return;
+  // Ignorar requests no-GET y externos (Firebase, Google Fonts, etc.)
+  if (event.request.method !== "GET") return;
+  if (!url.origin.includes(self.location.origin) &&
+      !url.hostname.includes("github.io")) return;
 
-  // ❌ Ignorar peticiones a Firebase / APIs externas (siempre red)
-  if (
-    url.hostname.includes("firestore.googleapis.com") ||
-    url.hostname.includes("firebase.googleapis.com") ||
-    url.hostname.includes("googleapis.com") ||
-    url.hostname.includes("gstatic.com") ||
-    url.hostname.includes("fcm.googleapis.com") ||
-    url.hostname.includes("allorigins.win")
-  ) {
-    return; // dejar pasar sin interceptar
-  }
-
-  // ✅ HTML principal → Network-First (siempre contenido fresco)
-  if (request.mode === "navigate" || url.pathname === "/" || url.pathname.endsWith(".html")) {
-    event.respondWith(networkFirst(request));
+  // Para HTML → Network-First (siempre contenido fresco)
+  if (event.request.headers.get("accept")?.includes("text/html")) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
     return;
   }
 
-  // ✅ Assets estáticos (JS, CSS, imágenes, fuentes) → Cache-First
-  event.respondWith(cacheFirst(request));
+  // Para assets (iconos, imágenes, etc.) → Cache-First
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+      return fetch(event.request).then(response => {
+        if (!response || response.status !== 200 || response.type === "error") {
+          return response;
+        }
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return response;
+      });
+    })
+  );
 });
 
-// ── Estrategia: Network-First ────────────────────────────────────
-async function networkFirst(request) {
-  try {
-    const networkRes = await fetch(request);
-    if (networkRes && networkRes.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, networkRes.clone());
-    }
-    return networkRes;
-  } catch {
-    // Sin red → devolver desde caché
-    const cached = await caches.match(request);
-    if (cached) return cached;
-    // Último recurso: página offline
-    return caches.match("/index.html");
-  }
-}
-
-// ── Estrategia: Cache-First ──────────────────────────────────────
-async function cacheFirst(request) {
-  const cached = await caches.match(request);
-  if (cached) return cached;
-
-  try {
-    const networkRes = await fetch(request);
-    if (networkRes && networkRes.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, networkRes.clone());
-    }
-    return networkRes;
-  } catch {
-    // Si es imagen y no hay red, devolver placeholder transparente
-    if (request.destination === "image") {
-      return new Response(
-        '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>',
-        { headers: { "Content-Type": "image/svg+xml" } }
-      );
-    }
-    return new Response("Sin conexión", { status: 503 });
-  }
-}
-
-// ── Mensaje desde la app: forzar actualización ───────────────────
+/* ── MESSAGE: forzar actualización desde el cliente ── */
 self.addEventListener("message", event => {
-  if (event.data === "SKIP_WAITING") self.skipWaiting();
+  if (event.data === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
