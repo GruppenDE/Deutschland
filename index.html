@@ -2763,13 +2763,21 @@ function alternarFavorito(btn,nombre){
     // Actualizar en popularidad_global (contador maestro compartido)
     const _popKey=nombre.replace(/[.#$[\]/]/g,"_");
     const _popRef=_db.collection("popularidad").doc(_popKey);
-    _popRef.get().then(docSnap=>{
+    _popRef.get().then(async docSnap=>{
       if(docSnap.exists){
-        // Documento ya existe: solo incrementar
+        // Documento ya existe: solo incrementar (atómico)
         return _popRef.update({ popularidad: firebase.firestore.FieldValue.increment(1) });
       } else {
-        // Primera vez: inicializar con favoritosBase + 1
-        const base=(g.favoritosBase||0);
+        // Doc de popularidad no existe: leer la base real desde grupos_extra en Firestore
+        // para no perder la popularidad que el admin configuró
+        let base = Math.max(g.popularidad||0, g.favoritosBase||0);
+        try{
+          const extraSnap=await _db.collection("grupos_extra").where("nombre","==",nombre).limit(1).get();
+          if(!extraSnap.empty){
+            const d=extraSnap.docs[0].data();
+            base=Math.max(base, d.popularidad||0, d.favoritosBase||0);
+          }
+        }catch(e){}
         return _popRef.set({ nombre, popularidad: base+1 });
       }
     }).catch(()=>{});
@@ -3424,6 +3432,7 @@ async function initFirebase(){
   }
 
   iniciarListenersChat();
+  iniciarListenerPopularidad();
   verificarNotificacionGlobal();
   setTimeout(iniciarAutoRefreshMiembros, 3000);
   iniciarFCM();
@@ -3685,7 +3694,7 @@ function iniciarListenerPopularidad(){
           g.popularidad=Math.max(data.popularidad, g.favoritosBase||0);
           huboActualizacion=true;
           // Actualizar SOLO el número en el botón sin re-renderizar toda la página
-          actualizarBtnPopularidadEnVivo(g.nombre, data.popularidad);
+          actualizarBtnPopularidadEnVivo(g.nombre, g.popularidad);
         }
       });
     });
