@@ -3437,19 +3437,67 @@ document.addEventListener("DOMContentLoaded", initFirebase);
    ═══════════════════════════════════════════════════════════════ */
 let _deferredPrompt = null;
 const _PWA_DISMISSED_KEY = "pwa_banner_dismissed";
+let _bannerShown = false;
 
-// ── Android / Chrome Desktop: capturar el evento ──
+function _yaInstalada(){
+  return window.matchMedia("(display-mode: standalone)").matches ||
+         window.navigator.standalone === true;
+}
+function _yaCerrado(){
+  return !!localStorage.getItem(_PWA_DISMISSED_KEY);
+}
+function _mostrarPwaBanner(){
+  if(_bannerShown || _yaInstalada() || _yaCerrado()) return;
+  _bannerShown = true;
+  document.getElementById("pwaBanner").classList.add("visible");
+}
+
+// ── Android / Chrome Desktop: capturar el evento nativo ──
 window.addEventListener("beforeinstallprompt", e => {
-  e.preventDefault();                          // evitar el mini-banner nativo
+  e.preventDefault();
   _deferredPrompt = e;
+  setTimeout(_mostrarPwaBanner, 1500);
+});
 
-  // No mostrar si el usuario ya lo cerró
-  if(localStorage.getItem(_PWA_DISMISSED_KEY)) return;
-  // No mostrar si ya está instalada
-  if(window.matchMedia("(display-mode: standalone)").matches) return;
+// ── iOS Safari: detectar ──
+function esIOS(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+}
+function estaInstalada(){
+  return window.navigator.standalone === true ||
+         window.matchMedia("(display-mode: standalone)").matches;
+}
 
-  // Mostrar banner llamativo después de 1.5 s
-  setTimeout(()=> document.getElementById("pwaBanner").classList.add("visible"), 1500);
+// ── FALLBACK universal: si en 2.5s no se disparó beforeinstallprompt ──
+// Cubre Samsung Internet, Firefox, Opera, Chrome sin trigger, etc.
+window.addEventListener("load", ()=>{
+  if(_yaInstalada() || _yaCerrado()) return;
+
+  // iOS → instrucciones share
+  if(esIOS() && !estaInstalada()){
+    setTimeout(()=>{
+      if(!_yaCerrado() && !estaInstalada()){
+        document.getElementById("iosBanner").classList.add("visible");
+      }
+    }, 1800);
+    return;
+  }
+
+  // Otros navegadores: mostrar banner siempre tras 2.5s si no hubo evento nativo
+  setTimeout(()=>{
+    if(!_bannerShown && !_yaInstalada() && !_yaCerrado()){
+      _bannerShown = true;
+      document.getElementById("pwaBanner").classList.add("visible");
+      // Si no hay prompt nativo disponible, cambiar botón a guía manual
+      if(!_deferredPrompt){
+        const btn = document.getElementById("pwaBtnInstall");
+        if(btn){
+          btn.textContent = "📖 Wie installieren?";
+          btn._isFallback = true;
+        }
+      }
+    }
+  }, 2500);
 });
 
 // Botón Instalar
@@ -3459,33 +3507,33 @@ document.addEventListener("DOMContentLoaded", ()=>{
   if(!btnInstall) return;
 
   btnInstall.addEventListener("click", async ()=>{
-    if(!_deferredPrompt) return;
-    document.getElementById("pwaBanner").classList.remove("visible");
-    _deferredPrompt.prompt();
-    const { outcome } = await _deferredPrompt.userChoice;
-    console.log("[PWA] Resultado instalación:", outcome);
-    _deferredPrompt = null;
+    if(_deferredPrompt){
+      document.getElementById("pwaBanner").classList.remove("visible");
+      _deferredPrompt.prompt();
+      const { outcome } = await _deferredPrompt.userChoice;
+      console.log("[PWA] Resultado:", outcome);
+      _deferredPrompt = null;
+    } else {
+      // Fallback: mostrar instrucciones según navegador
+      const ua = navigator.userAgent;
+      let instrucciones = "So installierst du die App:\n\n";
+      if(/samsung/i.test(ua)){
+        instrucciones += "Samsung Internet:\nMenü ☰ → \"Seite hinzufügen zu\" → Startbildschirm";
+      } else if(/firefox/i.test(ua)){
+        instrucciones += "Firefox:\nMenü ⋮ → \"Zum Startbildschirm hinzufügen\"";
+      } else {
+        instrucciones += "Chrome/Android:\nMenü ⋮ (oben rechts) → \"Zum Startbildschirm hinzufügen\"\n\nSafari/iOS:\nTeilen-Taste ⬆ → \"Zum Startbildschirm\"";
+      }
+      alert(instrucciones);
+      document.getElementById("pwaBanner").classList.remove("visible");
+      localStorage.setItem(_PWA_DISMISSED_KEY, "1");
+    }
   });
 
   btnLater.addEventListener("click", ()=>{
     document.getElementById("pwaBanner").classList.remove("visible");
     localStorage.setItem(_PWA_DISMISSED_KEY, "1");
   });
-});
-
-// ── iOS Safari: no tiene beforeinstallprompt → mostrar instrucciones ──
-function esIOS(){
-  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
-}
-function estaInstalada(){
-  return window.navigator.standalone === true ||
-         window.matchMedia("(display-mode: standalone)").matches;
-}
-
-window.addEventListener("load", ()=>{
-  if(esIOS() && !estaInstalada() && !localStorage.getItem(_PWA_DISMISSED_KEY)){
-    setTimeout(()=> document.getElementById("iosBanner").classList.add("visible"), 1800);
-  }
 });
 
 function cerrarIosBanner(){
