@@ -1983,6 +1983,14 @@ const grupos=[...baseGrupos];
 async function guardarGrupoFirestore(g){
   try{
     await _db.collection("grupos_extra").add({...g, creadoEn: firebase.firestore.FieldValue.serverTimestamp()});
+    // Pre-inicializar doc de popularidad con favoritosBase del admin
+    // para que el primer voto siempre parta del valor correcto
+    const popKey=g.nombre.replace(/[.#$[\]/]/g,"_");
+    const base=g.favoritosBase||0;
+    await _db.collection("popularidad").doc(popKey).set(
+      { nombre:g.nombre, popularidad:base },
+      { merge:true }
+    );
   }catch(e){ console.warn("FB guardarGrupo:",e); }
 }
 
@@ -2062,8 +2070,10 @@ function guardarAjustes(){
   guardarFavoritos();
 }
 function totalFavoritos(g){
-  // Usar popularidad global de Firestore si existe, sino favoritosBase local
-  return g.popularidad!==undefined ? g.popularidad : (g.favoritosBase+(ajustesFavoritos[g.nombre]||0));
+  const base = g.favoritosBase || 0;
+  const pop  = g.popularidad !== undefined ? g.popularidad : base;
+  // Nunca mostrar menos que la base puesta por el admin
+  return Math.max(pop, base);
 }
 
 function pintarCategorias(){
@@ -2581,7 +2591,7 @@ function alternarFavorito(btn,nombre){
     }).catch(()=>{});
 
     // Actualizar UI inmediatamente (optimistic update)
-    const baseActual=g.popularidad!==undefined ? g.popularidad : (g.favoritosBase||0);
+    const baseActual=Math.max(g.popularidad||0, g.favoritosBase||0);
     g.popularidad=baseActual+1;
     const nuevoTotal=totalFavoritos(g);
     btn.classList.add("activo","pulso");
