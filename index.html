@@ -216,7 +216,35 @@
  <p class="resultado-info" id="resultadoInfo"></p>
  <div class="grid" id="grid"></div>
  <div class="paginacion" id="paginacion"></div>
- <footer>
+ <!-- ═══ BANNER INSTALACIÓN PWA ═══ -->
+<div id="pwaBanner">
+  <div class="pwa-inner">
+    <img class="pwa-icon" src="/icons/icon-192x192.png" alt="Gruppen🇩🇪">
+    <div class="pwa-texto">
+      <strong>📲 App installieren – kostenlos!</strong>
+      <span>Gruppen🇩🇪 direkt auf deinem Startbildschirm – schneller & bequemer.</span>
+    </div>
+    <div class="pwa-btns">
+      <button class="pwa-btn-install" id="pwaBtnInstall">✅ Installieren</button>
+      <button class="pwa-btn-later" id="pwaBtnLater">Später</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ BANNER iOS (Safari no soporta beforeinstallprompt) ═══ -->
+<div id="iosBanner">
+  <button class="ios-close" onclick="cerrarIosBanner()">✕</button>
+  <strong style="font-size:14px">📲 App installieren</strong>
+  <p style="font-size:12.5px;color:#9aa6a2;margin:4px 0 0">Füge Gruppen🇩🇪 zu deinem Startbildschirm hinzu:</p>
+  <div class="ios-steps">
+    <div class="ios-step"><span class="ios-ico">⬆️</span><span>Tippe auf <b>Teilen</b></span></div>
+    <div class="ios-step"><span class="ios-ico">➕</span><span>„Zum Startbildschirm" wählen</span></div>
+    <div class="ios-step"><span class="ios-ico">✅</span><span>Auf <b>Hinzufügen</b> tippen</span></div>
+  </div>
+</div>
+<!-- ════════════════════════════════════════════════════════ -->
+
+<footer>
   <div class="footer-top">
    <div class="footer-marca">
     <div class="logo">
@@ -1749,6 +1777,50 @@ Mit Google fortfahren
   }
   body.dark .btn-galeria{background:#1d2421;border-color:#2a332f;color:#9aa6a2}
   .btn-galeria:hover{border-color:var(--verde);color:var(--verde);background:#1FAF5514}
+  /* ── Banner instalación PWA ── */
+  @keyframes slideUpBanner{from{transform:translateY(110%)}to{transform:translateY(0)}}
+  #pwaBanner{
+    position:fixed;bottom:0;left:0;right:0;z-index:10000;
+    background:#fff;
+    border-top:3px solid #1FAF55;
+    box-shadow:0 -4px 24px rgba(0,0,0,.13);
+    padding:14px 18px;
+    display:none;
+    animation:slideUpBanner .4s cubic-bezier(.22,.68,0,1.2);
+  }
+  #pwaBanner.visible{display:block}
+  #pwaBanner .pwa-inner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:560px;margin:0 auto}
+  #pwaBanner .pwa-icon{width:48px;height:48px;border-radius:12px;flex-shrink:0}
+  #pwaBanner .pwa-texto{flex:1;min-width:160px}
+  #pwaBanner .pwa-texto strong{display:block;font-size:14px;color:#1c2422;margin-bottom:2px}
+  #pwaBanner .pwa-texto span{font-size:12.5px;color:#5a6e68}
+  #pwaBanner .pwa-btns{display:flex;gap:8px;flex-shrink:0}
+  #pwaBanner .pwa-btn-install{
+    background:#1FAF55;color:#fff;border:none;border-radius:10px;
+    padding:9px 18px;font-size:13.5px;font-weight:700;cursor:pointer;
+    white-space:nowrap;
+  }
+  #pwaBanner .pwa-btn-install:hover{background:#18994a}
+  #pwaBanner .pwa-btn-later{
+    background:#f1f5f3;color:#5a6e68;border:none;border-radius:10px;
+    padding:9px 12px;font-size:13px;cursor:pointer;white-space:nowrap;
+  }
+  /* iOS: instrucciones share */
+  #iosBanner{
+    position:fixed;bottom:0;left:0;right:0;z-index:10000;
+    background:#1c2422;color:#eef2f0;
+    border-top:3px solid #1FAF55;
+    padding:16px 18px 22px;
+    display:none;
+    animation:slideUpBanner .4s cubic-bezier(.22,.68,0,1.2);
+    border-radius:18px 18px 0 0;
+  }
+  #iosBanner.visible{display:block}
+  #iosBanner .ios-close{float:right;background:none;border:none;color:#9aa6a2;font-size:20px;cursor:pointer;line-height:1}
+  #iosBanner .ios-steps{display:flex;gap:18px;margin-top:14px;flex-wrap:wrap;justify-content:center}
+  #iosBanner .ios-step{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:#c8d4d0;text-align:center;max-width:80px}
+  #iosBanner .ios-step .ios-ico{font-size:26px}
+
   /* Badge de verificación de miembros */
   .miembros-ts{
     font-size:10px;color:#16a34a;margin-left:4px;
@@ -3308,6 +3380,75 @@ async function initFirebase(){
 
 // Iniciar cuando el DOM esté listo
 document.addEventListener("DOMContentLoaded", initFirebase);
+
+/* ═══════════════════════════════════════════════════════════════
+   PWA — INSTALACIÓN: banner propio con beforeinstallprompt
+   ═══════════════════════════════════════════════════════════════ */
+let _deferredPrompt = null;
+const _PWA_DISMISSED_KEY = "pwa_banner_dismissed";
+
+// ── Android / Chrome Desktop: capturar el evento ──
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();                          // evitar el mini-banner nativo
+  _deferredPrompt = e;
+
+  // No mostrar si el usuario ya lo cerró esta sesión
+  if(sessionStorage.getItem(_PWA_DISMISSED_KEY)) return;
+  // No mostrar si ya está instalada
+  if(window.matchMedia("(display-mode: standalone)").matches) return;
+
+  // Mostrar nuestro banner bonito después de 3 s
+  setTimeout(()=> document.getElementById("pwaBanner").classList.add("visible"), 3000);
+});
+
+// Botón Instalar
+document.addEventListener("DOMContentLoaded", ()=>{
+  const btnInstall = document.getElementById("pwaBtnInstall");
+  const btnLater   = document.getElementById("pwaBtnLater");
+  if(!btnInstall) return;
+
+  btnInstall.addEventListener("click", async ()=>{
+    if(!_deferredPrompt) return;
+    document.getElementById("pwaBanner").classList.remove("visible");
+    _deferredPrompt.prompt();
+    const { outcome } = await _deferredPrompt.userChoice;
+    console.log("[PWA] Resultado instalación:", outcome);
+    _deferredPrompt = null;
+  });
+
+  btnLater.addEventListener("click", ()=>{
+    document.getElementById("pwaBanner").classList.remove("visible");
+    sessionStorage.setItem(_PWA_DISMISSED_KEY, "1");
+  });
+});
+
+// ── iOS Safari: no tiene beforeinstallprompt → mostrar instrucciones ──
+function esIOS(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+}
+function estaInstalada(){
+  return window.navigator.standalone === true ||
+         window.matchMedia("(display-mode: standalone)").matches;
+}
+
+window.addEventListener("load", ()=>{
+  if(esIOS() && !estaInstalada() && !sessionStorage.getItem(_PWA_DISMISSED_KEY)){
+    setTimeout(()=> document.getElementById("iosBanner").classList.add("visible"), 3500);
+  }
+});
+
+function cerrarIosBanner(){
+  document.getElementById("iosBanner").classList.remove("visible");
+  sessionStorage.setItem(_PWA_DISMISSED_KEY, "1");
+}
+
+// Ocultar el banner si la app ya se instaló
+window.addEventListener("appinstalled", ()=>{
+  document.getElementById("pwaBanner").classList.remove("visible");
+  document.getElementById("iosBanner").classList.remove("visible");
+  mostrarToast("✅ App erfolgreich installiert! 🎉", "📲");
+  _deferredPrompt = null;
+});
 
 /* =========================================================
    SISTEMA DE SOLICITUDES Y CHAT
