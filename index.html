@@ -3,8 +3,31 @@
 
 <head>
  <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width,initial-scale=1">
- <title>Gruppen🇩🇪</title>
+ <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+ <title>Gruppen🇩🇪 – WhatsApp & Telegram Gruppen finden</title>
+
+ <!-- ═══ PWA — Manifest & Meta Tags ═══ -->
+ <link rel="manifest" href="/manifest.json">
+ <meta name="theme-color" content="#1FAF55">
+ <meta name="mobile-web-app-capable" content="yes">
+ <meta name="apple-mobile-web-app-capable" content="yes">
+ <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+ <meta name="apple-mobile-web-app-title" content="Gruppen🇩🇪">
+ <meta name="application-name" content="Gruppen🇩🇪">
+ <meta name="description" content="Das Verzeichnis für WhatsApp- und Telegram-Communitys – finde deine Community.">
+
+ <!-- Apple Touch Icons (iOS) -->
+ <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
+ <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png">
+
+ <!-- Splash screens iOS (opcionales pero recomendados) -->
+ <link rel="apple-touch-startup-image" href="/icons/icon-512x512.png">
+
+ <!-- Favicon estándar -->
+ <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+ <link rel="icon" type="image/png" sizes="32x32"  href="/icons/icon-96x96.png">
+ <!-- ═══ /PWA ═══ -->
+
  <!-- ===== FIREBASE SDK v8 (compat — funciona con scripts normales) ===== -->
  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -1891,11 +1914,49 @@ Mit Google fortfahren
   firebase.initializeApp(firebaseConfig);
   const _VAPID_KEY = "BFmNPitSEll1GhsDKYTw6bpb2QJgb9tq_fgjokel_lADAlBKMALlf9UGhuIWT2sr0v9Cs3mbX7lYLdKKRA7QuLs";
   const _db  = firebase.firestore();
+
+  // ═══ FIRESTORE OFFLINE PERSISTENCE (caché local) ═══════════════
+  _db.enablePersistence({ synchronizeTabs: true })
+    .then(()=> console.log("[Firestore] Persistencia offline activada ✓"))
+    .catch(err=>{
+      if(err.code === "failed-precondition"){
+        // Varias pestañas abiertas → solo la primera pestaña puede activarla
+        console.warn("[Firestore] Persistencia no disponible (múltiples pestañas)");
+      } else if(err.code === "unimplemented"){
+        // Navegador sin soporte (Safari antiguo, modo incógnito)
+        console.warn("[Firestore] Este navegador no soporta persistencia offline");
+      }
+    });
+  // ════════════════════════════════════════════════════════════════
+
   const _auth = firebase.auth();
   const _googleProvider = new firebase.auth.GoogleAuthProvider();
 
   /* ===== FIREBASE CLOUD MESSAGING (FCM) ===== */
   let _messaging = null;
+
+  // ═══ REGISTRO SERVICE WORKER PWA (sw.js) ═══════════════════════
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", ()=>{
+      navigator.serviceWorker.register("/sw.js")
+        .then(reg=>{
+          console.log("[PWA] Service Worker registrado:", reg.scope);
+          // Notificar al SW que se actualice si hay una versión nueva
+          reg.addEventListener("updatefound", ()=>{
+            const newWorker = reg.installing;
+            newWorker.addEventListener("statechange", ()=>{
+              if(newWorker.state==="installed" && navigator.serviceWorker.controller){
+                console.log("[PWA] Nueva versión disponible – recargando…");
+                newWorker.postMessage("SKIP_WAITING");
+                location.reload();
+              }
+            });
+          });
+        })
+        .catch(err=> console.warn("[PWA] Error al registrar SW:", err));
+    });
+  }
+  // ════════════════════════════════════════════════════════════════
 
   async function iniciarFCM(){
     // 1. Verificar soporte del navegador
