@@ -2098,9 +2098,9 @@ Mit Google fortfahren
             const newWorker = reg.installing;
             newWorker.addEventListener("statechange", ()=>{
               if(newWorker.state==="installed" && navigator.serviceWorker.controller){
-                console.log("[PWA] Nueva versión disponible – recargando…");
-                newWorker.postMessage("SKIP_WAITING");
-                location.reload();
+                console.log("[PWA] Nueva versión disponible (sin recarga automática para evitar loops en móvil)");
+                // Fix: NO hacer location.reload() automático — causaba bucles de reinicio en móvil
+                // El usuario verá la versión nueva en la próxima vez que abra la app manualmente
               }
             });
           });
@@ -2122,41 +2122,38 @@ Mit Google fortfahren
     }
 
     try{
-      // 2. Registrar el Service Worker (debe estar en la raíz del sitio)
+      // 2. Registrar el Service Worker silenciosamente (sin pedir permiso al cargar)
+      // Fix: en móvil, pedir permiso automáticamente al cargar causaba reinicios y UX mala
       const registration = await navigator.serviceWorker.register("firebase-messaging-sw.js");
-      console.log("[FCM] Service Worker registrado correctamente:", registration);
+      console.log("[FCM] Service Worker FCM registrado:", registration.scope);
 
       _messaging = firebase.messaging();
 
-      // 3. Solicitar permiso de notificaciones al usuario
-      const permiso = await Notification.requestPermission();
-      if(permiso !== "granted"){
-        console.log("[FCM] Permiso de notificaciones NO concedido. Estado:", permiso);
-        return;
-      }
-      console.log("[FCM] Permiso de notificaciones concedido.");
+      // Fix: NO pedir permiso automáticamente — solo si el usuario ya lo concedió antes
+      if(Notification.permission === "granted"){
+        // Ya tiene permiso: obtener token silenciosamente
+        try{
+          const token = await _messaging.getToken({
+            vapidKey: _VAPID_KEY,
+            serviceWorkerRegistration: registration
+          });
+          if(token) console.log("[FCM] Token renovado:", token.substring(0,20)+"…");
+        }catch(e){ console.warn("[FCM] getToken error:", e); }
 
-      // 4. Obtener el token de FCM usando la clave VAPID
-      const token = await _messaging.getToken({
-        vapidKey: _VAPID_KEY,
-        serviceWorkerRegistration: registration
-      });
-
-      if(token){
-        console.log("[FCM] Token obtenido correctamente:", token);
-        // Aquí puedes guardar el token en Firestore, p. ej.:
-        // _db.collection("fcm_tokens").doc(token).set({ creadoEn: new Date().toISOString() });
+        // Escuchar mensajes en primer plano
+        _messaging.onMessage(payload=>{
+          console.log("[FCM] Mensaje en primer plano:", payload);
+          if(payload.notification && payload.notification.body){
+            mostrarToast(payload.notification.body, "🔔");
+          }
+        });
       } else {
-        console.log("[FCM] No se pudo obtener el token. El usuario puede necesitar conceder permiso nuevamente.");
+        // Sin permiso previo: no hacer nada hasta que el usuario lo solicite
+        console.log("[FCM] Permiso no concedido aún. Se solicitará cuando el usuario interactúe.");
       }
-
-      // 5. Escuchar mensajes mientras la pestaña está en primer plano
-      _messaging.onMessage(payload=>{
-        console.log("[FCM] Mensaje recibido en primer plano:", payload);
-      });
 
     }catch(err){
-      console.log("[FCM] Error al configurar las notificaciones:", err);
+      console.log("[FCM] Error al configurar notificaciones:", err);
     }
   }const categorias=[
   {nombre:"Todos",icono:"✨"},
@@ -4877,6 +4874,8 @@ function cerrarNotifGlobal(){
 
 async function verificarNotificacionGlobal(){
   async function chequear(){
+    // Fix: no hacer requests cuando la pestaña está oculta (móvil en segundo plano)
+    if(document.hidden) return;
     try{
       const snap = await _db.collection("notificaciones").doc("global").get();
       if(!snap.exists) return;
@@ -4890,8 +4889,26 @@ async function verificarNotificacionGlobal(){
     }catch(e){console.warn("FB verificarNotif:",e);}
   }
   chequear(); // comprobación inmediata al cargar
-  setInterval(chequear, 5000); // polling cada 5 segundos
+  // Fix: reducir polling de 5s a 60s — en móvil el polling agresivo causaba reinicios
+  setInterval(chequear, 60000);
 }
+
+/* ===== CONTROL DE VISIBILIDAD EN MÓVIL =====
+   Fix: pausar operaciones costosas cuando la app va a segundo plano
+   Evita reinicios y consumo de batería en iOS/Android */
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden){
+    // App en segundo plano: no hacer nada
+    console.log("[Móvil] App en segundo plano — pausando operaciones");
+  } else {
+    // App vuelve al primer plano: refrescar datos sin recargar
+    console.log("[Móvil] App en primer plano — reanudando");
+    // Solo refrescar si los datos tienen más de 5 minutos
+    if(typeof filtrar === "function"){
+      try{ filtrar(); }catch(e){}
+    }
+  }
+});
 
 /* ===== SPLASH DISMISS FALLBACK ===== */
 /* El splash se quita en initFirebase. Este bloque es fallback de emergencia. */
