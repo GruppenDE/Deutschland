@@ -4587,9 +4587,7 @@ function adminAprobarSolicitud(id){
 
   // Enviar automáticamente el enlace de compartir de su grupo
   if(s.link){
-    const DOMINIO_COMPARTIR="https://gruppende.github.io/Deutschland/";
-    const enlaceCompartir=`${DOMINIO_COMPARTIR}?grupo=${generarSlug(s.nombre)}`;
-    const msgEnlace={de:"admin",texto:`🔗 Hier ist dein Teilen-Link, um deine Gruppe zu bewerben:\n${enlaceCompartir}`,hora:horaActual()};
+    const msgEnlace={de:"admin",texto:`🔗 Hier ist der Link deiner Gruppe, um sie zu teilen:\n${s.link}`,hora:horaActual()};
     agregarMensajeChat(s.usuarioCorreo, msgEnlace);
   }
   actualizarBadgeChat(s.usuarioCorreo);
