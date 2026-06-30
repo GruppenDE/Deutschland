@@ -2865,8 +2865,12 @@ function animarNumero(btn, nuevoVal, subiendo){
 
 function aplicarGrupoDesdeURL(){
   const params=new URLSearchParams(window.location.search);
-  const nombre=params.get("grupo");
-  if(!nombre) return;
+  const slug=params.get("grupo");
+  if(!slug) return;
+
+  const grupo=grupoPorSlug(slug);
+  if(!grupo) return; // enlace inválido o grupo ya no existe
+  const nombre=grupo.nombre;
 
   const info=paginaDeGrupo(nombre);
 
@@ -2907,6 +2911,22 @@ function aplicarGrupoDesdeURL(){
 /* =========================================================
    COMPARTIR GRUPO — genera un enlace con el dominio propio
    ========================================================= */
+function generarSlug(nombre){
+  return nombre
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g,"")               // quita acentos
+    .replace(/\p{Extended_Pictographic}/gu,"")    // quita emojis
+    .replace(/\uFE0F/g,"")                        // variation selector de emojis
+    .replace(/[\u{1F1E6}-\u{1F1FF}]/gu,"")         // banderas (regional indicators)
+    .replace(/[^a-zA-Z0-9\s-]/g,"")                // quita símbolos restantes
+    .trim()
+    .replace(/\s+/g,"-")
+    .toLowerCase();
+}
+function grupoPorSlug(slug){
+  if(typeof grupos==="undefined"||!grupos.length) return null;
+  return grupos.find(g=>generarSlug(g.nombre)===slug)||null;
+}
 function paginaDeGrupo(nombre){
   if(typeof grupos==="undefined"||!grupos.length) return null;
   const arr=grupos;
@@ -2932,7 +2952,7 @@ function paginaDeGrupo(nombre){
 
 function compartirGrupo(btn,nombre,plataforma){
   const DOMINIO="https://gruppende.github.io/Deutschland/";
-  const url=`${DOMINIO}?grupo=${encodeURIComponent(nombre)}`;
+  const url=`${DOMINIO}?grupo=${generarSlug(nombre)}`;
   const info=paginaDeGrupo(nombre);
   const paginaTxt=info?` (Seite ${info.pagina} von ${info.total})`:"";
   const texto=`${nombre} · Gruppe auf ${plataforma}${paginaTxt}`;
