@@ -401,6 +401,9 @@
    <!-- TAB: GESTIONAR -->
    <div class="admin-seccion" id="adminGestionar">
     <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Bearbeite die Seite, auf der jede Gruppe erscheint, oder lösche sie. Änderungen werden beim Klicken auf <b>Speichern</b> übernommen.</p>
+    <input type="text" id="adminBuscarGrupo" placeholder="🔍 Gruppe nach Namen suchen…"
+      oninput="renderAdminTabla()"
+      style="width:100%;box-sizing:border-box;padding:10px 14px;margin-bottom:12px;border:1.5px solid var(--borde);border-radius:10px;font-size:14px;font-family:inherit">
     <div class="admin-tabla-wrap">
      <table class="admin-tabla" id="adminTabla">
       <thead>
@@ -470,7 +473,15 @@
     <button class="btn-principal" style="margin-top:4px" onclick="enviarNotificacionGlobal()">📢 Enviar notificación a todos</button>
     <!-- Historial -->
     <div style="margin-top:20px">
-     <p style="font-size:12.5px;font-weight:700;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Historial — clic para reenviar</p>
+     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px">
+      <p style="font-size:12.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin:0">Historial — clic para reenviar</p>
+      <button type="button" id="btnFiltroFavNotif" onclick="toggleFiltroFavNotif()"
+        style="flex-shrink:0;display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:99px;
+               border:1.5px solid var(--borde);background:#fff;color:var(--sub);cursor:pointer;
+               font-size:11.5px;font-weight:700;transition:border-color .18s,background .18s,color .18s">
+        <span id="iconoFiltroFavNotif">⭐</span><span>Favoritas</span>
+      </button>
+     </div>
      <div id="notifHistorialLista" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto"></div>
      <p id="notifHistorialVacio" style="font-size:13px;color:var(--sub);text-align:center;padding:18px 0;display:none">Sin notificaciones enviadas aún.</p>
     </div>
@@ -3418,7 +3429,17 @@ function adminPublicar(){
 function renderAdminTabla(){
   const pf=obtenerPaginasFijas();
   const body=document.getElementById("adminTablaBody");
-  body.innerHTML=grupos.map((g,i)=>`
+  const q=(document.getElementById("adminBuscarGrupo")?.value||"").trim().toLowerCase();
+  const filas=grupos
+    .map((g,i)=>({g,i}))
+    .filter(({g})=>!q||g.nombre.toLowerCase().includes(q));
+
+  if(!filas.length){
+    body.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:18px;color:var(--sub)">Keine Gruppen gefunden für „${q}“.</td></tr>`;
+    return;
+  }
+
+  body.innerHTML=filas.map(({g,i})=>`
     <tr>
       <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.nombre}">${g.nombre}</td>
       <td>${g.categoria}</td>
@@ -5001,7 +5022,7 @@ async function enviarNotificacionGlobal(mensajeDirecto){
     // Guardar en historial
     const histSnap = await _db.collection("notificaciones").doc("historial").get();
     const historial = histSnap.exists ? (histSnap.data().lista || []) : [];
-    historial.unshift({mensaje: msg, id: notif.id, creadaEn: notif.creadaEn});
+    historial.unshift({mensaje: msg, id: notif.id, creadaEn: notif.creadaEn, fav:false});
     if(historial.length > 20) historial.length = 20; // máx 20 entradas
     await _db.collection("notificaciones").doc("historial").set({lista: historial});
 
@@ -5022,20 +5043,63 @@ async function cargarPreviewNotificacion(){
   }catch(e){console.warn("FB cargarNotif:",e);}
 }
 
+let _notifHistorialCache = [];
+let _notifSoloFavoritas = false;
+
+function toggleFiltroFavNotif(){
+  _notifSoloFavoritas = !_notifSoloFavoritas;
+  const btn = document.getElementById("btnFiltroFavNotif");
+  const ico = document.getElementById("iconoFiltroFavNotif");
+  if(btn){
+    if(_notifSoloFavoritas){
+      btn.style.borderColor = "#f5a623";
+      btn.style.background = "#fff6e6";
+      btn.style.color = "#b8770f";
+      if(ico) ico.textContent = "⭐";
+    }else{
+      btn.style.borderColor = "var(--borde)";
+      btn.style.background = "#fff";
+      btn.style.color = "var(--sub)";
+      if(ico) ico.textContent = "⭐";
+    }
+  }
+  renderNotifHistorial(_notifHistorialCache);
+}
+
+async function toggleFavoritoNotif(id){
+  try{
+    const histSnap = await _db.collection("notificaciones").doc("historial").get();
+    let historial = histSnap.exists ? (histSnap.data().lista || []) : [];
+    historial = historial.map(n => n.id === id ? {...n, fav: !n.fav} : n);
+    await _db.collection("notificaciones").doc("historial").set({lista: historial});
+    renderNotifHistorial(historial);
+  }catch(e){
+    mostrarToast("Error al marcar favorita: "+e.message,"⚠️");
+    console.warn("FB toggleFav:",e);
+  }
+}
+
 function renderNotifHistorial(historial){
+  _notifHistorialCache = historial || [];
   const lista = document.getElementById("notifHistorialLista");
   const vacio = document.getElementById("notifHistorialVacio");
   if(!lista) return;
 
-  if(!historial || historial.length === 0){
+  const datos = _notifSoloFavoritas ? _notifHistorialCache.filter(n => n.fav) : _notifHistorialCache;
+
+  if(!datos || datos.length === 0){
     lista.innerHTML = "";
-    if(vacio) vacio.style.display = "block";
+    if(vacio){
+      vacio.style.display = "block";
+      vacio.textContent = _notifSoloFavoritas ? "Sin notificaciones favoritas aún." : "Sin notificaciones enviadas aún.";
+    }
     return;
   }
   if(vacio) vacio.style.display = "none";
 
-  lista.innerHTML = historial.map((n, i) => {
+  lista.innerHTML = datos.map((n, i) => {
     const fecha = n.creadaEn ? new Date(n.creadaEn).toLocaleString("es-PE",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) : "";
+    const esFav = !!n.fav;
     return `
     <div onclick="enviarNotificacionGlobal('${n.mensaje.replace(/'/g,"\\'")}')"
       title="Clic para reenviar"
@@ -5050,6 +5114,11 @@ function renderNotifHistorial(historial){
         <div style="font-size:11px;color:var(--sub);margin-top:2px">${fecha}</div>
       </div>
       <span style="font-size:11px;color:var(--verde);font-weight:700;flex-shrink:0">↩ Reenviar</span>
+      <button type="button" onclick="event.stopPropagation();toggleFavoritoNotif('${n.id}')"
+        title="${esFav ? 'Quitar de favoritas' : 'Marcar como favorita'}"
+        style="flex-shrink:0;width:26px;height:26px;border-radius:8px;border:1.5px solid ${esFav ? '#f5a623' : 'var(--borde)'};
+               background:${esFav ? '#fff6e6' : '#fff'};color:${esFav ? '#f5a623' : 'var(--sub)'};cursor:pointer;display:flex;align-items:center;justify-content:center;
+               font-size:14px;transition:border-color .18s,background .18s">${esFav ? '⭐' : '☆'}</button>
       <button type="button" onclick="event.stopPropagation();eliminarNotifHistorial('${n.id}')"
         title="Eliminar"
         style="flex-shrink:0;width:26px;height:26px;border-radius:8px;border:1.5px solid var(--borde);
