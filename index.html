@@ -216,15 +216,15 @@
  </div>
 
  <!-- ===== BANNER PUBLICITARIO ===== -->
- <a href="https://altersverifizierung.github.io/DE/" target="_blank" rel="noopener" class="banner-publi" aria-label="Publicidad - Google Perú">
+ <a href="https://www.google.com.pe" target="_blank" rel="noopener" class="banner-publi" aria-label="Publicidad - Google Perú">
   <div class="banner-publi-inner">
    <img
-     src="https://i.imgur.com/nHj0RSY.png"
+     src="https://i.imgur.com/l4SMPXL.jpeg"
      alt="Publicidad"
      class="banner-publi-img"
      onerror="this.closest('.banner-publi').style.display='none'"
    >
-
+   <span class="banner-publi-tag">Publicidad</span>
   </div>
  </a>
  <!-- ===== FIN BANNER PUBLICITARIO ===== -->
@@ -1232,11 +1232,17 @@ Mit Google fortfahren
     50%  { transform:scale(1.07); }
     100% { transform:scale(1); }
   }
+  @keyframes bannerColor{
+    0%   { filter:grayscale(0%) brightness(1); }
+    50%  { filter:grayscale(100%) brightness(.9); }
+    100% { filter:grayscale(0%) brightness(1); }
+  }
   .banner-publi-img{
     width:100%;height:110px;
     object-fit:cover;object-position:center;
     display:block;padding:0;margin:0;
-    animation:bannerZoom 6s ease-in-out infinite;
+    animation:bannerZoom 6s ease-in-out infinite,
+              bannerColor 3s ease-in-out infinite;
     transform-origin:center center;
   }
   .banner-publi-tag{
@@ -1247,9 +1253,22 @@ Mit Google fortfahren
     border-radius:4px;padding:2px 5px;
   }
   @media(max-width:540px){
-    .banner-publi{padding:0 12px;margin:0 auto 12px;}
-    .banner-publi-inner{min-height:unset;overflow:hidden;}
-    .banner-publi-img{height:66px;}
+    /* Idéntico a .banner-agregar + .banner-agregar-inner en móvil */
+    .banner-publi{padding:0 12px;margin:14px auto 4px;}
+    .banner-publi-inner{
+      flex-direction:column;
+      align-items:flex-start;
+      gap:12px;
+      padding:0;
+      border-radius:14px;
+      overflow:hidden;
+      min-height:unset;
+    }
+    .banner-publi-img{
+      width:100%;
+      height:110px;
+      object-fit:cover;
+    }
   }
   /* ===== FIN BANNER PUBLICITARIO ===== */
 
