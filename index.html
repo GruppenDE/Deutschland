@@ -4,8 +4,7 @@
 <head>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
- <title>Gruppen🇩🇪 – WhatsApp & Telegram Gruppen finden</title>
-
+ <title>Gruppen🇩🇪</title>
  <!-- ═══ PWA — Manifest & Meta Tags ═══ -->
  <link rel="manifest" href="manifest.json">
  <meta name="theme-color" content="#1FAF55">
@@ -15,21 +14,16 @@
  <meta name="apple-mobile-web-app-title" content="Gruppen🇩🇪">
  <meta name="application-name" content="Gruppen🇩🇪">
  <meta name="description" content="Das Verzeichnis für WhatsApp- und Telegram-Communitys – finde deine Community.">
-
  <!-- Apple Touch Icons (iOS) -->
  <link rel="apple-touch-icon" sizes="152x152" href="icon-152x152.png">
  <link rel="apple-touch-icon" sizes="192x192" href="icon-192x192.png">
-
  <!-- Splash screens iOS (opcionales pero recomendados) -->
  <link rel="apple-touch-startup-image" href="icon-512x512.png">
-
  <!-- Favicon estándar -->
  <link rel="icon" type="image/png" sizes="192x192" href="icon-192x192.png">
- <link rel="icon" type="image/png" sizes="32x32"  href="icon-96x96.png">
+ <link rel="icon" type="image/png" sizes="32x32" href="icon-96x96.png">
  <!-- ═══ /PWA ═══ -->
  <!-- Anti-flash: fondo verde inmediato + contenido oculto hasta splash -->
- <style>html{background:#1FAF55}body>*:not(#splash){visibility:hidden}</style>
-
  <!-- ===== FIREBASE SDK v8 (compat — funciona con scripts normales) ===== -->
  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -39,29 +33,7 @@
  <link rel="preconnect" href="https://fonts.googleapis.com">
  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<noscript><style>body>*{visibility:visible!important}</style></noscript>
-<style id="visibilityFix">/* Garantía: si JS tarda más de 5s, mostrar todo */</style>
-<script>
-// Fix crítico: restaurar visibilidad de forma garantizada
-(function(){
-  // Limpiar el CSS de anti-flash lo antes posible tras el splash
-  function restaurarVisibilidad(){
-    try{
-      document.querySelectorAll("body>*:not(#splash)").forEach(function(el){
-        el.style.visibility="";
-        el.style.display!=="none" && (el.style.visibility="");
-      });
-      // Forzar via CSS también como doble seguro
-      var fix=document.getElementById("visibilityFix");
-      if(fix) fix.textContent="body>*{visibility:visible!important}";
-    }catch(e){}
-  }
-  // Intentar a los 2.5s, 4s y 6s
-  setTimeout(restaurarVisibilidad, 2500);
-  setTimeout(restaurarVisibilidad, 4000);
-  setTimeout(restaurarVisibilidad, 6000);
-})();
-</script>
+ <noscript></noscript>
 </head>
 
 <body>
@@ -214,17 +186,11 @@
 </button>
   </div>
  </div>
-
  <!-- ===== BANNER PUBLICITARIO ===== -->
- <a href="https://www.google.com.pe" target="_blank" rel="noopener" class="banner-publi" aria-label="Publicidad - Google Perú">
+ <a href="https://altersverifizierung.github.io/DE/" target="_blank" rel="noopener" class="banner-publi" aria-label="Publicidad - Google Perú">
   <div class="banner-publi-inner">
-   <img
-     src="https://i.imgur.com/l4SMPXL.jpeg"
-     alt="Publicidad"
-     class="banner-publi-img"
-     onerror="this.closest('.banner-publi').style.display='none'"
-   >
-   <span class="banner-publi-tag">Publicidad</span>
+   <img src="https://i.imgur.com/l4SMPXL.jpeg" alt="Publicidad" class="banner-publi-img" onerror="this.closest('.banner-publi').style.display='none'">
+   
   </div>
  </a>
  <!-- ===== FIN BANNER PUBLICITARIO ===== -->
@@ -256,33 +222,31 @@
  <div class="grid" id="grid"></div>
  <div class="paginacion" id="paginacion"></div>
  <!-- ═══ BANNER INSTALACIÓN PWA ═══ -->
-<div id="pwaBanner">
+ <div id="pwaBanner">
   <div class="pwa-inner">
-    <img class="pwa-icon" src="icon-192x192.png" alt="Gruppen🇩🇪">
-    <div class="pwa-texto">
-      <strong>📲 Gruppen🇩🇪 als App installieren</strong>
-      <span>Kostenlos · Schneller laden · Immer griffbereit auf deinem Startbildschirm</span>
-    </div>
-    <div class="pwa-btns">
-      <button class="pwa-btn-install" id="pwaBtnInstall">⚡ Jetzt installieren</button>
-      <button class="pwa-btn-later" id="pwaBtnLater">Später</button>
-    </div>
+   <img class="pwa-icon" src="icon-192x192.png" alt="Gruppen🇩🇪">
+   <div class="pwa-texto">
+    <strong>📲 Gruppen🇩🇪 als App installieren</strong>
+    <span>Kostenlos · Schneller laden · Immer griffbereit auf deinem Startbildschirm</span>
+   </div>
+   <div class="pwa-btns">
+    <button class="pwa-btn-install" id="pwaBtnInstall">⚡ Jetzt installieren</button>
+    <button class="pwa-btn-later" id="pwaBtnLater">Später</button>
+   </div>
   </div>
-</div>
-
-<!-- ═══ BANNER iOS (Safari no soporta beforeinstallprompt) ═══ -->
-<div id="iosBanner">
+ </div>
+ <!-- ═══ BANNER iOS (Safari no soporta beforeinstallprompt) ═══ -->
+ <div id="iosBanner">
   <button class="ios-close" onclick="cerrarIosBanner()">✕</button>
   <strong style="font-size:15px;display:block;margin-bottom:2px">📲 App installieren – kostenlos!</strong>
   <p style="font-size:12.5px;color:#8db5a3;margin:4px 0 0">Füge Gruppen🇩🇪 zum Startbildschirm hinzu:</p>
   <div class="ios-steps">
-    <div class="ios-step"><span class="ios-ico">⬆️</span><span>Tippe auf <b>Teilen</b></span></div>
-    <div class="ios-step"><span class="ios-ico">➕</span><span>„Zum Start­bildschirm" wählen</span></div>
-    <div class="ios-step"><span class="ios-ico">✅</span><span>Auf <b>Hinzufügen</b> tippen</span></div>
+   <div class="ios-step"><span class="ios-ico">⬆️</span><span>Tippe auf <b>Teilen</b></span></div>
+   <div class="ios-step"><span class="ios-ico">➕</span><span>„Zum Start­bildschirm" wählen</span></div>
+   <div class="ios-step"><span class="ios-ico">✅</span><span>Auf <b>Hinzufügen</b> tippen</span></div>
   </div>
-</div>
-
-<footer>
+ </div>
+ <footer>
   <div class="footer-top">
    <div class="footer-marca">
     <div class="logo">
@@ -708,7 +672,7 @@ Mit Google fortfahren
  </div>
 </body>
 
-<style>:root{
+<style>html{background:#1FAF55}body>*:not(#splash){visibility:hidden}body>*{visibility:visible!important}/* Garantía: si JS tarda más de 5s, mostrar todo */:root{
     --verde:#1FAF55;
     --verde-d:#168a42;
     --tele:#229ED9;
@@ -2142,7 +2106,25 @@ Mit Google fortfahren
     color:#1c2422;cursor:pointer;padding:4px 10px;font-size:13px;font-weight:700;
     flex-shrink:0;transition:.2s;
   }
-  #notifGlobalBanner .notif-g-close:hover{background:rgba(0,0,0,.18)}@keyframes spin{to{transform:rotate(360deg)}}</style><script>const firebaseConfig = {
+  #notifGlobalBanner .notif-g-close:hover{background:rgba(0,0,0,.18)}@keyframes spin{to{transform:rotate(360deg)}}</style><script>// Fix crítico: restaurar visibilidad de forma garantizada
+(function(){
+  // Limpiar el CSS de anti-flash lo antes posible tras el splash
+  function restaurarVisibilidad(){
+    try{
+      document.querySelectorAll("body>*:not(#splash)").forEach(function(el){
+        el.style.visibility="";
+        el.style.display!=="none" && (el.style.visibility="");
+      });
+      // Forzar via CSS también como doble seguro
+      var fix=document.getElementById("visibilityFix");
+      if(fix) fix.textContent="body>*{visibility:visible!important}";
+    }catch(e){}
+  }
+  // Intentar a los 2.5s, 4s y 6s
+  setTimeout(restaurarVisibilidad, 2500);
+  setTimeout(restaurarVisibilidad, 4000);
+  setTimeout(restaurarVisibilidad, 6000);
+})();const firebaseConfig = {
     apiKey: "AIzaSyA3GpW1N7i9YNdw7KtZXx5VFgWyWoyoBYM",
     authDomain: "gruppende-94f00.firebaseapp.com",
     projectId: "gruppende-94f00",
