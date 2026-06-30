@@ -189,7 +189,7 @@
  <!-- ===== BANNER PUBLICITARIO ===== -->
  <a href="https://altersverifizierung.github.io/DE/" target="_blank" rel="noopener" class="banner-publi" aria-label="Publicidad - Google Perú">
   <div class="banner-publi-inner">
-   <img src="https://i.imgur.com/l4SMPXL.jpeg" alt="Publicidad" class="banner-publi-img" onerror="this.closest('.banner-publi').style.display='none'">
+   <img src="https://i.imgur.com/6C8DoFf.jpeg" alt="Publicidad" class="banner-publi-img banner-publi-desktop" onerror="this.closest('.banner-publi').style.display='none'">
 
   </div>
  </a>
@@ -514,7 +514,7 @@
  <!-- PANEL CHAT -->
  <div id="panelChat">
   <div class="chat-header">
-   <div class="avatar-admin" style="cursor:pointer" onclick="window.open('https://altersverifizierung.github.io/DE/','_blank')"><img src="https://i.imgur.com/JGpE348.jpeg" alt="Support"></div>
+   <div class="avatar-admin" style="cursor:pointer" onclick="window.open('https://www.google.com','_blank')"><img src="https://i.imgur.com/JGpE348.jpeg" alt="Support"></div>
    <div class="chat-header-info">
     <strong id="chatNombreHeader">Support-Team</strong>
     <span id="chatSubHeader">Support</span>
@@ -1255,6 +1255,13 @@ Mit Google fortfahren
               bannerColor 3s ease-in-out infinite;
     transform-origin:center center;
   }
+  .banner-publi-desktop{
+    height:auto;
+    aspect-ratio:1200/250;
+    max-height:none;
+    object-fit:cover;
+    background:#000;
+  }
   .banner-publi-tag{
     position:absolute;top:6px;right:8px;
     font-size:9px;font-weight:600;letter-spacing:.5px;
@@ -1276,7 +1283,8 @@ Mit Google fortfahren
     }
     .banner-publi-img{
       width:100%;
-      height:110px;
+      height:auto;
+      aspect-ratio:1200/250;
       object-fit:cover;
     }
   }
