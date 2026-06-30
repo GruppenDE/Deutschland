@@ -4325,7 +4325,7 @@ function poblarSelectChat(){
   correos.forEach(correo=>{
     const label=obtenerNombrePorCorreo(correo);
     const n=contarNoLeidosCorreo(correo);
-    sel.innerHTML+=`<option value="${correo}">${label}${n>0?` 🔴(${n})`:""}</option>`;
+    sel.innerHTML+=`<option value="${correo}">${label}${n>0?` (${n})`:""}</option>`;
   });
   if(valorActual) sel.value=valorActual;
 }
@@ -4584,6 +4584,14 @@ function adminAprobarSolicitud(id){
   // Notificar usuario por chat
   const msgAdmin={de:"admin",texto:`✅ Deine Gruppe *${s.nombre}* wurde genehmigt und ist jetzt auf Gruppen🇩🇪 sichtbar! 🎉 Jetzt haben andere die Möglichkeit, deine Gruppe zu favorisieren und ihr Ranking zu verbessern.`,hora:horaActual()};
   agregarMensajeChat(s.usuarioCorreo, msgAdmin);
+
+  // Enviar automáticamente el enlace de compartir de su grupo
+  if(s.link){
+    const DOMINIO_COMPARTIR="https://gruppende.github.io/Deutschland/";
+    const enlaceCompartir=`${DOMINIO_COMPARTIR}?grupo=${generarSlug(s.nombre)}`;
+    const msgEnlace={de:"admin",texto:`🔗 Hier ist dein Teilen-Link, um deine Gruppe zu bewerben:\n${enlaceCompartir}`,hora:horaActual()};
+    agregarMensajeChat(s.usuarioCorreo, msgEnlace);
+  }
   actualizarBadgeChat(s.usuarioCorreo);
 
   // Actualizar vista inmediatamente
@@ -4671,7 +4679,7 @@ function poblarSelectAdminChats(){
   correos.forEach(correo=>{
     const label=obtenerNombrePorCorreo(correo);
     const n=contarNoLeidosCorreo(correo);
-    sel.innerHTML+=`<option value="${correo}">${label}${n>0?` 🔴(${n})`:""}</option>`;
+    sel.innerHTML+=`<option value="${correo}">${label}${n>0?` (${n})`:""}</option>`;
   });
   if(valorActual) sel.value=valorActual;
 }
