@@ -194,6 +194,10 @@
   </div>
  </a>
  <!-- ===== FIN BANNER PUBLICITARIO ===== -->
+ <div id="bannerGrupoCompartido" class="banner-grupo-compartido" style="display:none">
+  <span class="bgc-texto" id="bgcTexto"></span>
+  <button type="button" class="bgc-btn" onclick="reiniciar();document.getElementById('bannerGrupoCompartido').style.display='none'">Alle Gruppen anzeigen</button>
+ </div>
  <input id="buscar" placeholder="Gruppen nach Name oder Plattform suchen …" onkeyup="buscarCambio()">
  <div class="plat-wrap">
   <div class="plat-selector" id="platSelector">
@@ -1096,6 +1100,37 @@ Mit Google fortfahren
   .btn-unirse:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.18)}
   .btn-unirse .flecha{transition:transform .18s}
   .btn-unirse:hover .flecha{transform:translateX(3px)}
+
+  .acciones{flex-wrap:wrap}
+  .btn-compartir{
+    flex:0 0 100%;display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:10px 14px;border-radius:10px;color:var(--sub);text-decoration:none;
+    font-weight:600;font-size:13.5px;background:#0000000a;border:1.5px solid #00000014;
+    cursor:pointer;transition:transform .18s, background .18s, color .18s;
+  }
+  .btn-compartir:hover{background:#1FAF551a;color:var(--verde-d);border-color:#1FAF5540;transform:translateY(-1px)}
+  .btn-compartir.copiado{background:#1FAF55;color:#fff;border-color:#1FAF55}
+
+  .banner-grupo-compartido{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    background:#1FAF551a;border:1.5px solid #1FAF5540;border-radius:12px;
+    padding:12px 16px;margin-bottom:14px;font-size:13.5px;color:var(--verde-d);
+  }
+  .banner-grupo-compartido .bgc-btn{
+    flex-shrink:0;background:var(--verde);color:#fff;border:none;border-radius:8px;
+    padding:8px 14px;font-weight:600;font-size:13px;cursor:pointer;transition:transform .15s;
+  }
+  .banner-grupo-compartido .bgc-btn:hover{transform:translateY(-1px)}
+
+  /* Tarjeta resaltada al llegar desde un enlace compartido */
+  .card.card-resaltada{
+    animation:resaltarTarjeta 3s ease;
+    box-shadow:0 0 0 3px var(--verde),0 8px 24px rgba(31,175,85,.35);
+  }
+  @keyframes resaltarTarjeta{
+    0%,100%{box-shadow:0 0 0 3px var(--verde),0 8px 24px rgba(31,175,85,.35)}
+    50%{box-shadow:0 0 0 3px var(--verde),0 8px 34px rgba(31,175,85,.55)}
+  }
 
   .btn-fav{
     position:absolute;bottom:10px;right:10px;
@@ -2711,6 +2746,9 @@ function pintar(arr){
           <a class="btn-unirse ${claseBtn}" target="_blank" rel="noopener" href="${g.link}">
             Gruppe beitreten <span class="flecha">→</span>
           </a>
+          <button class="btn-compartir" type="button" onclick="compartirGrupo(this,'${g.nombre.replace(/'/g,"\\'")}','${g.plataforma}')">
+            <span class="compartir-ico">🔗</span> Teilen
+          </button>
         </div>
       </div>
     </div>`;
@@ -2823,6 +2861,98 @@ function animarNumero(btn, nuevoVal, subiendo){
       setTimeout(()=>p.remove(),700);
     }
   }
+}
+
+function aplicarGrupoDesdeURL(){
+  const params=new URLSearchParams(window.location.search);
+  const nombre=params.get("grupo");
+  if(!nombre) return;
+
+  const info=paginaDeGrupo(nombre);
+
+  // En vez de filtrar por texto (lo que ocultaba el resto de grupos y la
+  // paginación), navegamos directamente a la página real donde está el
+  // grupo dentro del listado completo, sin tocar el buscador.
+  if(info){
+    paginaActual=info.pagina;
+  }
+  filtrar();
+
+  const banner=document.getElementById("bannerGrupoCompartido");
+  const texto=document.getElementById("bgcTexto");
+  if(banner&&texto){
+    texto.textContent=info
+      ? `🔎 Du wurdest zur geteilten Gruppe „${nombre}“ weitergeleitet — Seite ${info.pagina} von ${info.total}.`
+      : `🔎 Du suchst die geteilte Gruppe „${nombre}“.`;
+    banner.style.display="flex";
+  }
+
+  // Resaltar la tarjeta del grupo compartido y hacer scroll hasta ella
+  setTimeout(()=>{
+    const tarjetas=document.querySelectorAll("#grid .card h3");
+    for(const h of tarjetas){
+      if(h.textContent.trim()===nombre.trim()){
+        const card=h.closest(".card");
+        if(card){
+          card.classList.add("card-resaltada");
+          card.scrollIntoView({behavior:"smooth",block:"center"});
+          setTimeout(()=>card.classList.remove("card-resaltada"),3000);
+        }
+        break;
+      }
+    }
+  },300);
+}
+
+/* =========================================================
+   COMPARTIR GRUPO — genera un enlace con el dominio propio
+   ========================================================= */
+function paginaDeGrupo(nombre){
+  if(typeof grupos==="undefined"||!grupos.length) return null;
+  const arr=grupos;
+  const pf=obtenerPaginasFijas();
+  const conPagFija=arr.filter(g=>pf[g.nombre]);
+  const sinPagFija=[...arr].filter(g=>!pf[g.nombre]).sort((a,b)=>totalFavoritos(b)-totalFavoritos(a));
+  const totalPaginas=Math.max(1,Math.ceil(arr.length/GRUPOS_POR_PAGINA));
+  const slots=Array.from({length:totalPaginas},()=>[]);
+  conPagFija.forEach(g=>{
+    const pag=Math.min(pf[g.nombre],totalPaginas)-1;
+    slots[pag].push(g);
+  });
+  let ptrLibre=0;
+  sinPagFija.forEach(g=>{
+    while(ptrLibre<totalPaginas && slots[ptrLibre].length>=GRUPOS_POR_PAGINA) ptrLibre++;
+    if(ptrLibre<totalPaginas) slots[ptrLibre].push(g);
+  });
+  for(let i=0;i<slots.length;i++){
+    if(slots[i].some(g=>g.nombre===nombre)) return {pagina:i+1,total:totalPaginas};
+  }
+  return null;
+}
+
+function compartirGrupo(btn,nombre,plataforma){
+  const DOMINIO="https://gruppende.github.io/Deutschland/";
+  const url=`${DOMINIO}?grupo=${encodeURIComponent(nombre)}`;
+  const info=paginaDeGrupo(nombre);
+  const paginaTxt=info?` (Seite ${info.pagina} von ${info.total})`:"";
+  const texto=`${nombre} · Gruppe auf ${plataforma}${paginaTxt} — gefunden auf ${DOMINIO}`;
+
+  if(navigator.share){
+    navigator.share({title:nombre,text:texto,url}).catch(()=>{});
+    return;
+  }
+
+  navigator.clipboard.writeText(`${texto}\n${url}`).then(()=>{
+    const original=btn.innerHTML;
+    btn.classList.add("copiado");
+    btn.innerHTML='<span class="compartir-ico">✓</span> Link kopiert!';
+    setTimeout(()=>{
+      btn.classList.remove("copiado");
+      btn.innerHTML=original;
+    },1800);
+  }).catch(()=>{
+    prompt("Link kopieren:",`${texto}\n${url}`);
+  });
 }
 
 function alternarFavorito(btn,nombre){
@@ -3534,12 +3664,14 @@ async function initFirebase(){
     // Ya termino de cargar: repintar siempre (haya o no grupos nuevos)
     _cargandoGrupos=false;
     filtrar();
+    try{ aplicarGrupoDesdeURL(); }catch(e){ console.warn("aplicarGrupoDesdeURL:",e); }
 
   }catch(e){
     console.warn("Firebase init error:",e);
     _cargandoGrupos=false;
     // Fix: pintar igual para no dejar skeletons infinitos
     try{ filtrar(); }catch(fe){ console.warn("filtrar fallback:",fe); }
+    try{ aplicarGrupoDesdeURL(); }catch(fe){ console.warn("aplicarGrupoDesdeURL fallback:",fe); }
   }
 
   try{ iniciarListenersChat(); }catch(e){ console.warn("iniciarListenersChat:",e); }
@@ -4595,7 +4727,10 @@ function renderMisGrupos(user){
         <div class="meta">📅 ${new Date(s.fecha).toLocaleDateString("de-DE",{day:"2-digit",month:"short",year:"numeric"})}</div>
         <div class="acciones">
           ${s.estado==="aprobado"
-            ?`<a class="btn-unirse ${claseBtn}" target="_blank" rel="noopener" href="${s.link}">Gruppe öffnen <span class="flecha">→</span></a>`
+            ?`<a class="btn-unirse ${claseBtn}" target="_blank" rel="noopener" href="${s.link}">Gruppe öffnen <span class="flecha">→</span></a>
+              <button class="btn-compartir" type="button" onclick="compartirGrupo(this,'${s.nombre.replace(/'/g,"\\'")}','${s.plataforma}')">
+                <span class="compartir-ico">🔗</span> Teilen
+              </button>`
             :`<button class="btn-unirse ${claseBtn}" disabled style="opacity:.5;cursor:not-allowed">
                 ${s.estado==="pendiente"?"⏳ Wird geprüft…":"❌ Abgelehnt"}
               </button>`}
