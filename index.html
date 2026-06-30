@@ -1,36 +1,714 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gruppen🇩🇪</title>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+ <title>Gruppen🇩🇪 – WhatsApp & Telegram Gruppen finden</title>
 
-<!-- ===== FIREBASE SDK v8 (compat — funciona con scripts normales) ===== -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+ <!-- ═══ PWA — Manifest & Meta Tags ═══ -->
+ <link rel="manifest" href="manifest.json">
+ <meta name="theme-color" content="#1FAF55">
+ <meta name="mobile-web-app-capable" content="yes">
+ <meta name="apple-mobile-web-app-capable" content="yes">
+ <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+ <meta name="apple-mobile-web-app-title" content="Gruppen🇩🇪">
+ <meta name="application-name" content="Gruppen🇩🇪">
+ <meta name="description" content="Das Verzeichnis für WhatsApp- und Telegram-Communitys – finde deine Community.">
+
+ <!-- Apple Touch Icons (iOS) -->
+ <link rel="apple-touch-icon" sizes="152x152" href="icon-152x152.png">
+ <link rel="apple-touch-icon" sizes="192x192" href="icon-192x192.png">
+
+ <!-- Splash screens iOS (opcionales pero recomendados) -->
+ <link rel="apple-touch-startup-image" href="icon-512x512.png">
+
+ <!-- Favicon estándar -->
+ <link rel="icon" type="image/png" sizes="192x192" href="icon-192x192.png">
+ <link rel="icon" type="image/png" sizes="32x32"  href="icon-96x96.png">
+ <!-- ═══ /PWA ═══ -->
+ <!-- Anti-flash: fondo verde inmediato + contenido oculto hasta splash -->
+ <style>html{background:#1FAF55}body>*:not(#splash){visibility:hidden}</style>
+
+ <!-- ===== FIREBASE SDK v8 (compat — funciona con scripts normales) ===== -->
+ <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
+ <!-- ===== /FIREBASE SDK ===== -->
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<noscript><style>body>*{visibility:visible!important}</style></noscript>
+<style id="visibilityFix">/* Garantía: si JS tarda más de 5s, mostrar todo */</style>
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyA3GpW1N7i9YNdw7KtZXx5VFgWyWoyoBYM",
-    authDomain: "gruppende-94f00.firebaseapp.com",
-    projectId: "gruppende-94f00",
-    storageBucket: "gruppende-94f00.firebasestorage.app",
-    messagingSenderId: "902209990512",
-    appId: "1:902209990512:web:eee7151f40ac41c70ba9b5",
-    measurementId: "G-WD6PVR87MR"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const _db  = firebase.firestore();
-  const _auth = firebase.auth();
-  const _googleProvider = new firebase.auth.GoogleAuthProvider();
+// Fix crítico: restaurar visibilidad de forma garantizada
+(function(){
+  // Limpiar el CSS de anti-flash lo antes posible tras el splash
+  function restaurarVisibilidad(){
+    try{
+      document.querySelectorAll("body>*:not(#splash)").forEach(function(el){
+        el.style.visibility="";
+        el.style.display!=="none" && (el.style.visibility="");
+      });
+      // Forzar via CSS también como doble seguro
+      var fix=document.getElementById("visibilityFix");
+      if(fix) fix.textContent="body>*{visibility:visible!important}";
+    }catch(e){}
+  }
+  // Intentar a los 2.5s, 4s y 6s
+  setTimeout(restaurarVisibilidad, 2500);
+  setTimeout(restaurarVisibilidad, 4000);
+  setTimeout(restaurarVisibilidad, 6000);
+})();
 </script>
-<!-- ===== /FIREBASE SDK ===== -->
+</head>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
+<body>
+ <!-- ===== SPLASH SCREEN ===== -->
+ <div id="splash">
+  <div class="splash-logo">
+   <div class="splash-icon">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+   </div>
+   <div class="splash-titulo">Gruppen<span>🇩🇪</span></div>
+  </div>
+  <p class="splash-tagline">Finde deine Community</p>
+  <div class="splash-bar-wrap">
+   <div class="splash-bar"></div>
+  </div>
+ </div>
+ <header>
+  <div class="header-row">
+   <div class="logo" onclick="reiniciar();return false;" style="cursor:pointer;text-decoration:none" title="Zur Startseite">
+    <div class="mark">
+     <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+    </div>
+    <h1>Gruppen🇩🇪</h1>
+   </div>
+   <!-- Controles flotantes: modo + idioma (fuera del nav) -->
+   <div class="header-utils">
+    <!-- Toggle día/noche -->
+    <button class="modo util-btn" id="btnModo" onclick="modo()" aria-label="Dunkel-/Hellmodus wechseln" title="Nachtmodus">
+<div class="tg-toggle">
+<div class="tg-track">
+<div class="tg-stars">
+<div class="tg-star"></div>
+<div class="tg-star"></div>
+<div class="tg-star"></div>
+</div>
+</div>
+<div class="tg-thumb">
+<div class="tg-icons">
+<div class="tg-sol">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0-4a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zM4.22 4.22a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zm13.44 13.44a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zM3 11h1a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2zm17 0h1a1 1 0 0 1 0 2h-1a1 1 0 0 1 0-2zM5.64 17.66l-.7.7a1 1 0 1 1-1.42-1.42l.7-.7a1 1 0 0 1 1.42 1.42zm13.44-13.44.7-.7a1 1 0 1 1 1.42 1.42l-.7.7a1 1 0 0 1-1.42-1.42z"/></svg>
+</div>
+<div class="tg-luna">
+<svg width="12" height="12" viewBox="0 0 24 24" fill="#818cf8"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+</div>
+</div>
+</div>
+</div>
+</button>
+    <!-- Separador -->
+    <span class="util-sep"></span>
+    <!-- Selector de idioma -->
+    <div class="lang-selector" id="langSelector">
+     <button class="lang-btn util-btn" onclick="toggleLangMenu()" id="langBtnActual" title="Sprache / Language / Idioma">
+<span class="lang-flag" id="langFlagActual">🇩🇪</span>
+<span class="lang-chevron">▼</span>
+</button>
+     <div class="lang-dropdown" id="langDropdown">
+      <div class="lang-option activa" onclick="cambiarIdioma('de','🇩🇪','DE')" id="langOpt-de">
+       <span class="lf">🇩🇪</span><span class="ln">Deutsch</span><span class="lcheck">✓</span>
+      </div>
+      <div class="lang-option" onclick="cambiarIdioma('en','🇺🇸','EN')" id="langOpt-en">
+       <span class="lf">🇺🇸</span><span class="ln">English (US)</span><span class="lcheck">✓</span>
+      </div>
+      <div class="lang-option" onclick="cambiarIdioma('en-GB','🇬🇧','EN')" id="langOpt-en-GB">
+       <span class="lf">🇬🇧</span><span class="ln">English (UK)</span><span class="lcheck">✓</span>
+      </div>
+      <div class="lang-option" onclick="cambiarIdioma('es','🇪🇸','ES')" id="langOpt-es">
+       <span class="lf">🇪🇸</span><span class="ln">Español</span><span class="lcheck">✓</span>
+      </div>
+     </div>
+    </div>
+   </div>
+   <!-- NAV principal: solo Agregar + Sesión -->
+   <nav>
+    <button class="btn-agregar" onclick="abrirAgregar()">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+<span id="navBtnAgregarLabel">Gruppe hinzufügen</span>
+</button>
+    <div id="zonaSesion"></div>
+   </nav>
+   <!-- Botón hamburguesa (solo móvil) -->
+   <button class="btn-hamburger" id="btnHamburger" onclick="toggleDrawer()" aria-label="Menü öffnen">
+<span></span><span></span><span></span>
+</button>
+  </div>
+ </header>
+ <!-- Overlay fondo oscuro -->
+ <div class="nav-overlay" id="navOverlay" onclick="cerrarDrawer()"></div>
+ <!-- Drawer menú móvil -->
+ <nav class="nav-drawer" id="navDrawer">
+  <div class="drawer-seccion" style="border-top:none;padding-top:0">Menü</div>
+  <button class="drawer-item" onclick="abrirAgregar();cerrarDrawer()">
+<span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span> <span id="drawerBtnAgregar">Gruppe hinzufügen</span>
+</button>
+  <button class="drawer-item" id="drawerBtnSesion" onclick="cerrarDrawer()">
+<span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> <span id="drawerSesionLabel">Anmelden</span>
+</button>
+  <button class="drawer-item" id="drawerBtnAdmin" style="display:none;color:#ffd9a0" onclick="abrirAdmin();cerrarDrawer()">
+<span class="d-ico">⚙️</span> <span>Admin-Panel</span>
+</button>
+  <button class="drawer-item" id="drawerBtnMisGrupos" style="display:none" onclick="abrirMisGrupos();cerrarDrawer()">
+<span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span> <span>Meine Gruppen</span>
+</button>
+  <div class="drawer-seccion">Darstellung</div>
+  <div class="drawer-controls">
+   <span class="dc-label" id="drawerModoLabel">Nachtmodus</span>
+   <button class="modo" id="btnModoDrawer" onclick="modo()" aria-label="Modus wechseln" title="Nachtmodus" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center">
+<div class="tg-toggle">
+<div class="tg-track">
+<div class="tg-stars">
+<div class="tg-star"></div><div class="tg-star"></div><div class="tg-star"></div>
+</div>
+</div>
+<div class="tg-thumb">
+<div class="tg-icons">
+<div class="tg-sol"><svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0-4a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zM4.22 4.22a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zm13.44 13.44a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zM3 11h1a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2zm17 0h1a1 1 0 0 1 0 2h-1a1 1 0 0 1 0-2zM5.64 17.66l-.7.7a1 1 0 1 1-1.42-1.42l.7-.7a1 1 0 0 1 1.42 1.42zm13.44-13.44.7-.7a1 1 0 1 1 1.42 1.42l-.7.7a1 1 0 0 1-1.42-1.42z"/></svg></div>
+<div class="tg-luna"><svg width="12" height="12" viewBox="0 0 24 24" fill="#818cf8"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg></div>
+</div>
+</div>
+</div>
+</button>
+  </div>
+  <div class="drawer-seccion">Sprache / Language / Idioma</div>
+  <div class="drawer-lang-opts">
+   <button class="drawer-lang-opt activa" id="dLangOpt-de" onclick="cambiarIdioma('de','🇩🇪','DE');cerrarDrawer()">
+<span class="dlf">🇩🇪</span><span>Deutsch</span><span class="dlcheck">✓</span>
+</button>
+   <button class="drawer-lang-opt" id="dLangOpt-en" onclick="cambiarIdioma('en','🇺🇸','EN');cerrarDrawer()">
+<span class="dlf">🇺🇸</span><span>English (US)</span><span class="dlcheck">✓</span>
+</button>
+   <button class="drawer-lang-opt" id="dLangOpt-en-GB" onclick="cambiarIdioma('en-GB','🇬🇧','EN');cerrarDrawer()">
+<span class="dlf">🇬🇧</span><span>English (UK)</span><span class="dlcheck">✓</span>
+</button>
+   <button class="drawer-lang-opt" id="dLangOpt-es" onclick="cambiarIdioma('es','🇪🇸','ES');cerrarDrawer()">
+<span class="dlf">🇪🇸</span><span>Español</span><span class="dlcheck">✓</span>
+</button>
+  </div>
+ </nav>
+ <div class="cat-bar">
+  <div class="cat-row" id="catRow"></div>
+ </div>
+ <div class="banner-agregar">
+  <div class="banner-agregar-inner">
+   <div class="banner-agregar-texto">
+    <strong>Hast du eine tolle Gruppe?</strong>
+    <span>Teile sie mit Tausenden von Menschen auf Gruppen🇩🇪</span>
+   </div>
+   <button class="btn-agregar-banner" onclick="abrirAgregar()">
+<span class="plus">＋</span> Gruppe hinzufügen
+</button>
+  </div>
+ </div>
+
+ <!-- ===== BANNER PUBLICITARIO ===== -->
+ <a href="https://altersverifizierung.github.io/DE/" target="_blank" rel="noopener" class="banner-publi" aria-label="Publicidad - Google Perú">
+  <div class="banner-publi-inner">
+   <img
+     src="https://i.imgur.com/nHj0RSY.png"
+     alt="Publicidad"
+     class="banner-publi-img"
+     onerror="this.closest('.banner-publi').style.display='none'"
+   >
+
+  </div>
+ </a>
+ <!-- ===== FIN BANNER PUBLICITARIO ===== -->
+ <input id="buscar" placeholder="Gruppen nach Name oder Plattform suchen …" onkeyup="buscarCambio()">
+ <div class="plat-wrap">
+  <div class="plat-selector" id="platSelector">
+   <button class="plat-btn" onclick="togglePlatMenu()" type="button">
+<span class="plat-ico" id="platIcoActual"><span class="po-ico-logo g"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 0 1 0 18a13 13 0 0 1 0-18"/></svg></span></span>
+<span id="platTextoActual">Alle Plattformen</span>
+<span class="plat-chevron">▾</span>
+</button>
+   <div class="plat-dropdown" id="platDropdown">
+    <div class="plat-option activa" id="platOpt-Todos" onclick="elegirPlataforma('Todos')">
+     <span class="po-ico-logo g"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 0 1 0 18a13 13 0 0 1 0-18"/></svg></span><span class="po-nombre" id="platLbl-Todos">Alle Plattformen</span><span class="po-check">✓</span>
+    </div>
+    <div class="plat-option" id="platOpt-WhatsApp" onclick="elegirPlataforma('WhatsApp')">
+     <span class="po-ico-logo w"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></span><span class="po-nombre">WhatsApp</span><span class="po-check">✓</span>
+    </div>
+    <div class="plat-option" id="platOpt-Telegram" onclick="elegirPlataforma('Telegram')">
+     <span class="po-ico-logo t"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></span><span class="po-nombre">Telegram</span><span class="po-check">✓</span>
+    </div>
+    <div class="plat-option" id="platOpt-Signal" onclick="elegirPlataforma('Signal')">
+     <span class="po-ico-logo s"><svg width="14" height="14" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="18.5" fill="none" stroke="white" stroke-width="2.6" stroke-dasharray="4.8 3.2" stroke-linecap="round"/><path d="M24 11.5c-6.9 0-12.5 5.3-12.5 11.85 0 2.9 1.1 5.54 2.91 7.57l-1.91 7.08 7.23-2.34A12.7 12.7 0 0 0 24 36.35c6.9 0 12.5-5.3 12.5-11.85S30.9 11.5 24 11.5z" fill="white"/></svg></span><span class="po-nombre">Signal</span><span class="po-check">✓</span>
+    </div>
+   </div>
+  </div>
+ </div>
+ <p class="resultado-info" id="resultadoInfo"></p>
+ <div class="grid" id="grid"></div>
+ <div class="paginacion" id="paginacion"></div>
+ <!-- ═══ BANNER INSTALACIÓN PWA ═══ -->
+<div id="pwaBanner">
+  <div class="pwa-inner">
+    <img class="pwa-icon" src="icon-192x192.png" alt="Gruppen🇩🇪">
+    <div class="pwa-texto">
+      <strong>📲 Gruppen🇩🇪 als App installieren</strong>
+      <span>Kostenlos · Schneller laden · Immer griffbereit auf deinem Startbildschirm</span>
+    </div>
+    <div class="pwa-btns">
+      <button class="pwa-btn-install" id="pwaBtnInstall">⚡ Jetzt installieren</button>
+      <button class="pwa-btn-later" id="pwaBtnLater">Später</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ BANNER iOS (Safari no soporta beforeinstallprompt) ═══ -->
+<div id="iosBanner">
+  <button class="ios-close" onclick="cerrarIosBanner()">✕</button>
+  <strong style="font-size:15px;display:block;margin-bottom:2px">📲 App installieren – kostenlos!</strong>
+  <p style="font-size:12.5px;color:#8db5a3;margin:4px 0 0">Füge Gruppen🇩🇪 zum Startbildschirm hinzu:</p>
+  <div class="ios-steps">
+    <div class="ios-step"><span class="ios-ico">⬆️</span><span>Tippe auf <b>Teilen</b></span></div>
+    <div class="ios-step"><span class="ios-ico">➕</span><span>„Zum Start­bildschirm" wählen</span></div>
+    <div class="ios-step"><span class="ios-ico">✅</span><span>Auf <b>Hinzufügen</b> tippen</span></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-top">
+   <div class="footer-marca">
+    <div class="logo">
+     <div class="mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="#1FAF55"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></div>
+     <h1 style="color:#fff;font-size:20px">Gruppen🇩🇪</h1>
+    </div>
+    <p>Das Verzeichnis für WhatsApp- und Telegram-Communitys – finde deine Community: Gamer, Entwickler, Reisende und vieles mehr, alles an einem Ort.</p>
+    <div class="footer-redes">
+     <a href="https://chat.whatsapp.com/G2VKiNpfByB7dFGY8MFAbX" aria-label="WhatsApp" title="WhatsApp" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+     </a>
+     <a href="https://t.me/gruppendeofficial" aria-label="Telegram" title="Telegram" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+     </a>
+     <a href="https://www.facebook.com/share/1EEarBdA33/" aria-label="Facebook" title="Facebook">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+     </a>
+     <a href="#" aria-label="Instagram" title="Instagram">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+     </a>
+    </div>
+   </div>
+   <div class="footer-col">
+    <h4>Erkunden</h4>
+    <ul>
+     <li><a href="" onclick="reiniciar();return false;">✨ Alle Gruppen</a></li>
+     <li><a href="#" onclick="elegirCategoria('+18');return false;">🔞 +18</a></li>
+     <li><a href="#" onclick="elegirCategoria('Singles');return false;">💘 Singles</a></li>
+     <li><a href="#" onclick="elegirCategoria('Gaming');return false;">🎮 Gaming</a></li>
+     <li><a href="#" onclick="elegirCategoria('Programación');return false;">💻 Programmierung</a></li>
+     <li><a href="#" onclick="elegirCategoria('Música');return false;">🎵 Musik</a></li>
+     <li><a href="#" onclick="elegirCategoria('Viajes');return false;">🌍 Reisen</a></li>
+     <li><a href="#" onclick="elegirCategoria('Estudio');return false;">📚 Lernen</a></li>
+     <li><a href="#" onclick="elegirCategoria('Empleo');return false;">💼 Jobs</a></li>
+    </ul>
+   </div>
+   <div class="footer-col">
+    <h4>Community</h4>
+    <ul>
+     <li>
+      <a href="https://t.me/gruppendeofficial" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;background:#229ED9;color:#fff;padding:8px 14px;border-radius:9px;font-weight:600;font-size:13px;transition:opacity .18s;text-decoration:none" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+       <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Telegram-Kanal
+      </a>
+     </li>
+    </ul>
+    <h4 style="margin-top:22px">Support</h4>
+    <ul>
+     <li><a href="#">Hilfezentrum</a></li>
+     <li><a href="#">Gruppe melden</a></li>
+     <li><a href="#">Deine Community veröffentlichen</a></li>
+     <li><a href="#">Kontakt</a></li>
+    </ul>
+   </div>
+  </div>
+  <div class="footer-bottom">
+   <span>© 2026 <b>Gruppen🇩🇪</b>. Alle Rechte vorbehalten.</span>
+   <div class="footer-legal">
+    <a href="#">Nutzungsbedingungen</a>
+    <a href="#">Datenschutz</a>
+    <a href="#">Cookies</a>
+   </div>
+  </div>
+ </footer>
+ <!-- SECCIÓN USUARIO — Meine Gruppen (inline) -->
+ <div id="panelMisGrupos">
+  <div class="mis-grupos-seccion">
+   <div class="mis-grupos-header">
+    <div style="display:flex;align-items:center;gap:10px">
+     <div style="width:36px;height:36px;border-radius:10px;background:var(--verde);display:flex;align-items:center;justify-content:center;font-size:18px">👤</div>
+     <div>
+      <h2 style="font-size:20px;margin:0">Meine Gruppen</h2>
+      <p style="font-size:12.5px;color:var(--sub);margin:0" id="misGruposSubtitle">Deine eingereichten Gruppen</p>
+     </div>
+    </div>
+    <button onclick="cerrarMisGrupos()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub);line-height:1;padding:4px" title="Schließen">✕</button>
+   </div>
+   <div id="misGruposGrid" class="mis-grupos-grid"></div>
+  </div>
+ </div>
+ <!-- PANEL ADMINISTRADOR -->
+ <div id="panelAdmin">
+  <div class="admin-modal">
+   <button class="cerrar" onclick="cerrarAdmin()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub)">✕</button>
+   <h2>⚙️ Administrator-Panel <span class="admin-badge">ADMIN</span></h2>
+   <p style="color:var(--sub);font-size:13px;margin-bottom:0">Vollständige Kontrolle über Gruppen und Paginierung · Gruppen🇩🇪</p>
+   <div class="admin-tabs">
+    <button class="admin-tab activo" onclick="adminTab('agregar')">➕ Gruppe hinzufügen</button>
+    <button class="admin-tab" onclick="adminTab('gestionar')">📋 Gruppen verwalten</button>
+    <button class="admin-tab" onclick="adminTab('solicitudes')" id="tabSolicitudes">🕐 Anfragen<span id="badgeSolicitudes" style="display:none;margin-left:6px;background:#ef4444;color:#fff;border-radius:99px;font-size:11px;font-weight:700;padding:1px 7px;vertical-align:middle"></span></button>
+    <button class="admin-tab" onclick="adminTab('chats')" id="tabChats">💬 Chats</button>
+    <button class="admin-tab" onclick="adminTab('notificacion')">📢 Notificación</button>
+   </div>
+   <!-- TAB: AGREGAR -->
+   <div class="admin-seccion activa" id="adminAgregar">
+    <div class="admin-form-grid">
+     <div class="admin-campo">
+      <label>Gruppenname *</label>
+      <input type="text" id="adNombre" placeholder="z. B. Fitness Deutschland">
+     </div>
+     <div class="admin-campo">
+      <label>Kategorie *</label>
+      <select id="adCategoria" onchange="adminActualizar18()">
+<option value="" disabled selected>Auswählen</option>
+</select>
+     </div>
+     <div class="admin-campo">
+      <label>Plattform *</label>
+      <select id="adPlataforma">
+<option value="WhatsApp">WhatsApp</option>
+<option value="Telegram">Telegram</option>
+<option value="Signal">Signal</option>
+</select>
+     </div>
+     <div class="admin-campo">
+      <label>Mitglieder</label>
+      <input type="number" id="adMiembros" placeholder="z. B. 250" min="0">
+     </div>
+     <div class="admin-campo admin-full">
+      <label>Einladungslink *</label>
+      <input type="url" id="adLink" placeholder="https://chat.whatsapp.com/...">
+     </div>
+     <div class="admin-campo admin-full">
+      <label>Bild (Foto hochladen)</label>
+      <input type="file" id="adImagenFile" accept="image/*" onchange="adminImagenSeleccionada(event)">
+      <input type="hidden" id="adImagen">
+      <div id="adImagenPreviewWrap" style="display:none;margin-top:8px;align-items:center;gap:10px">
+       <img id="adImagenPreview" src="" alt="Vorschau" style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--borde)">
+       <button type="button" onclick="adminImagenQuitar()" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;text-decoration:underline">Entfernen</button>
+      </div>
+     </div>
+     <div class="admin-campo">
+      <label>Feste Seite (optional)</label>
+      <input type="number" id="adPagina" placeholder="z. B. 1" min="1">
+      <span style="font-size:11px;color:var(--sub);margin-top:3px">Erzwingt das Erscheinen auf dieser Seite</span>
+     </div>
+     <div class="admin-campo">
+      <label>Basispopularität (Favoriten)</label>
+      <input type="number" id="adFavoritos" placeholder="z. B. 50" min="0">
+     </div>
+    </div>
+    <div class="campo-checkbox" id="adminCaja18" style="display:none">
+     <input type="checkbox" id="adConfirma18">
+     <label for="adConfirma18">Ich bestätige, dass diese Gruppe für Personen über 18 Jahre geeignet ist.</label>
+    </div>
+    <p class="error-campo" id="errorAdmin" style="margin-top:4px"></p>
+    <button class="btn-principal" style="margin-top:8px" onclick="adminPublicar()">Gruppe veröffentlichen</button>
+   </div>
+   <!-- TAB: GESTIONAR -->
+   <div class="admin-seccion" id="adminGestionar">
+    <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Bearbeite die Seite, auf der jede Gruppe erscheint, oder lösche sie. Änderungen werden beim Klicken auf <b>Speichern</b> übernommen.</p>
+    <div class="admin-tabla-wrap">
+     <table class="admin-tabla" id="adminTabla">
+      <thead>
+       <tr>
+        <th>Gruppe</th>
+        <th>Kat.</th>
+        <th>Plattform</th>
+        <th>👥 Mitglieder</th>
+        <th>⭐ Popularität</th>
+        <th>Feste Seite</th>
+        <th>Aktionen</th>
+       </tr>
+      </thead>
+      <tbody id="adminTablaBody"></tbody>
+     </table>
+    </div>
+   </div>
+   <!-- TAB: SOLICITUDES -->
+   <div class="admin-seccion" id="adminSolicitudes">
+    <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Von Benutzern eingereichte Gruppen, die deine Genehmigung benötigen.</p>
+    <div class="admin-tabla-wrap" id="adminSolicitudesWrap">
+     <table class="admin-tabla">
+      <thead>
+       <tr>
+        <th>Gruppe</th>
+        <th>Kat.</th>
+        <th>Plattform</th>
+        <th>Benutzer</th>
+        <th>Enlace del grupo</th>
+        <th>Status</th>
+        <th>Aktionen</th>
+       </tr>
+      </thead>
+      <tbody id="adminSolicitudesBody"></tbody>
+     </table>
+    </div>
+   </div>
+   <!-- TAB: CHATS -->
+   <div class="admin-seccion" id="adminChats">
+    <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Kommuniziere mit Benutzern über ihre Anfragen.</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+     <div style="display:flex;gap:10px;align-items:center">
+      <label style="font-size:13px;font-weight:700;color:var(--sub)">Gespräch mit:</label>
+      <select id="adminChatSelect" onchange="adminCambiarChat()" style="flex:1;padding:8px 10px;border-radius:8px;border:1.5px solid var(--borde);font-size:13px;outline:none;background:#fafbfa;color:var(--texto)">
+<option value="">Benutzer auswählen...</option>
+</select>
+     </div>
+     <div id="adminChatMensajes" style="background:#f7f9f8;border-radius:12px;padding:12px;min-height:180px;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;border:1px solid var(--borde)"></div>
+     <div style="display:flex;gap:8px;align-items:center">
+      <label class="btn-galeria" title="Enviar imagen" style="flex:0 0 auto">
+<input type="file" id="adminChatImgInput" accept="image/*" style="display:none" onchange="adminEnviarImagen(this)">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+</label>
+      <input type="text" id="adminChatInput" placeholder="Antwort schreiben..." onkeydown="if(event.key==='Enter')adminEnviarMensaje()" style="flex:1;padding:10px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:13.5px;outline:none;background:#fafbfa">
+      <button onclick="adminEnviarMensaje()" style="padding:10px 18px;border-radius:9px;border:none;background:var(--verde);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer">Senden</button>
+     </div>
+    </div>
+   </div>
+   <!-- TAB: NOTIFICACIÓN GLOBAL -->
+   <div class="admin-seccion" id="adminNotificacion">
+    <p style="font-size:13px;color:var(--sub);margin-bottom:14px">Envía un banner de notificación a todos los usuarios. Cada usuario lo ve <b>una sola vez</b> por envío.</p>
+    <div class="admin-campo">
+     <label>Nuevo mensaje</label>
+     <input type="text" id="notifAdminInput" placeholder="Ej: Un grupo nuevo ha sido añadido 🎉" maxlength="120">
+    </div>
+    <p style="font-size:11.5px;color:var(--sub);margin:-6px 0 12px">Máx. 120 caracteres.</p>
+    <button class="btn-principal" style="margin-top:4px" onclick="enviarNotificacionGlobal()">📢 Enviar notificación a todos</button>
+    <!-- Historial -->
+    <div style="margin-top:20px">
+     <p style="font-size:12.5px;font-weight:700;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Historial — clic para reenviar</p>
+     <div id="notifHistorialLista" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto"></div>
+     <p id="notifHistorialVacio" style="font-size:13px;color:var(--sub);text-align:center;padding:18px 0;display:none">Sin notificaciones enviadas aún.</p>
+    </div>
+   </div>
+  </div>
+  <!-- /admin-modal -->
+ </div>
+ <!-- /panelAdmin -->
+ <div id="toast"></div>
+ <!-- BANNER NOTIFICACIÓN GLOBAL -->
+ <div id="notifGlobalBanner">
+  <span class="notif-g-ico">📢</span>
+  <span class="notif-g-txt" id="notifGlobalTxt"></span>
+  <button class="notif-g-close" onclick="cerrarNotifGlobal()">✕</button>
+ </div>
+ <!-- NOTIFICACIÓN PUSH -->
+ <div id="notifPush">
+  <button class="notif-close" onclick="cerrarNotif()">✕</button>
+  <div class="notif-ico" id="notifIco">💬</div>
+  <div class="notif-body">
+   <strong id="notifTitulo">Neue Nachricht</strong>
+   <span id="notifTexto"></span>
+  </div>
+ </div>
+ <!-- BOTÓN FLOTANTE CHAT -->
+ <button id="chatFlotante" onclick="toggleChat()" title="Chat con soporte">
+💬
+<span id="chatBadge">0</span>
+</button>
+ <!-- PANEL CHAT -->
+ <div id="panelChat">
+  <div class="chat-header">
+   <div class="avatar-admin"><img src="https://s67.erome.com/8391/25otK4Ph/KHyzTjkN.jpg?v=1782372656" alt="Support"></div>
+   <div class="chat-header-info">
+    <strong id="chatNombreHeader">Support-Team</strong>
+    <span id="chatSubHeader">Support</span>
+   </div>
+   <button onclick="toggleChat()">✕</button>
+  </div>
+  <!-- Selector de conversación (solo admin) -->
+  <div class="chat-conv-sel" id="chatConvSel" style="display:none">
+   <span style="color:var(--sub);white-space:nowrap">Chat von:</span>
+   <select id="chatConvSelect" onchange="cambiarConversacion()">
+<option value="">Benutzer auswählen...</option>
+</select>
+  </div>
+  <div class="chat-mensajes" id="chatMensajes"></div>
+  <div class="chat-input-row">
+   <label class="btn-galeria" title="Enviar imagen">
+<input type="file" id="chatImgInput" accept="image/*" style="display:none" onchange="enviarImagen(this)">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+</label>
+   <input type="text" id="chatInput" placeholder="Nachricht schreiben..." onkeydown="if(event.key==='Enter')enviarMensaje()">
+   <button onclick="enviarMensaje()">➤</button>
+  </div>
+ </div>
+ <!-- MODAL DE INICIO DE SESIÓN / REGISTRO -->
+ <div class="overlay" id="overlayAuth">
+  <div class="modal">
+   <button class="cerrar" onclick="cerrarAuth()">✕</button>
+   <div class="tabs-auth">
+    <button id="tabLogin" class="activo" onclick="cambiarTab('login')">Anmelden</button>
+    <button id="tabRegistro" onclick="cambiarTab('registro')">Konto erstellen</button>
+   </div>
+   <!-- LOGIN -->
+   <div id="vistaLogin">
+    <h2>Willkommen zurück</h2>
+    <p class="sub">Melde dich an, um deine Lieblingsgruppen zu speichern.</p>
+    <div class="campo">
+     <label>E-Mail-Adresse</label>
+     <input type="email" id="loginCorreo" placeholder="deine@gmail.com">
+    </div>
+    <div class="campo">
+     <label>Passwort</label>
+     <input type="password" id="loginPass" placeholder="••••••••">
+    </div>
+    <p class="error-campo" id="errorLogin"></p>
+    <button class="btn-principal" onclick="iniciarSesion()">Anmelden</button>
+    <div class="divisor">oder</div>
+    <button class="btn-google" onclick="googleSignIn()">
+<svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
+Mit Google fortfahren
+</button>
+    <p class="pie-auth">Noch kein Konto? <a onclick="cambiarTab('registro')">Jetzt registrieren</a></p>
+   </div>
+   <!-- REGISTRO -->
+   <div id="vistaRegistro" style="display:none">
+    <h2>Konto erstellen</h2>
+    <p class="sub">Tritt bei und speichere die Gruppen, die dich interessieren.</p>
+    <div class="campo">
+     <label>Name</label>
+     <input type="text" id="regNombre" placeholder="Dein Name">
+    </div>
+    <div class="campo">
+     <label>E-Mail-Adresse</label>
+     <input type="email" id="regCorreo" placeholder="deine@gmail.com">
+    </div>
+    <div class="campo">
+     <label>Passwort</label>
+     <input type="password" id="regPass" placeholder="Mindestens 6 Zeichen">
+    </div>
+    <p class="error-campo" id="errorRegistro"></p>
+    <button class="btn-principal" onclick="registrar()">Konto erstellen</button>
+    <div class="divisor">oder</div>
+    <button class="btn-google" onclick="googleSignIn()">
+<svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
+Mit Google fortfahren
+</button>
+    <p class="pie-auth">Bereits ein Konto? <a onclick="cambiarTab('login')">Jetzt anmelden</a></p>
+   </div>
+  </div>
+ </div>
+ <!-- MODAL AVISO FOTO — todas las demás categorías -->
+ <div class="overlay" id="overlayFotoAviso">
+  <div class="modal modal-edad">
+   <span class="e">📷</span>
+   <h2>Hinweis für deine Gruppe</h2>
+   <p class="sub">Es wird empfohlen, beim Hinzufügen Ihrer Gruppen eigene Fotos hochzuladen.</p>
+   <div class="acciones-edad">
+    <button class="no" onclick="cerrarFotoAviso()">Schließen</button>
+    <button class="si" onclick="confirmarFotoAviso()">Verstanden</button>
+   </div>
+  </div>
+ </div>
+ <div class="overlay" id="overlayEdad">
+  <div class="modal modal-edad">
+   <span class="e">🔒</span>
+   <h2>Inhalt nur für Erwachsene</h2>
+   <p class="sub">Sind Sie über 18 Jahre alt? Es wird empfohlen, beim Hinzufügen von Gruppen eigene Fotos hochzuladen +18.</p>
+   <div class="acciones-edad">
+    <button class="no" onclick="rechazarEdad()">Nein, zurück</button>
+    <button class="si" onclick="confirmarEdad()">Ja, ich bin über 18</button>
+   </div>
+  </div>
+ </div>
+ <!-- MODAL — AÑADIR GRUPO -->
+ <div class="overlay" id="overlayAgregar">
+  <div class="modal modal-grande">
+   <button class="cerrar" onclick="cerrarAgregar()">✕</button>
+   <h2>Deine Gruppe hinzufügen</h2>
+   <p class="sub">Teile deine WhatsApp- oder Telegram-Community mit Tausenden von Menschen.</p>
+   <div class="plataforma-toggle">
+    <div class="opcion-plataforma activa w" id="optWhatsApp" onclick="elegirPlataformaForm('WhatsApp')">
+     <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></span><span class="nombre">WhatsApp</span>
+    </div>
+    <div class="opcion-plataforma t" id="optTelegram" onclick="elegirPlataformaForm('Telegram')">
+     <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="#229ED9"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></span><span class="nombre">Telegram</span>
+    </div>
+    <div class="opcion-plataforma s" id="optSignal" onclick="elegirPlataformaForm('Signal')">
+     <span class="ic"><svg width="26" height="26" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<circle cx="24" cy="24" r="24" fill="#3A76F0"/>
+<circle cx="24" cy="24" r="18.5" fill="none" stroke="white" stroke-width="2.6" stroke-dasharray="4.8 3.2" stroke-linecap="round"/>
+<path d="M24 11.5c-6.9 0-12.5 5.3-12.5 11.85 0 2.9 1.1 5.54 2.91 7.57l-1.91 7.08 7.23-2.34A12.7 12.7 0 0 0 24 36.35c6.9 0 12.5-5.3 12.5-11.85S30.9 11.5 24 11.5z" fill="white"/>
+</svg></span><span class="nombre">Signal</span>
+    </div>
+   </div>
+   <div class="campo">
+    <label>Gruppenname</label>
+    <input type="text" id="agNombre" placeholder="z. B. Deutsche Entwickler">
+   </div>
+   <div class="campo">
+    <label>Kategorie</label>
+    <select id="agCategoria" onchange="actualizarCategoriaForm()">
+<option value="" disabled selected>Kategorie auswählen</option>
+</select>
+   </div>
+   <div class="campo">
+    <label>Einladungslink</label>
+    <input type="url" id="agLink" placeholder="https://chat.whatsapp.com/...">
+    <span class="ayuda" id="agLinkAyuda">Muss mit https://chat.whatsapp.com/ beginnen.</span>
+   </div>
+   <div class="campo">
+    <label>Gruppenbeschreibung</label>
+    <textarea id="agDescripcion" placeholder="Beschreibe kurz, worum es in deiner Gruppe geht, welche Regeln gelten und welche Mitglieder ihr sucht …" rows="3" style="padding:11px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:14px;outline:none;background:#fafbfa;resize:vertical;transition:border-color .18s;font-family:inherit;line-height:1.5;width:100%;box-sizing:border-box" onfocus="this.style.borderColor='var(--verde)'" onblur="this.style.borderColor='var(--borde)'"></textarea>
+   </div>
+   <div class="campo">
+    <label>Gruppenfoto hochladen</label>
+    <label id="agFotoLabel" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:11px 13px;border-radius:9px;border:1.5px dashed var(--borde);background:#fafbfa;transition:border-color .18s" onmouseenter="this.style.borderColor='var(--verde)'" onmouseleave="this.style.borderColor='var(--borde)'">
+<input type="file" id="agFotoInput" accept="image/*" style="display:none" onchange="previsualizarFoto(this)">
+<span id="agFotoIco" style="font-size:26px">📷</span>
+<div>
+<span id="agFotoTexto" style="font-size:14px;font-weight:600;color:var(--texto);display:block">Foto auswählen</span>
+<span style="font-size:11.5px;color:var(--sub)">JPG, PNG oder GIF · max. 5 MB</span>
+</div>
+<img id="agFotoPreview" src="" alt="" style="display:none;width:56px;height:56px;object-fit:cover;border-radius:8px;margin-left:auto;border:1.5px solid var(--borde)">
+</label>
+   </div>
+   <div class="campo-checkbox" id="cajaConfirma18" style="display:none">
+    <input type="checkbox" id="agConfirma18">
+    <label for="agConfirma18">Ich bestätige, dass diese Gruppe für Personen über 18 Jahre ist und die Regeln von WhatsApp/Telegram einhält.</label>
+   </div>
+   <p class="error-campo" id="errorAgregar"></p>
+   <button class="btn-principal" onclick="publicarGrupo()">Anfrage senden</button>
+   <p style="font-size:12px;color:var(--sub);text-align:center;margin-top:8px">Deine Gruppe wird vom Administrator geprüft, bevor sie auf der Seite erscheint.</p>
+  </div>
+ </div>
+ <!-- FIREBASE LOADING OVERLAY -->
+ <div id="fbLoading" style="display:none!important"></div>
+ <!-- SPINNER CAMBIO DE IDIOMA -->
+ <div id="langSpinner">
+  <div class="spin"></div>
+  <span id="langSpinnerTxt">Sprache wird geladen …</span>
+ </div>
+</body>
+
+<style>:root{
     --verde:#1FAF55;
     --verde-d:#168a42;
     --tele:#229ED9;
@@ -515,6 +1193,65 @@
   @keyframes pulso{0%{transform:scale(1)}45%{transform:scale(1.3)}100%{transform:scale(1)}}
   .btn-fav.fav-bloqueado{opacity:.6;cursor:not-allowed}
   .btn-fav.fav-bloqueado:hover{transform:none;box-shadow:none;background:rgba(0,0,0,.45)}
+
+
+  /* ===== BANNER PUBLICITARIO ===== */
+  .banner-publi{
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+    width:100%;max-width:1100px;margin:0 auto 6px;padding:0 24px;
+    box-sizing:border-box;
+    border-radius:0;overflow:visible;
+    background:transparent;
+    border:none;
+    box-shadow:none;
+    min-height:unset;
+    text-decoration:none;
+    transition:none;
+  }
+  /* Inner del banner publi — misma forma que banner-agregar-inner */
+  .banner-publi-inner{
+    width:100%;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:14px;overflow:hidden;
+    background:#fff;
+    border:1.5px solid var(--borde);
+    box-shadow:0 2px 10px rgba(0,0,0,.07);
+    min-height:80px;
+    transition:box-shadow .2s, transform .2s;
+    /* Fix: contener el zoom dentro del border-radius */
+    isolation:isolate;
+  }
+  .banner-publi:hover .banner-publi-inner{
+    box-shadow:0 6px 22px rgba(0,0,0,.13);
+    transform:translateY(-2px);
+  }
+
+  @keyframes bannerZoom{
+    0%   { transform:scale(1); }
+    50%  { transform:scale(1.07); }
+    100% { transform:scale(1); }
+  }
+  .banner-publi-img{
+    width:100%;height:110px;
+    object-fit:cover;object-position:center;
+    display:block;padding:0;margin:0;
+    animation:bannerZoom 6s ease-in-out infinite;
+    transform-origin:center center;
+  }
+  .banner-publi-tag{
+    position:absolute;top:6px;right:8px;
+    font-size:9px;font-weight:600;letter-spacing:.5px;
+    color:#999;text-transform:uppercase;
+    background:rgba(0,0,0,.06);
+    border-radius:4px;padding:2px 5px;
+  }
+  @media(max-width:540px){
+    .banner-publi{padding:0 12px;margin:0 auto 12px;}
+    .banner-publi-inner{min-height:unset;overflow:hidden;}
+    .banner-publi-img{height:80px;}
+  }
+  /* ===== FIN BANNER PUBLICITARIO ===== */
 
 /* ===== SPLASH SCREEN ===== */
   #splash{
@@ -1051,8 +1788,28 @@
   }
   body.dark .chat-burbuja.admin{background:#1d2421;color:#eef2f0}
   .chat-burbuja.usuario{
-    align-self:flex-end;background:linear-gradient(135deg,var(--verde),var(--verde-d));color:#fff;
+    align-self:flex-end;background:linear-gradient(160deg,#2ec96a 0%,#1FAF55 60%,#179944 100%);color:#fff;
     border-bottom-right-radius:4px;
+    box-shadow:0 1px 4px rgba(31,175,85,.18);
+  }
+  /* Links en burbujas verdes (usuario): blanco con opacidad */
+  .chat-burbuja.usuario .chat-link{
+    color:#fff;
+    text-decoration:underline;
+    font-weight:500;
+  }
+  .chat-burbuja.usuario .chat-link:hover{
+    color:#fff;
+    opacity:.85;
+  }
+  /* Links en burbujas claras (admin/recibido): verde normal */
+  .chat-burbuja.admin .chat-link{
+    color:var(--verde-d);
+    text-decoration:underline;
+    font-weight:500;
+  }
+  .chat-burbuja.admin .chat-link:hover{
+    color:var(--verde);
   }
   .chat-burbuja .hora{display:block;font-size:10px;opacity:.6;margin-top:4px;text-align:right}
   .chat-burbuja.admin .hora{text-align:left}
@@ -1117,9 +1874,128 @@
   }
   body.dark .btn-galeria{background:#1d2421;border-color:#2a332f;color:#9aa6a2}
   .btn-galeria:hover{border-color:var(--verde);color:var(--verde);background:#1FAF5514}
+  /* ── Banner instalación PWA ── */
+  @keyframes slideUpBanner{from{transform:translateY(110%)}to{transform:translateY(0)}}
+  /* ── PWA Install Banner — diseño prominente ── */
+  #pwaBanner{
+    position:fixed;bottom:0;left:0;right:0;z-index:10000;
+    background:linear-gradient(135deg,#0d1f1a 0%,#1a3328 100%);
+    box-shadow:0 -6px 40px rgba(31,175,85,.25), 0 -2px 0 rgba(31,175,85,.6);
+    padding:0;
+    display:none;
+    animation:slideUpBanner .45s cubic-bezier(.22,.68,0,1.15);
+  }
+  #pwaBanner.visible{display:block}
+  #pwaBanner::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,#1FAF55,#25d36b,#1FAF55);
+    background-size:200% 100%;
+    animation:shimmer 2s linear infinite;
+  }
+  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  #pwaBanner .pwa-inner{
+    display:flex;align-items:center;gap:14px;
+    max-width:640px;margin:0 auto;padding:16px 20px;
+  }
+  #pwaBanner .pwa-icon{
+    width:54px;height:54px;border-radius:14px;flex-shrink:0;
+    box-shadow:0 0 0 3px rgba(31,175,85,.4);
+    animation:pulse-ring 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse-ring{
+    0%,100%{box-shadow:0 0 0 3px rgba(31,175,85,.4)}
+    50%{box-shadow:0 0 0 7px rgba(31,175,85,.15)}
+  }
+  #pwaBanner .pwa-texto{flex:1;min-width:0}
+  #pwaBanner .pwa-texto strong{
+    display:block;font-size:15px;font-weight:700;
+    color:#fff;margin-bottom:3px;letter-spacing:-.2px;
+  }
+  #pwaBanner .pwa-texto span{font-size:12.5px;color:#8db5a3;line-height:1.4}
+  #pwaBanner .pwa-btns{display:flex;gap:8px;flex-shrink:0;align-items:center}
+  #pwaBanner .pwa-btn-install{
+    background:linear-gradient(135deg,#1FAF55,#25d36b);
+    color:#fff;border:none;border-radius:12px;
+    padding:11px 22px;font-size:14px;font-weight:800;cursor:pointer;
+    white-space:nowrap;letter-spacing:-.2px;
+    box-shadow:0 4px 16px rgba(31,175,85,.45);
+    transition:transform .15s,box-shadow .15s;
+  }
+  #pwaBanner .pwa-btn-install:hover{
+    transform:translateY(-1px);
+    box-shadow:0 6px 22px rgba(31,175,85,.55);
+  }
+  #pwaBanner .pwa-btn-install:active{transform:translateY(0)}
+  #pwaBanner .pwa-btn-later{
+    background:transparent;color:#5a7a70;border:1.5px solid #2a4238;
+    border-radius:10px;padding:10px 14px;font-size:13px;cursor:pointer;
+    white-space:nowrap;transition:color .15s,border-color .15s;
+  }
+  #pwaBanner .pwa-btn-later:hover{color:#8db5a3;border-color:#3d6050}
+  @media(max-width:480px){
+    #pwaBanner .pwa-inner{gap:10px;padding:14px 14px 18px}
+    #pwaBanner .pwa-texto strong{font-size:13.5px}
+    #pwaBanner .pwa-btns{flex-direction:column;gap:6px;width:100%}
+    #pwaBanner .pwa-btn-install{width:100%;text-align:center;padding:12px}
+    #pwaBanner .pwa-btn-later{width:100%;text-align:center;padding:9px}
+    #pwaBanner .pwa-inner{flex-wrap:wrap}
+  }
+  /* iOS: instrucciones share */
+  #iosBanner{
+    position:fixed;bottom:0;left:0;right:0;z-index:10000;
+    background:linear-gradient(135deg,#0d1f1a 0%,#1a3328 100%);
+    color:#eef2f0;
+    box-shadow:0 -6px 40px rgba(31,175,85,.25), 0 -2px 0 rgba(31,175,85,.6);
+    padding:20px 18px 28px;
+    display:none;
+    animation:slideUpBanner .45s cubic-bezier(.22,.68,0,1.15);
+    border-radius:22px 22px 0 0;
+  }
+  #iosBanner.visible{display:block}
+  #iosBanner::before{
+    content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);
+    margin-top:10px;
+  }
+  #iosBanner .ios-close{
+    float:right;background:rgba(255,255,255,.08);border:none;
+    color:#8db5a3;font-size:16px;cursor:pointer;line-height:1;
+    width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  }
+  #iosBanner .ios-steps{display:flex;gap:20px;margin-top:16px;flex-wrap:wrap;justify-content:center}
+  #iosBanner .ios-step{
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    font-size:12px;color:#8db5a3;text-align:center;max-width:90px;
+    background:rgba(255,255,255,.05);border-radius:12px;padding:12px 8px;
+  }
+  #iosBanner .ios-step .ios-ico{font-size:28px}
+
+  /* Badge de verificación de miembros */
+  .miembros-ts{
+    font-size:10px;color:#16a34a;margin-left:4px;
+    vertical-align:middle;cursor:help;
+  }
+  .miembros-num{font-weight:600}
+
   .chat-burbuja img.chat-img{
     max-width:100%;border-radius:10px;display:block;margin-top:4px;cursor:pointer;
   }
+  /* Burbuja de imagen: sin fondo verde, sin padding */
+  .chat-burbuja.chat-burbuja-img{
+    background:transparent!important;
+    padding:0!important;
+    box-shadow:none!important;
+  }
+  .chat-burbuja.chat-burbuja-img .msg-meta{
+    position:absolute;bottom:6px;right:8px;
+    background:rgba(0,0,0,0.38);
+    border-radius:8px;padding:1px 5px;
+  }
+  .chat-burbuja.chat-burbuja-img{
+    position:relative;
+  }
+  .chat-burbuja.chat-burbuja-img .msg-hora{color:#fff}
+  .chat-burbuja.chat-burbuja-img .tick-stroke{stroke:#fff!important}
 
   /* Notificación push estilo burbuja */
   #notifPush{
@@ -1247,624 +2123,112 @@
     color:#1c2422;cursor:pointer;padding:4px 10px;font-size:13px;font-weight:700;
     flex-shrink:0;transition:.2s;
   }
-  #notifGlobalBanner .notif-g-close:hover{background:rgba(0,0,0,.18)}
-</style>
-</head>
-<body>
+  #notifGlobalBanner .notif-g-close:hover{background:rgba(0,0,0,.18)}@keyframes spin{to{transform:rotate(360deg)}}</style><script>const firebaseConfig = {
+    apiKey: "AIzaSyA3GpW1N7i9YNdw7KtZXx5VFgWyWoyoBYM",
+    authDomain: "gruppende-94f00.firebaseapp.com",
+    projectId: "gruppende-94f00",
+    storageBucket: "gruppende-94f00.firebasestorage.app",
+    messagingSenderId: "902209990512",
+    appId: "1:902209990512:web:eee7151f40ac41c70ba9b5",
+    measurementId: "G-WD6PVR87MR"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const _VAPID_KEY = "BFmNPitSEll1GhsDKYTw6bpb2QJgb9tq_fgjokel_lADAlBKMALlf9UGhuIWT2sr0v9Cs3mbX7lYLdKKRA7QuLs";
+  // Fix: declarar _db en window para garantizar acceso global desde cualquier función
+  window._db  = firebase.firestore();
+  var _db = window._db;
 
-<!-- ===== SPLASH SCREEN ===== -->
-<div id="splash">
-  <div class="splash-logo">
-    <div class="splash-icon">
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-    </div>
-    <div class="splash-titulo">Gruppen<span>🇩🇪</span></div>
-  </div>
-  <p class="splash-tagline">Finde deine Community</p>
-  <div class="splash-bar-wrap">
-    <div class="splash-bar"></div>
-  </div>
-</div>
-  <header>
-  <div class="header-row">
-    <div class="logo" onclick="reiniciar();return false;" style="cursor:pointer;text-decoration:none" title="Zur Startseite">
-      <div class="mark">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-      </div>
-      <h1>Gruppen🇩🇪</h1>
-    </div>
-    <!-- Controles flotantes: modo + idioma (fuera del nav) -->
-    <div class="header-utils">
-      <!-- Toggle día/noche -->
-      <button class="modo util-btn" id="btnModo" onclick="modo()" aria-label="Dunkel-/Hellmodus wechseln" title="Nachtmodus">
-        <div class="tg-toggle">
-          <div class="tg-track">
-            <div class="tg-stars">
-              <div class="tg-star"></div>
-              <div class="tg-star"></div>
-              <div class="tg-star"></div>
-            </div>
-          </div>
-          <div class="tg-thumb">
-            <div class="tg-icons">
-              <div class="tg-sol">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0-4a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zM4.22 4.22a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zm13.44 13.44a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zM3 11h1a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2zm17 0h1a1 1 0 0 1 0 2h-1a1 1 0 0 1 0-2zM5.64 17.66l-.7.7a1 1 0 1 1-1.42-1.42l.7-.7a1 1 0 0 1 1.42 1.42zm13.44-13.44.7-.7a1 1 0 1 1 1.42 1.42l-.7.7a1 1 0 0 1-1.42-1.42z"/></svg>
-              </div>
-              <div class="tg-luna">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="#818cf8"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
-              </div>
-            </div>
-          </div>
-        </div>
-      </button>
+  // ═══ FIRESTORE OFFLINE PERSISTENCE (caché local) ═══════════════
+  _db.enablePersistence({ synchronizeTabs: true })
+    .then(()=> console.log("[Firestore] Persistencia offline activada ✓"))
+    .catch(err=>{
+      if(err.code === "failed-precondition"){
+        // Varias pestañas abiertas → solo la primera pestaña puede activarla
+        console.warn("[Firestore] Persistencia no disponible (múltiples pestañas)");
+      } else if(err.code === "unimplemented"){
+        // Navegador sin soporte (Safari antiguo, modo incógnito)
+        console.warn("[Firestore] Este navegador no soporta persistencia offline");
+      }
+    });
+  // ════════════════════════════════════════════════════════════════
 
-      <!-- Separador -->
-      <span class="util-sep"></span>
+  window._auth = firebase.auth();
+  var _auth = window._auth;
+  window._googleProvider = new firebase.auth.GoogleAuthProvider();
+  var _googleProvider = window._googleProvider;
 
-      <!-- Selector de idioma -->
-      <div class="lang-selector" id="langSelector">
-        <button class="lang-btn util-btn" onclick="toggleLangMenu()" id="langBtnActual" title="Sprache / Language / Idioma">
-          <span class="lang-flag" id="langFlagActual">🇩🇪</span>
-          <span class="lang-chevron">▼</span>
-        </button>
-        <div class="lang-dropdown" id="langDropdown">
-          <div class="lang-option activa" onclick="cambiarIdioma('de','🇩🇪','DE')" id="langOpt-de">
-            <span class="lf">🇩🇪</span><span class="ln">Deutsch</span><span class="lcheck">✓</span>
-          </div>
-          <div class="lang-option" onclick="cambiarIdioma('en','🇺🇸','EN')" id="langOpt-en">
-            <span class="lf">🇺🇸</span><span class="ln">English (US)</span><span class="lcheck">✓</span>
-          </div>
-          <div class="lang-option" onclick="cambiarIdioma('en-GB','🇬🇧','EN')" id="langOpt-en-GB">
-            <span class="lf">🇬🇧</span><span class="ln">English (UK)</span><span class="lcheck">✓</span>
-          </div>
-          <div class="lang-option" onclick="cambiarIdioma('es','🇪🇸','ES')" id="langOpt-es">
-            <span class="lf">🇪🇸</span><span class="ln">Español</span><span class="lcheck">✓</span>
-          </div>
-        </div>
-      </div>
-    </div>
+  /* ===== FIREBASE CLOUD MESSAGING (FCM) ===== */
+  let _messaging = null;
 
-    <!-- NAV principal: solo Agregar + Sesión -->
-    <nav>
-      <button class="btn-agregar" onclick="abrirAgregar()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <span id="navBtnAgregarLabel">Gruppe hinzufügen</span>
-      </button>
-      <div id="zonaSesion"></div>
-    </nav>
+  // ═══ REGISTRO SERVICE WORKER PWA (sw.js) ═══════════════════════
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", ()=>{
+      navigator.serviceWorker.register("sw.js")
+        .then(reg=>{
+          console.log("[PWA] Service Worker registrado:", reg.scope);
+          // Notificar al SW que se actualice si hay una versión nueva
+          reg.addEventListener("updatefound", ()=>{
+            const newWorker = reg.installing;
+            newWorker.addEventListener("statechange", ()=>{
+              if(newWorker.state==="installed" && navigator.serviceWorker.controller){
+                console.log("[PWA] Nueva versión disponible (sin recarga automática para evitar loops en móvil)");
+                // Fix: NO hacer location.reload() automático — causaba bucles de reinicio en móvil
+                // El usuario verá la versión nueva en la próxima vez que abra la app manualmente
+              }
+            });
+          });
+        })
+        .catch(err=> console.warn("[PWA] Error al registrar SW:", err));
+    });
+  }
+  // ════════════════════════════════════════════════════════════════
 
-    <!-- Botón hamburguesa (solo móvil) -->
-    <button class="btn-hamburger" id="btnHamburger" onclick="toggleDrawer()" aria-label="Menü öffnen">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
-</header>
+  async function iniciarFCM(){
+    // 1. Verificar soporte del navegador
+    if(!("Notification" in window) || !("serviceWorker" in navigator)){
+      console.log("[FCM] Este navegador no soporta notificaciones push.");
+      return;
+    }
+    if(!firebase.messaging.isSupported()){
+      console.log("[FCM] Firebase Messaging no es soportado en este navegador.");
+      return;
+    }
 
-<!-- Overlay fondo oscuro -->
-<div class="nav-overlay" id="navOverlay" onclick="cerrarDrawer()"></div>
+    try{
+      // 2. Registrar el Service Worker silenciosamente (sin pedir permiso al cargar)
+      // Fix: en móvil, pedir permiso automáticamente al cargar causaba reinicios y UX mala
+      const registration = await navigator.serviceWorker.register("firebase-messaging-sw.js");
+      console.log("[FCM] Service Worker FCM registrado:", registration.scope);
 
-<!-- Drawer menú móvil -->
-<nav class="nav-drawer" id="navDrawer">
-  <div class="drawer-seccion" style="border-top:none;padding-top:0">Menü</div>
+      _messaging = firebase.messaging();
 
-  <button class="drawer-item" onclick="abrirAgregar();cerrarDrawer()">
-    <span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span> <span id="drawerBtnAgregar">Gruppe hinzufügen</span>
-  </button>
-  <button class="drawer-item" id="drawerBtnSesion" onclick="cerrarDrawer()">
-    <span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> <span id="drawerSesionLabel">Anmelden</span>
-  </button>
-  <button class="drawer-item" id="drawerBtnAdmin" style="display:none;color:#ffd9a0" onclick="abrirAdmin();cerrarDrawer()">
-    <span class="d-ico">⚙️</span> <span>Admin-Panel</span>
-  </button>
-  <button class="drawer-item" id="drawerBtnMisGrupos" style="display:none" onclick="abrirMisGrupos();cerrarDrawer()">
-    <span class="d-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span> <span>Meine Gruppen</span>
-  </button>
+      // Fix: NO pedir permiso automáticamente — solo si el usuario ya lo concedió antes
+      if(Notification.permission === "granted"){
+        // Ya tiene permiso: obtener token silenciosamente
+        try{
+          const token = await _messaging.getToken({
+            vapidKey: _VAPID_KEY,
+            serviceWorkerRegistration: registration
+          });
+          if(token) console.log("[FCM] Token renovado:", token.substring(0,20)+"…");
+        }catch(e){ console.warn("[FCM] getToken error:", e); }
 
-  <div class="drawer-seccion">Darstellung</div>
-  <div class="drawer-controls">
-    <span class="dc-label" id="drawerModoLabel">Nachtmodus</span>
-    <button class="modo" id="btnModoDrawer" onclick="modo()" aria-label="Modus wechseln" title="Nachtmodus" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center">
-      <div class="tg-toggle">
-        <div class="tg-track">
-          <div class="tg-stars">
-            <div class="tg-star"></div><div class="tg-star"></div><div class="tg-star"></div>
-          </div>
-        </div>
-        <div class="tg-thumb">
-          <div class="tg-icons">
-            <div class="tg-sol"><svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0-4a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zM4.22 4.22a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zm13.44 13.44a1 1 0 0 1 1.42 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42zM3 11h1a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2zm17 0h1a1 1 0 0 1 0 2h-1a1 1 0 0 1 0-2zM5.64 17.66l-.7.7a1 1 0 1 1-1.42-1.42l.7-.7a1 1 0 0 1 1.42 1.42zm13.44-13.44.7-.7a1 1 0 1 1 1.42 1.42l-.7.7a1 1 0 0 1-1.42-1.42z"/></svg></div>
-            <div class="tg-luna"><svg width="12" height="12" viewBox="0 0 24 24" fill="#818cf8"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg></div>
-          </div>
-        </div>
-      </div>
-    </button>
-  </div>
+        // Escuchar mensajes en primer plano
+        _messaging.onMessage(payload=>{
+          console.log("[FCM] Mensaje en primer plano:", payload);
+          if(payload.notification && payload.notification.body){
+            mostrarToast(payload.notification.body, "🔔");
+          }
+        });
+      } else {
+        // Sin permiso previo: no hacer nada hasta que el usuario lo solicite
+        console.log("[FCM] Permiso no concedido aún. Se solicitará cuando el usuario interactúe.");
+      }
 
-  <div class="drawer-seccion">Sprache / Language / Idioma</div>
-  <div class="drawer-lang-opts">
-    <button class="drawer-lang-opt activa" id="dLangOpt-de" onclick="cambiarIdioma('de','🇩🇪','DE');cerrarDrawer()">
-      <span class="dlf">🇩🇪</span><span>Deutsch</span><span class="dlcheck">✓</span>
-    </button>
-    <button class="drawer-lang-opt" id="dLangOpt-en" onclick="cambiarIdioma('en','🇺🇸','EN');cerrarDrawer()">
-      <span class="dlf">🇺🇸</span><span>English (US)</span><span class="dlcheck">✓</span>
-    </button>
-    <button class="drawer-lang-opt" id="dLangOpt-en-GB" onclick="cambiarIdioma('en-GB','🇬🇧','EN');cerrarDrawer()">
-      <span class="dlf">🇬🇧</span><span>English (UK)</span><span class="dlcheck">✓</span>
-    </button>
-    <button class="drawer-lang-opt" id="dLangOpt-es" onclick="cambiarIdioma('es','🇪🇸','ES');cerrarDrawer()">
-      <span class="dlf">🇪🇸</span><span>Español</span><span class="dlcheck">✓</span>
-    </button>
-  </div>
-</nav>
-
-<div class="cat-bar">
-  <div class="cat-row" id="catRow"></div>
-</div>
-
-<div class="banner-agregar">
-  <div class="banner-agregar-inner">
-    <div class="banner-agregar-texto">
-      <strong>Hast du eine tolle Gruppe?</strong>
-      <span>Teile sie mit Tausenden von Menschen auf Gruppen🇩🇪</span>
-    </div>
-    <button class="btn-agregar-banner" onclick="abrirAgregar()">
-      <span class="plus">＋</span> Gruppe hinzufügen
-    </button>
-  </div>
-</div>
-
-<input id="buscar" placeholder="Gruppen nach Name oder Plattform suchen …" onkeyup="buscarCambio()">
-
-<div class="plat-wrap">
-  <div class="plat-selector" id="platSelector">
-    <button class="plat-btn" onclick="togglePlatMenu()" type="button">
-      <span class="plat-ico" id="platIcoActual"><span class="po-ico-logo g"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 0 1 0 18a13 13 0 0 1 0-18"/></svg></span></span>
-      <span id="platTextoActual">Alle Plattformen</span>
-      <span class="plat-chevron">▾</span>
-    </button>
-    <div class="plat-dropdown" id="platDropdown">
-      <div class="plat-option activa" id="platOpt-Todos" onclick="elegirPlataforma('Todos')">
-        <span class="po-ico-logo g"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 0 1 0 18a13 13 0 0 1 0-18"/></svg></span><span class="po-nombre" id="platLbl-Todos">Alle Plattformen</span><span class="po-check">✓</span>
-      </div>
-      <div class="plat-option" id="platOpt-WhatsApp" onclick="elegirPlataforma('WhatsApp')">
-        <span class="po-ico-logo w"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></span><span class="po-nombre">WhatsApp</span><span class="po-check">✓</span>
-      </div>
-      <div class="plat-option" id="platOpt-Telegram" onclick="elegirPlataforma('Telegram')">
-        <span class="po-ico-logo t"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></span><span class="po-nombre">Telegram</span><span class="po-check">✓</span>
-      </div>
-      <div class="plat-option" id="platOpt-Signal" onclick="elegirPlataforma('Signal')">
-        <span class="po-ico-logo s"><svg width="14" height="14" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="18.5" fill="none" stroke="white" stroke-width="2.6" stroke-dasharray="4.8 3.2" stroke-linecap="round"/><path d="M24 11.5c-6.9 0-12.5 5.3-12.5 11.85 0 2.9 1.1 5.54 2.91 7.57l-1.91 7.08 7.23-2.34A12.7 12.7 0 0 0 24 36.35c6.9 0 12.5-5.3 12.5-11.85S30.9 11.5 24 11.5z" fill="white"/></svg></span><span class="po-nombre">Signal</span><span class="po-check">✓</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<p class="resultado-info" id="resultadoInfo"></p>
-
-<div class="grid" id="grid"></div>
-<div class="paginacion" id="paginacion"></div>
-
-<footer>
-  <div class="footer-top">
-    <div class="footer-marca">
-      <div class="logo"><div class="mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="#1FAF55"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></div><h1 style="color:#fff;font-size:20px">Gruppen🇩🇪</h1></div>
-      <p>Das Verzeichnis für WhatsApp- und Telegram-Communitys – finde deine Community: Gamer, Entwickler, Reisende und vieles mehr, alles an einem Ort.</p>
-      <div class="footer-redes">
-        <a href="#" aria-label="WhatsApp" title="WhatsApp">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-        </a>
-        <a href="#" aria-label="Telegram" title="Telegram">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-        </a>
-        <a href="#" aria-label="Facebook" title="Facebook">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-        </a>
-        <a href="#" aria-label="Instagram" title="Instagram">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
-        </a>
-      </div>
-    </div>
-    <div class="footer-col">
-      <h4>Erkunden</h4>
-      <ul>
-        <li><a href="" onclick="reiniciar();return false;">✨ Alle Gruppen</a></li>
-        <li><a href="#" onclick="elegirCategoria('Gaming');return false;">🎮 Gaming</a></li>
-        <li><a href="#" onclick="elegirCategoria('Programación');return false;">💻 Programmierung</a></li>
-        <li><a href="#" onclick="elegirCategoria('Música');return false;">🎵 Musik</a></li>
-        <li><a href="#" onclick="elegirCategoria('Viajes');return false;">🌍 Reisen</a></li>
-        <li><a href="#" onclick="elegirCategoria('Estudio');return false;">📚 Lernen</a></li>
-        <li><a href="#" onclick="elegirCategoria('Empleo');return false;">💼 Jobs</a></li>
-        <li><a href="#" onclick="elegirCategoria('Singles');return false;">💘 Singles</a></li>
-        <li><a href="#" onclick="elegirCategoria('+18');return false;">🔞 +18</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h4>Support</h4>
-      <ul>
-        <li><a href="#">Hilfezentrum</a></li>
-        <li><a href="#">Gruppe melden</a></li>
-        <li><a href="#">Deine Community veröffentlichen</a></li>
-        <li><a href="#">Kontakt</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <span>© 2026 <b>Gruppen🇩🇪</b>. Alle Rechte vorbehalten.</span>
-    <div class="footer-legal">
-      <a href="#">Nutzungsbedingungen</a>
-      <a href="#">Datenschutz</a>
-      <a href="#">Cookies</a>
-    </div>
-  </div>
-</footer>
-
-<!-- SECCIÓN USUARIO — Meine Gruppen (inline) -->
-<div id="panelMisGrupos">
-  <div class="mis-grupos-seccion">
-    <div class="mis-grupos-header">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:36px;height:36px;border-radius:10px;background:var(--verde);display:flex;align-items:center;justify-content:center;font-size:18px">👤</div>
-        <div>
-          <h2 style="font-size:20px;margin:0">Meine Gruppen</h2>
-          <p style="font-size:12.5px;color:var(--sub);margin:0" id="misGruposSubtitle">Deine eingereichten Gruppen</p>
-        </div>
-      </div>
-      <button onclick="cerrarMisGrupos()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub);line-height:1;padding:4px" title="Schließen">✕</button>
-    </div>
-    <div id="misGruposGrid" class="mis-grupos-grid"></div>
-  </div>
-</div>
-
-<!-- PANEL ADMINISTRADOR -->
-<div id="panelAdmin">
-  <div class="admin-modal">
-    <button class="cerrar" onclick="cerrarAdmin()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub)">✕</button>
-    <h2>⚙️ Administrator-Panel <span class="admin-badge">ADMIN</span></h2>
-    <p style="color:var(--sub);font-size:13px;margin-bottom:0">Vollständige Kontrolle über Gruppen und Paginierung · Gruppen🇩🇪</p>
-
-    <div class="admin-tabs">
-      <button class="admin-tab activo" onclick="adminTab('agregar')">➕ Gruppe hinzufügen</button>
-      <button class="admin-tab" onclick="adminTab('gestionar')">📋 Gruppen verwalten</button>
-      <button class="admin-tab" onclick="adminTab('solicitudes')" id="tabSolicitudes">🕐 Anfragen</button>
-      <button class="admin-tab" onclick="adminTab('chats')" id="tabChats">💬 Chats</button>
-      <button class="admin-tab" onclick="adminTab('notificacion')">📢 Notificación</button>
-    </div>
-
-    <!-- TAB: AGREGAR -->
-    <div class="admin-seccion activa" id="adminAgregar">
-      <div class="admin-form-grid">
-        <div class="admin-campo">
-          <label>Gruppenname *</label>
-          <input type="text" id="adNombre" placeholder="z. B. Fitness Deutschland">
-        </div>
-        <div class="admin-campo">
-          <label>Kategorie *</label>
-          <select id="adCategoria" onchange="adminActualizar18()">
-            <option value="" disabled selected>Auswählen</option>
-          </select>
-        </div>
-        <div class="admin-campo">
-          <label>Plattform *</label>
-          <select id="adPlataforma">
-            <option value="WhatsApp">WhatsApp</option>
-            <option value="Telegram">Telegram</option>
-            <option value="Signal">Signal</option>
-          </select>
-        </div>
-        <div class="admin-campo">
-          <label>Mitglieder</label>
-          <input type="number" id="adMiembros" placeholder="z. B. 250" min="0">
-        </div>
-        <div class="admin-campo admin-full">
-          <label>Einladungslink *</label>
-          <input type="url" id="adLink" placeholder="https://chat.whatsapp.com/...">
-        </div>
-        <div class="admin-campo admin-full">
-          <label>Bild (Foto hochladen)</label>
-          <input type="file" id="adImagenFile" accept="image/*" onchange="adminImagenSeleccionada(event)">
-          <input type="hidden" id="adImagen">
-          <div id="adImagenPreviewWrap" style="display:none;margin-top:8px;align-items:center;gap:10px">
-            <img id="adImagenPreview" src="" alt="Vorschau" style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--borde)">
-            <button type="button" onclick="adminImagenQuitar()" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;text-decoration:underline">Entfernen</button>
-          </div>
-        </div>
-        <div class="admin-campo">
-          <label>Feste Seite (optional)</label>
-          <input type="number" id="adPagina" placeholder="z. B. 1" min="1">
-          <span style="font-size:11px;color:var(--sub);margin-top:3px">Erzwingt das Erscheinen auf dieser Seite</span>
-        </div>
-        <div class="admin-campo">
-          <label>Basispopularität (Favoriten)</label>
-          <input type="number" id="adFavoritos" placeholder="z. B. 50" min="0">
-        </div>
-      </div>
-      <div class="campo-checkbox" id="adminCaja18" style="display:none">
-        <input type="checkbox" id="adConfirma18">
-        <label for="adConfirma18">Ich bestätige, dass diese Gruppe für Personen über 18 Jahre geeignet ist.</label>
-      </div>
-      <p class="error-campo" id="errorAdmin" style="margin-top:4px"></p>
-      <button class="btn-principal" style="margin-top:8px" onclick="adminPublicar()">Gruppe veröffentlichen</button>
-    </div>
-
-    <!-- TAB: GESTIONAR -->
-    <div class="admin-seccion" id="adminGestionar">
-      <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Bearbeite die Seite, auf der jede Gruppe erscheint, oder lösche sie. Änderungen werden beim Klicken auf <b>Speichern</b> übernommen.</p>
-      <div class="admin-tabla-wrap">
-        <table class="admin-tabla" id="adminTabla">
-          <thead><tr>
-            <th>Gruppe</th><th>Kat.</th><th>Plattform</th><th>Feste Seite</th><th>Aktionen</th>
-          </tr></thead>
-          <tbody id="adminTablaBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB: SOLICITUDES -->
-    <div class="admin-seccion" id="adminSolicitudes">
-      <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Von Benutzern eingereichte Gruppen, die deine Genehmigung benötigen.</p>
-      <div class="admin-tabla-wrap" id="adminSolicitudesWrap">
-        <table class="admin-tabla">
-          <thead><tr>
-            <th>Gruppe</th><th>Kat.</th><th>Plattform</th><th>Benutzer</th><th>Enlace del grupo</th><th>Status</th><th>Aktionen</th>
-          </tr></thead>
-          <tbody id="adminSolicitudesBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB: CHATS -->
-    <div class="admin-seccion" id="adminChats">
-      <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Kommuniziere mit Benutzern über ihre Anfragen.</p>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="display:flex;gap:10px;align-items:center">
-          <label style="font-size:13px;font-weight:700;color:var(--sub)">Gespräch mit:</label>
-          <select id="adminChatSelect" onchange="adminCambiarChat()" style="flex:1;padding:8px 10px;border-radius:8px;border:1.5px solid var(--borde);font-size:13px;outline:none;background:#fafbfa;color:var(--texto)">
-            <option value="">Benutzer auswählen...</option>
-          </select>
-        </div>
-        <div id="adminChatMensajes" style="background:#f7f9f8;border-radius:12px;padding:12px;min-height:180px;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;border:1px solid var(--borde)"></div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <label class="btn-galeria" title="Enviar imagen" style="flex:0 0 auto">
-            <input type="file" id="adminChatImgInput" accept="image/*" style="display:none" onchange="adminEnviarImagen(this)">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          </label>
-          <input type="text" id="adminChatInput" placeholder="Antwort schreiben..." onkeydown="if(event.key==='Enter')adminEnviarMensaje()"
-            style="flex:1;padding:10px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:13.5px;outline:none;background:#fafbfa">
-          <button onclick="adminEnviarMensaje()" style="padding:10px 18px;border-radius:9px;border:none;background:var(--verde);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer">Senden</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: NOTIFICACIÓN GLOBAL -->
-    <div class="admin-seccion" id="adminNotificacion">
-      <p style="font-size:13px;color:var(--sub);margin-bottom:14px">Envía un banner de notificación a todos los usuarios. Cada usuario lo ve <b>una sola vez</b> por envío.</p>
-      <div class="admin-campo">
-        <label>Nuevo mensaje</label>
-        <input type="text" id="notifAdminInput" placeholder="Ej: Un grupo nuevo ha sido añadido 🎉" maxlength="120">
-      </div>
-      <p style="font-size:11.5px;color:var(--sub);margin:-6px 0 12px">Máx. 120 caracteres.</p>
-      <button class="btn-principal" style="margin-top:4px" onclick="enviarNotificacionGlobal()">📢 Enviar notificación a todos</button>
-
-      <!-- Historial -->
-      <div style="margin-top:20px">
-        <p style="font-size:12.5px;font-weight:700;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Historial — clic para reenviar</p>
-        <div id="notifHistorialLista" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto"></div>
-        <p id="notifHistorialVacio" style="font-size:13px;color:var(--sub);text-align:center;padding:18px 0;display:none">Sin notificaciones enviadas aún.</p>
-      </div>
-    </div>
-
-  </div><!-- /admin-modal -->
-</div><!-- /panelAdmin -->
-
-<div id="toast"></div>
-
-<!-- BANNER NOTIFICACIÓN GLOBAL -->
-<div id="notifGlobalBanner">
-  <span class="notif-g-ico">📢</span>
-  <span class="notif-g-txt" id="notifGlobalTxt"></span>
-  <button class="notif-g-close" onclick="cerrarNotifGlobal()">✕</button>
-</div>
-
-<!-- NOTIFICACIÓN PUSH -->
-<div id="notifPush">
-  <button class="notif-close" onclick="cerrarNotif()">✕</button>
-  <div class="notif-ico" id="notifIco">💬</div>
-  <div class="notif-body">
-    <strong id="notifTitulo">Neue Nachricht</strong>
-    <span id="notifTexto"></span>
-  </div>
-</div>
-
-<!-- BOTÓN FLOTANTE CHAT -->
-<button id="chatFlotante" onclick="toggleChat()" title="Chat con soporte">
-  💬
-  <span id="chatBadge">0</span>
-</button>
-
-<!-- PANEL CHAT -->
-<div id="panelChat">
-  <div class="chat-header">
-    <div class="avatar-admin"><img src="https://s67.erome.com/8391/25otK4Ph/KHyzTjkN.jpg?v=1782372656" alt="Support"></div>
-    <div class="chat-header-info">
-      <strong id="chatNombreHeader">Support-Team</strong>
-      <span id="chatSubHeader">Support</span>
-    </div>
-    <button onclick="toggleChat()">✕</button>
-  </div>
-  <!-- Selector de conversación (solo admin) -->
-  <div class="chat-conv-sel" id="chatConvSel" style="display:none">
-    <span style="color:var(--sub);white-space:nowrap">Chat von:</span>
-    <select id="chatConvSelect" onchange="cambiarConversacion()">
-      <option value="">Benutzer auswählen...</option>
-    </select>
-  </div>
-  <div class="chat-mensajes" id="chatMensajes"></div>
-  <div class="chat-input-row">
-    <label class="btn-galeria" title="Enviar imagen">
-      <input type="file" id="chatImgInput" accept="image/*" style="display:none" onchange="enviarImagen(this)">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-    </label>
-    <input type="text" id="chatInput" placeholder="Nachricht schreiben..." onkeydown="if(event.key==='Enter')enviarMensaje()">
-    <button onclick="enviarMensaje()">➤</button>
-  </div>
-</div>
-
-<!-- MODAL DE INICIO DE SESIÓN / REGISTRO -->
-<div class="overlay" id="overlayAuth">
-  <div class="modal">
-    <button class="cerrar" onclick="cerrarAuth()">✕</button>
-    <div class="tabs-auth">
-      <button id="tabLogin" class="activo" onclick="cambiarTab('login')">Anmelden</button>
-      <button id="tabRegistro" onclick="cambiarTab('registro')">Konto erstellen</button>
-    </div>
-
-    <!-- LOGIN -->
-    <div id="vistaLogin">
-      <h2>Willkommen zurück</h2>
-      <p class="sub">Melde dich an, um deine Lieblingsgruppen zu speichern.</p>
-      <div class="campo">
-        <label>E-Mail-Adresse</label>
-        <input type="email" id="loginCorreo" placeholder="deine@gmail.com">
-      </div>
-      <div class="campo">
-        <label>Passwort</label>
-        <input type="password" id="loginPass" placeholder="••••••••">
-      </div>
-      <p class="error-campo" id="errorLogin"></p>
-      <button class="btn-principal" onclick="iniciarSesion()">Anmelden</button>
-      <div class="divisor">oder</div>
-      <button class="btn-google" onclick="googleSignIn()">
-        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
-        Mit Google fortfahren
-      </button>
-      <p class="pie-auth">Noch kein Konto? <a onclick="cambiarTab('registro')">Jetzt registrieren</a></p>
-    </div>
-
-    <!-- REGISTRO -->
-    <div id="vistaRegistro" style="display:none">
-      <h2>Konto erstellen</h2>
-      <p class="sub">Tritt bei und speichere die Gruppen, die dich interessieren.</p>
-      <div class="campo">
-        <label>Name</label>
-        <input type="text" id="regNombre" placeholder="Dein Name">
-      </div>
-      <div class="campo">
-        <label>E-Mail-Adresse</label>
-        <input type="email" id="regCorreo" placeholder="deine@gmail.com">
-      </div>
-      <div class="campo">
-        <label>Passwort</label>
-        <input type="password" id="regPass" placeholder="Mindestens 6 Zeichen">
-      </div>
-      <p class="error-campo" id="errorRegistro"></p>
-      <button class="btn-principal" onclick="registrar()">Konto erstellen</button>
-      <div class="divisor">oder</div>
-      <button class="btn-google" onclick="googleSignIn()">
-        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
-        Mit Google fortfahren
-      </button>
-      <p class="pie-auth">Bereits ein Konto? <a onclick="cambiarTab('login')">Jetzt anmelden</a></p>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL AVISO FOTO — todas las demás categorías -->
-<div class="overlay" id="overlayFotoAviso">
-  <div class="modal modal-edad">
-    <span class="e">📷</span>
-    <h2>Hinweis für deine Gruppe</h2>
-    <p class="sub">Es wird empfohlen, beim Hinzufügen Ihrer Gruppen eigene Fotos hochzuladen.</p>
-    <div class="acciones-edad">
-      <button class="no" onclick="cerrarFotoAviso()">Schließen</button>
-      <button class="si" onclick="confirmarFotoAviso()">Verstanden</button>
-    </div>
-  </div>
-</div>
-<div class="overlay" id="overlayEdad">
-  <div class="modal modal-edad">
-    <span class="e">🔒</span>
-    <h2>Inhalt nur für Erwachsene</h2>
-    <p class="sub">Sind Sie über 18 Jahre alt? Es wird empfohlen, beim Hinzufügen von Gruppen eigene Fotos hochzuladen +18.</p>
-    <div class="acciones-edad">
-      <button class="no" onclick="rechazarEdad()">Nein, zurück</button>
-      <button class="si" onclick="confirmarEdad()">Ja, ich bin über 18</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL — AÑADIR GRUPO -->
-<div class="overlay" id="overlayAgregar">
-  <div class="modal modal-grande">
-    <button class="cerrar" onclick="cerrarAgregar()">✕</button>
-    <h2>Deine Gruppe hinzufügen</h2>
-    <p class="sub">Teile deine WhatsApp- oder Telegram-Community mit Tausenden von Menschen.</p>
-
-    <div class="plataforma-toggle">
-      <div class="opcion-plataforma activa w" id="optWhatsApp" onclick="elegirPlataformaForm('WhatsApp')">
-        <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></span><span class="nombre">WhatsApp</span>
-      </div>
-      <div class="opcion-plataforma t" id="optTelegram" onclick="elegirPlataformaForm('Telegram')">
-        <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="#229ED9"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></span><span class="nombre">Telegram</span>
-      </div>
-      <div class="opcion-plataforma s" id="optSignal" onclick="elegirPlataformaForm('Signal')">
-        <span class="ic"><svg width="26" height="26" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="24" cy="24" r="24" fill="#3A76F0"/>
-  <circle cx="24" cy="24" r="18.5" fill="none" stroke="white" stroke-width="2.6" stroke-dasharray="4.8 3.2" stroke-linecap="round"/>
-  <path d="M24 11.5c-6.9 0-12.5 5.3-12.5 11.85 0 2.9 1.1 5.54 2.91 7.57l-1.91 7.08 7.23-2.34A12.7 12.7 0 0 0 24 36.35c6.9 0 12.5-5.3 12.5-11.85S30.9 11.5 24 11.5z" fill="white"/>
-</svg></span><span class="nombre">Signal</span>
-      </div>
-    </div>
-
-    <div class="campo">
-      <label>Gruppenname</label>
-      <input type="text" id="agNombre" placeholder="z. B. Deutsche Entwickler">
-    </div>
-
-    <div class="campo">
-      <label>Kategorie</label>
-      <select id="agCategoria" onchange="actualizarCategoriaForm()">
-        <option value="" disabled selected>Kategorie auswählen</option>
-      </select>
-    </div>
-
-    <div class="campo">
-      <label>Einladungslink</label>
-      <input type="url" id="agLink" placeholder="https://chat.whatsapp.com/...">
-      <span class="ayuda" id="agLinkAyuda">Muss mit https://chat.whatsapp.com/ beginnen.</span>
-    </div>
-
-    <div class="campo">
-      <label>Gruppenbeschreibung</label>
-      <textarea id="agDescripcion" placeholder="Beschreibe kurz, worum es in deiner Gruppe geht, welche Regeln gelten und welche Mitglieder ihr sucht …" rows="3" style="padding:11px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:14px;outline:none;background:#fafbfa;resize:vertical;transition:border-color .18s;font-family:inherit;line-height:1.5;width:100%;box-sizing:border-box" onfocus="this.style.borderColor='var(--verde)'" onblur="this.style.borderColor='var(--borde)'"></textarea>
-    </div>
-
-    <div class="campo">
-      <label>Gruppenfoto hochladen</label>
-      <label id="agFotoLabel" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:11px 13px;border-radius:9px;border:1.5px dashed var(--borde);background:#fafbfa;transition:border-color .18s" onmouseenter="this.style.borderColor='var(--verde)'" onmouseleave="this.style.borderColor='var(--borde)'">
-        <input type="file" id="agFotoInput" accept="image/*" style="display:none" onchange="previsualizarFoto(this)">
-        <span id="agFotoIco" style="font-size:26px">📷</span>
-        <div>
-          <span id="agFotoTexto" style="font-size:14px;font-weight:600;color:var(--texto);display:block">Foto auswählen</span>
-          <span style="font-size:11.5px;color:var(--sub)">JPG, PNG oder GIF · max. 5 MB</span>
-        </div>
-        <img id="agFotoPreview" src="" alt="" style="display:none;width:56px;height:56px;object-fit:cover;border-radius:8px;margin-left:auto;border:1.5px solid var(--borde)">
-      </label>
-    </div>
-
-    <div class="campo-checkbox" id="cajaConfirma18" style="display:none">
-      <input type="checkbox" id="agConfirma18">
-      <label for="agConfirma18">Ich bestätige, dass diese Gruppe für Personen über 18 Jahre ist und die Regeln von WhatsApp/Telegram einhält.</label>
-    </div>
-
-    <p class="error-campo" id="errorAgregar"></p>
-    <button class="btn-principal" onclick="publicarGrupo()">Anfrage senden</button>
-    <p style="font-size:12px;color:var(--sub);text-align:center;margin-top:8px">Deine Gruppe wird vom Administrator geprüft, bevor sie auf der Seite erscheint.</p>
-  </div>
-</div>
-
-
-<script>
-const categorias=[
+    }catch(err){
+      console.log("[FCM] Error al configurar notificaciones:", err);
+    }
+  }const categorias=[
   {nombre:"Todos",icono:"✨"},
   {nombre:"+18",icono:"🔞"},
   {nombre:"Singles",icono:"💘"},
@@ -1902,7 +2266,55 @@ const grupos=[...baseGrupos];
 async function guardarGrupoFirestore(g){
   try{
     await _db.collection("grupos_extra").add({...g, creadoEn: firebase.firestore.FieldValue.serverTimestamp()});
+    // Pre-inicializar doc de popularidad con favoritosBase del admin
+    // para que el primer voto siempre parta del valor correcto
+    const popKey=g.nombre.replace(/[.#$[\]/]/g,"_");
+    const base=g.favoritosBase||0;
+    await _db.collection("popularidad").doc(popKey).set(
+      { nombre:g.nombre, popularidad:base },
+      { merge:true }
+    );
   }catch(e){ console.warn("FB guardarGrupo:",e); }
+}
+
+/* ─── OBTENER MIEMBROS REALES DEL GRUPO ───────────────────────── */
+async function obtenerMiembrosReales(link){
+  try{
+    // Telegram: los metadatos OG son públicos y accesibles via proxy CORS
+    if(link.includes("t.me")||link.includes("telegram.me")){
+      const proxy="https://api.allorigins.win/get?url="+encodeURIComponent(link);
+      const res=await fetch(proxy,{signal:AbortSignal.timeout(8000)});
+      const json=await res.json();
+      const html=json.contents||"";
+      // Telegram pone "X members" o "X Mitglieder" en og:description
+      const m=html.match(/(\d[\d\s.,]+)\s*(member|subscriber|Mitglied|miembro|follower)/i);
+      if(m){
+        const num=parseInt(m[1].replace(/[\s.,]/g,""));
+        if(!isNaN(num)&&num>0) return num;
+      }
+    }
+    // WhatsApp no expone metadatos públicos → retorna null
+    return null;
+  }catch(e){
+    console.warn("obtenerMiembrosReales:",e);
+    return null;
+  }
+}
+
+// Actualiza miembros de un grupo en Firestore y en memoria
+async function actualizarMiembrosGrupo(nombre, link){
+  const real=await obtenerMiembrosReales(link);
+  if(real===null) return null;
+  // Actualizar en memoria
+  [grupos, gruposExtra].forEach(arr=>{
+    const g=arr.find(x=>x.nombre===nombre);
+    if(g){ g.miembros=real; g.miembrosActualizadoEn=Date.now(); }
+  });
+  // Actualizar en Firestore
+  _db.collection("grupos_extra").where("nombre","==",nombre).get().then(snap=>{
+    snap.forEach(doc=>doc.ref.update({miembros:real, miembrosActualizadoEn:Date.now()}));
+  }).catch(()=>{});
+  return real;
 }
 async function guardarGrupoUsuario(g){
   gruposExtra.push(g);
@@ -1913,7 +2325,7 @@ async function guardarGrupoUsuario(g){
 const GRUPOS_POR_PAGINA=6;
 let paginaActual=1;
 let _cargandoGrupos=true;
-const _splashInicio=Date.now();
+const _splashInicio=Date.now(); window._splashInicio=_splashInicio;
 
 const grid=document.getElementById("grid");
 const catRow=document.getElementById("catRow");
@@ -1941,7 +2353,10 @@ function guardarAjustes(){
   guardarFavoritos();
 }
 function totalFavoritos(g){
-  return g.favoritosBase+(ajustesFavoritos[g.nombre]||0);
+  const base = g.favoritosBase || 0;
+  const pop  = g.popularidad !== undefined ? g.popularidad : base;
+  // Nunca mostrar menos que la base puesta por el admin
+  return Math.max(pop, base);
 }
 
 function pintarCategorias(){
@@ -2287,7 +2702,10 @@ function pintar(arr){
       <div class="card-body">
         <span class="tag ${g.categoria==='+18'?'plus18':''}">${categorias.find(c=>c.nombre===g.categoria)?.icono||""} ${categoriaLabel[g.categoria]||g.categoria}</span>
         <h3>${g.nombre}</h3>
-        <div class="meta">👥 ${g.miembros.toLocaleString("de-DE")} Mitglieder</div>
+        <div class="meta" id="meta-miembros-${g.nombre.replace(/[^a-z0-9]/gi,'_')}">
+          👥 <span class="miembros-num">${g.miembros>0?g.miembros.toLocaleString("de-DE"):"—"}</span> Mitglieder
+          ${g.miembrosActualizadoEn?`<span class="miembros-ts" title="Zuletzt aktualisiert: ${new Date(g.miembrosActualizadoEn).toLocaleDateString('de-DE')}">✓</span>`:""}
+        </div>
         <div class="acciones">
           <a class="btn-unirse ${claseBtn}" target="_blank" rel="noopener" href="${g.link}">
             Gruppe beitreten <span class="flecha">→</span>
@@ -2409,38 +2827,68 @@ function animarNumero(btn, nuevoVal, subiendo){
 function alternarFavorito(btn,nombre){
   if(!puedeVotar(nombre)){
     const resta=tiempoRestante(nombre);
-    mostrarToast(`Heute bereits abgestimmt · Wieder in ${resta}`,"⏳");
+    mostrarToast(`Du hast bereits heute für „${nombre}" gestimmt · Wieder in ${resta}`,"⏳");
     return;
   }
-  const votos=obtenerVotosFav();
-  let subiendo;
-  if(favoritos.has(nombre)){
-    favoritos.delete(nombre);
-    ajustesFavoritos[nombre]=(ajustesFavoritos[nombre]||0)-1;
-    delete votos[nombre];
-    subiendo=false;
-    mostrarToast(`Aus Favoriten entfernt · ${nombre}`,"➖");
-  }else{
-    favoritos.add(nombre);
-    ajustesFavoritos[nombre]=(ajustesFavoritos[nombre]||0)+1;
-    votos[nombre]=Date.now();
-    subiendo=true;
-    mostrarToast(`+1 Favoritenbonus · ${nombre}`,"⭐");
-  }
-  guardarVotosFav(votos);
-  guardarFavoritos();
-  guardarAjustes();
 
-  // calcular nuevo total sin re-renderizar todo
+  // Registrar timestamp del voto (para el límite 24h)
+  const votos=obtenerVotosFav();
+  votos[nombre]=Date.now();
+  guardarVotosFav(votos);
+
+  // Marcar como favorito localmente (solo para mostrar ⭐ al usuario actual)
+  favoritos.add(nombre);
+  guardarFavoritos();
+
+  // Incrementar popularidad global en Firestore (FieldValue.increment — atómico)
   const g=grupos.find(x=>x.nombre===nombre)||gruposExtra.find(x=>x.nombre===nombre);
   if(g){
+    // Actualizar en grupos_extra (grupos de usuarios)
+    _db.collection("grupos_extra").where("nombre","==",nombre).get().then(snap=>{
+      snap.forEach(doc=>{
+        doc.ref.update({
+          popularidad: firebase.firestore.FieldValue.increment(1)
+        });
+      });
+    }).catch(()=>{});
+    // Actualizar en grupos_admin (grupos del admin, si existe esa colección)
+    _db.collection("grupos_admin").where("nombre","==",nombre).get().then(snap=>{
+      snap.forEach(doc=>{
+        doc.ref.update({
+          popularidad: firebase.firestore.FieldValue.increment(1)
+        });
+      });
+    }).catch(()=>{});
+    // Actualizar en popularidad_global (contador maestro compartido)
+    const _popKey=nombre.replace(/[.#$[\]/]/g,"_");
+    const _popRef=_db.collection("popularidad").doc(_popKey);
+    _popRef.get().then(async docSnap=>{
+      if(docSnap.exists){
+        // Documento ya existe: solo incrementar (atómico)
+        return _popRef.update({ popularidad: firebase.firestore.FieldValue.increment(1) });
+      } else {
+        // Doc de popularidad no existe: leer la base real desde grupos_extra en Firestore
+        // para no perder la popularidad que el admin configuró
+        let base = Math.max(g.popularidad||0, g.favoritosBase||0);
+        try{
+          const extraSnap=await _db.collection("grupos_extra").where("nombre","==",nombre).limit(1).get();
+          if(!extraSnap.empty){
+            const d=extraSnap.docs[0].data();
+            base=Math.max(base, d.popularidad||0, d.favoritosBase||0);
+          }
+        }catch(e){}
+        return _popRef.set({ nombre, popularidad: base+1 });
+      }
+    }).catch(()=>{});
+
+    // Actualizar UI inmediatamente (optimistic update)
+    const baseActual=Math.max(g.popularidad||0, g.favoritosBase||0);
+    g.popularidad=baseActual+1;
     const nuevoTotal=totalFavoritos(g);
-    btn.classList.toggle("activo",subiendo);
-    btn.classList.add("pulso");
-    animarNumero(btn, nuevoTotal, subiendo);
+    btn.classList.add("activo","pulso");
+    animarNumero(btn, nuevoTotal, true);
     btn.addEventListener("animationend",()=>btn.classList.remove("pulso"),{once:true});
-  } else {
-    filtrar();
+    mostrarToast(`+1 ⭐ · ${nombre} — Danke für deine Stimme!`,"⭐");
   }
 }
 
@@ -2821,9 +3269,29 @@ function renderAdminTabla(){
   const body=document.getElementById("adminTablaBody");
   body.innerHTML=grupos.map((g,i)=>`
     <tr>
-      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.nombre}">${g.nombre}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.nombre}">${g.nombre}</td>
       <td>${g.categoria}</td>
       <td>${g.plataforma}</td>
+      <td style="min-width:130px">
+        <div style="display:flex;align-items:center;gap:4px">
+          <input type="number" min="0" value="${g.miembros||0}"
+            id="mb_${i}" style="width:72px;padding:4px 6px;border:1.5px solid #d1fae5;border-radius:8px;font-size:13px;font-weight:600;color:#065f46;text-align:center"
+            placeholder="0">
+          <button class="btn-admin-sm save" style="padding:4px 8px;font-size:12px"
+            onclick="adminGuardarMiembros(${i},'${g.nombre}')">💾</button>
+          ${g.link&&g.link.includes("t.me")?`<button class="btn-admin-sm" style="padding:4px 6px;font-size:12px;background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7"
+            onclick="adminRefreshMiembros(${i},'${g.nombre}','${g.link}')" title="Automatisch abrufen (Telegram)">🔄</button>`:""}
+        </div>
+      </td>
+      <td style="min-width:120px">
+        <div style="display:flex;align-items:center;gap:4px">
+          <input type="number" min="0" value="${totalFavoritos(g)}"
+            id="pop_${i}" style="width:72px;padding:4px 6px;border:1.5px solid #fde68a;border-radius:8px;font-size:13px;font-weight:700;color:#92400e;text-align:center"
+            placeholder="0">
+          <button class="btn-admin-sm save" style="padding:4px 8px;font-size:12px;background:#fef3c7;color:#92400e;border:1px solid #fde68a"
+            onclick="adminGuardarPopularidad(${i},'${g.nombre}')">⭐</button>
+        </div>
+      </td>
       <td>
         <input type="number" min="1" value="${pf[g.nombre]||''}" placeholder="Auto"
           id="pf_${i}" style="width:60px">
@@ -2850,6 +3318,57 @@ function adminGuardarPagina(i,nombre){
   guardarPaginasFijas(pf);
   mostrarToast(`Seite gespeichert für „${nombre}"`,"📌");
   filtrar();
+}
+
+function adminGuardarMiembros(i, nombre){
+  const input=document.getElementById(`mb_${i}`);
+  if(!input) return;
+  const val=Math.max(0, parseInt(input.value)||0);
+  // Actualizar en memoria
+  [grupos, gruposExtra].forEach(arr=>{
+    const g=arr.find(x=>x.nombre===nombre);
+    if(g){ g.miembros=val; g.miembrosActualizadoEn=Date.now(); }
+  });
+  // Guardar en Firestore
+  _db.collection("grupos_extra").where("nombre","==",nombre).get().then(snap=>{
+    snap.forEach(doc=>doc.ref.update({miembros:val, miembrosActualizadoEn:Date.now()}));
+  }).catch(()=>{});
+  filtrar(); // re-pintar cards públicas
+  mostrarToast(`👥 „${nombre}": ${val.toLocaleString("de-DE")} Mitglieder gespeichert`,"✅");
+}
+
+function adminGuardarPopularidad(i, nombre){
+  const input=document.getElementById(`pop_${i}`);
+  if(!input) return;
+  const val=Math.max(0, parseInt(input.value)||0);
+
+  // 1. Actualizar en memoria (ambos arrays)
+  [grupos, gruposExtra].forEach(arr=>{
+    const g=arr.find(x=>x.nombre===nombre);
+    if(g){
+      g.popularidad=val;
+      g.favoritosBase=val; // también actualizar la base
+    }
+  });
+
+  // 2. Guardar en colección "popularidad" (fuente de verdad en tiempo real)
+  const popKey=nombre.replace(/[.#$[\]/]/g,"_");
+  _db.collection("popularidad").doc(popKey).set({
+    nombre,
+    popularidad: val
+  }).catch(e=>console.warn("FB popularidad:",e));
+
+  // 3. Actualizar también en grupos_extra para que la base persista
+  _db.collection("grupos_extra").where("nombre","==",nombre).get().then(snap=>{
+    snap.forEach(doc=>doc.ref.update({ popularidad:val, favoritosBase:val }));
+  }).catch(()=>{});
+
+  // 4. Actualizar el input con el valor guardado
+  input.value=val;
+
+  // 5. Re-pintar cards públicas en tiempo real
+  filtrar();
+  mostrarToast(`⭐ „${nombre}": Popularität auf ${val.toLocaleString("de-DE")} gesetzt`,"⭐");
 }
 
 function adminEliminar(i,nombre){
@@ -2954,69 +3473,263 @@ async function cargarDatosAdmin(){
 }
 
 async function initFirebase(){
-  // 1. Renderizar los grupos base INMEDIATAMENTE — sin esperar a Firebase
-  pintarSesion();
-  pintarCategorias();
-  poblarSelectCategorias();
-  pintar(grupos);
-
-  // 2. Quitar el splash dejando que se vea su animación completa (mínimo 2.2s desde que empezó a cargar)
+  // Fix: funcion robusta de quitar splash — se llama siempre, pase lo que pase
   function quitarSplash(){
-    const splash=document.getElementById("splash");
-    if(splash && !splash.classList.contains("oculto")){
-      splash.classList.add("oculto");
-      setTimeout(()=>{ if(splash.parentNode) splash.parentNode.removeChild(splash); },400);
-    }
+    try{
+      var splash=document.getElementById("splash");
+      if(splash && !splash.classList.contains("oculto")){
+        document.querySelectorAll("body>*:not(#splash)").forEach(function(el){ el.style.visibility=""; });
+        splash.classList.add("oculto");
+        setTimeout(function(){ if(splash && splash.parentNode) splash.parentNode.removeChild(splash); },520);
+      }
+    }catch(err){ console.warn("quitarSplash error:",err); }
   }
-  const _tiempoMinimoSplash=2200;
-  const _transcurrido=Date.now()-_splashInicio;
-  setTimeout(quitarSplash, Math.max(0,_tiempoMinimoSplash-_transcurrido));
+
+  // 1. Renderizar los grupos base INMEDIATAMENTE — sin esperar a Firebase
+  try{ pintarSesion(); }catch(e){ console.warn("pintarSesion:",e); }
+  try{ pintarCategorias(); }catch(e){ console.warn("pintarCategorias:",e); }
+  try{ poblarSelectCategorias(); }catch(e){ console.warn("poblarSelectCategorias:",e); }
+  try{ pintar(grupos); }catch(e){ console.warn("pintar:",e); }
+
+  // 2. Quitar el splash respetando minimo de 2.2s, con doble garantia de ejecucion
+  var _tiempoMinimoSplash=2200;
+  var _transcurrido=Date.now()-(window._splashInicio||Date.now());
+  var _demoraSplash=Math.max(0,_tiempoMinimoSplash-_transcurrido);
+  setTimeout(quitarSplash, _demoraSplash);
+  // Fallback extra: si por algun motivo no se quito, forzar a los 4s
+  setTimeout(quitarSplash, Math.max(_demoraSplash+1000, 4000));
 
   // 3. Cargar Firebase en paralelo (Promise.all) — no bloquea la UI
   try{
+    // Fix: verificar que _db este disponible (window._db como respaldo)
+    var db = (typeof _db !== "undefined" && _db) ? _db : window._db;
+    if(!db){ console.error("_db no disponible — revisa la configuracion de Firebase"); _cargandoGrupos=false; try{filtrar();}catch(fe){} return; }
     const user=obtenerSesion();
     const promesas=[
-      _db.collection("grupos_extra").get(),
-      _db.collection("config").doc("paginas_fijas").get(),
+      db.collection("grupos_extra").get(),
+      db.collection("config").doc("paginas_fijas").get(),
       user ? cargarDatosUsuario(user.correo) : Promise.resolve(),
       user && esAdmin(user) ? cargarDatosAdmin() : Promise.resolve()
     ];
     const [gruposSnap, pfSnap] = await Promise.all(promesas);
 
     // Grupos extra
-    let hayNuevos=false;
     if(gruposSnap){
       gruposSnap.forEach(d=>{
         const g={...d.data()}; delete g.creadoEn;
         // Evitar duplicados si ya existe
         if(!gruposExtra.some(e=>e.nombre===g.nombre)){
-          gruposExtra.push(g); grupos.push(g); hayNuevos=true;
+          gruposExtra.push(g); grupos.push(g);
         }
       });
     }
 
-    // Páginas fijas
+    // Paginas fijas
     if(pfSnap && pfSnap.exists){
       _paginasFijasCache=pfSnap.data();
       aplicarPaginasFijasLocal();
     }
 
-    // Ya terminó de cargar: repintar siempre (haya o no grupos nuevos)
+    // Ya termino de cargar: repintar siempre (haya o no grupos nuevos)
     _cargandoGrupos=false;
     filtrar();
 
   }catch(e){
     console.warn("Firebase init error:",e);
     _cargandoGrupos=false;
-    filtrar();
+    // Fix: pintar igual para no dejar skeletons infinitos
+    try{ filtrar(); }catch(fe){ console.warn("filtrar fallback:",fe); }
   }
 
-  iniciarListenersChat();
-  verificarNotificacionGlobal();
+  try{ iniciarListenersChat(); }catch(e){ console.warn("iniciarListenersChat:",e); }
+  try{ iniciarListenerPopularidad(); }catch(e){ console.warn("iniciarListenerPopularidad:",e); }
+  try{ verificarNotificacionGlobal(); }catch(e){ console.warn("verificarNotif:",e); }
+  setTimeout(iniciarAutoRefreshMiembros, 3000);
+  try{ iniciarFCM(); }catch(e){ console.warn("iniciarFCM:",e); }
 }
 
-// Iniciar cuando el DOM esté listo
-document.addEventListener("DOMContentLoaded", initFirebase);
+// Iniciar cuando el DOM esté listo — con manejo de error para garantizar que el splash siempre se quite
+document.addEventListener("DOMContentLoaded", function(){
+  initFirebase().catch(function(err){
+    console.error("initFirebase falló completamente:", err);
+    // Garantía: quitar splash aunque todo falle
+    setTimeout(function(){
+      var splash=document.getElementById("splash");
+      if(splash && !splash.classList.contains("oculto")){
+        document.querySelectorAll("body>*:not(#splash)").forEach(function(el){ el.style.visibility=""; });
+        splash.classList.add("oculto");
+        setTimeout(function(){ if(splash && splash.parentNode) splash.parentNode.removeChild(splash); },520);
+      }
+    }, 500);
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   PWA — INSTALACIÓN: banner propio con beforeinstallprompt
+   ═══════════════════════════════════════════════════════════════ */
+let _deferredPrompt = null;
+const _PWA_DISMISSED_KEY  = "pwa_banner_dismissed";
+const _PWA_INSTALLED_KEY  = "pwa_was_installed";   // marca que el usuario instaló alguna vez
+const _PWA_DISMISSED_TTL  = 3 * 24 * 60 * 60 * 1000; // 3 días en ms (solo aplica al botón "Später")
+let _bannerShown = false;
+
+function _yaInstalada(){
+  return window.matchMedia("(display-mode: standalone)").matches ||
+         window.navigator.standalone === true;
+}
+
+/**
+ * Devuelve true solo si el usuario pulsó "Später" hace menos de 3 días
+ * Y la app sigue instalada (o nunca se instaló).
+ * Si detectamos que se desinstaló (beforeinstallprompt volvió a dispararse
+ * o no está en standalone), borramos la marca para que el banner reaparezca.
+ */
+function _yaCerrado(){
+  const val = localStorage.getItem(_PWA_DISMISSED_KEY);
+  if(!val) return false;
+  const guardadoEn = parseInt(val, 10);
+  // TTL expirado → borrar y mostrar
+  if(isNaN(guardadoEn) || Date.now() - guardadoEn > _PWA_DISMISSED_TTL){
+    localStorage.removeItem(_PWA_DISMISSED_KEY);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Cuando el navegador vuelve a disparar beforeinstallprompt significa que
+ * la app NO está instalada (o fue desinstalada). En ese caso limpiamos la
+ * marca "dismissed" para que el banner vuelva a aparecer sin importar
+ * el tiempo transcurrido desde que el usuario pulsó "Später".
+ */
+function _limpiarSiDesinstalada(){
+  const fueInstalada = localStorage.getItem(_PWA_INSTALLED_KEY);
+  if(fueInstalada && !_yaInstalada()){
+    // El usuario la instaló antes, ahora no está en standalone → desinstalada
+    localStorage.removeItem(_PWA_DISMISSED_KEY);
+    localStorage.removeItem(_PWA_INSTALLED_KEY);
+  }
+}
+
+function _mostrarPwaBanner(){
+  if(_bannerShown || _yaInstalada() || _yaCerrado()) return;
+  _bannerShown = true;
+  document.getElementById("pwaBanner").classList.add("visible");
+}
+
+// ── Android / Chrome Desktop: capturar el evento nativo ──
+// Si este evento se dispara, significa que la app NO está instalada ahora mismo.
+// Limpiamos la marca "dismissed" para que el banner reaparezca siempre.
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  _deferredPrompt = e;
+  // Si antes fue instalada y ahora no → fue desinstalada; resetear dismissal
+  localStorage.removeItem(_PWA_DISMISSED_KEY);
+  localStorage.removeItem(_PWA_INSTALLED_KEY);
+  setTimeout(_mostrarPwaBanner, 1500);
+});
+
+// ── iOS Safari: detectar ──
+function esIOS(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+}
+function estaInstalada(){
+  return window.navigator.standalone === true ||
+         window.matchMedia("(display-mode: standalone)").matches;
+}
+
+// ── FALLBACK universal: si en 2.5s no se disparó beforeinstallprompt ──
+// Cubre Samsung Internet, Firefox, Opera, Chrome sin trigger, etc.
+window.addEventListener("load", ()=>{
+  // Comprobar si fue desinstalada antes de decidir qué mostrar
+  _limpiarSiDesinstalada();
+
+  if(_yaInstalada() || _yaCerrado()) return;
+
+  // iOS → instrucciones share
+  if(esIOS() && !estaInstalada()){
+    setTimeout(()=>{
+      if(!_yaCerrado() && !estaInstalada()){
+        document.getElementById("iosBanner").classList.add("visible");
+      }
+    }, 1800);
+    return;
+  }
+
+  // Otros navegadores: mostrar banner siempre tras 2.5s si no hubo evento nativo
+  setTimeout(()=>{
+    if(!_bannerShown && !_yaInstalada() && !_yaCerrado()){
+      _bannerShown = true;
+      document.getElementById("pwaBanner").classList.add("visible");
+      // Si no hay prompt nativo disponible, cambiar botón a guía manual
+      if(!_deferredPrompt){
+        const btn = document.getElementById("pwaBtnInstall");
+        if(btn){
+          btn.textContent = "📖 Wie installieren?";
+          btn._isFallback = true;
+        }
+      }
+    }
+  }, 2500);
+});
+
+// Botón Instalar
+document.addEventListener("DOMContentLoaded", ()=>{
+  const btnInstall = document.getElementById("pwaBtnInstall");
+  const btnLater   = document.getElementById("pwaBtnLater");
+  if(!btnInstall) return;
+
+  btnInstall.addEventListener("click", async ()=>{
+    if(_deferredPrompt){
+      document.getElementById("pwaBanner").classList.remove("visible");
+      _deferredPrompt.prompt();
+      const { outcome } = await _deferredPrompt.userChoice;
+      console.log("[PWA] Resultado:", outcome);
+      if(outcome === "accepted"){
+        // El usuario aceptó instalar
+        localStorage.setItem(_PWA_INSTALLED_KEY, "1");
+        localStorage.removeItem(_PWA_DISMISSED_KEY);
+      } else {
+        // Rechazó el diálogo nativo → no guardar nada, el banner reaparece en próxima visita
+      }
+      _deferredPrompt = null;
+    } else {
+      // Fallback: mostrar instrucciones según navegador
+      const ua = navigator.userAgent;
+      let instrucciones = "So installierst du die App:\n\n";
+      if(/samsung/i.test(ua)){
+        instrucciones += "Samsung Internet:\nMenü ☰ → \"Seite hinzufügen zu\" → Startbildschirm";
+      } else if(/firefox/i.test(ua)){
+        instrucciones += "Firefox:\nMenü ⋮ → \"Zum Startbildschirm hinzufügen\"";
+      } else {
+        instrucciones += "Chrome/Android:\nMenü ⋮ (oben rechts) → \"Zum Startbildschirm hinzufügen\"\n\nSafari/iOS:\nTeilen-Taste ⬆ → \"Zum Startbildschirm\"";
+      }
+      alert(instrucciones);
+      document.getElementById("pwaBanner").classList.remove("visible");
+      // No se guarda nada → reaparece en próxima visita
+    }
+  });
+
+  btnLater.addEventListener("click", ()=>{
+    document.getElementById("pwaBanner").classList.remove("visible");
+    // No se guarda nada → el banner reaparece en cada recarga/visita
+  });
+});
+
+function cerrarIosBanner(){
+  document.getElementById("iosBanner").classList.remove("visible");
+  // No se guarda nada → el banner reaparece en cada recarga/visita
+}
+
+// Ocultar el banner y marcar como instalada cuando el SO confirma la instalación
+window.addEventListener("appinstalled", ()=>{
+  document.getElementById("pwaBanner").classList.remove("visible");
+  document.getElementById("iosBanner").classList.remove("visible");
+  mostrarToast("✅ App erfolgreich installiert! 🎉", "📲");
+  localStorage.setItem(_PWA_INSTALLED_KEY, "1");
+  localStorage.removeItem(_PWA_DISMISSED_KEY);
+  _deferredPrompt = null;
+});
 
 /* =========================================================
    SISTEMA DE SOLICITUDES Y CHAT
@@ -3126,6 +3839,56 @@ function actualizarBadgeUsuarioChat(correo){
   } else {
     badge.classList.remove("visible");
   }
+}
+
+/* ─── POPULARIDAD EN TIEMPO REAL ────────────────────────────── */
+let _listenerPopularidad=null;
+function iniciarListenerPopularidad(){
+  if(_listenerPopularidad) return;
+  _listenerPopularidad=_db.collection("popularidad").onSnapshot(snap=>{
+    let huboActualizacion=false;
+    snap.docChanges().forEach(change=>{
+      if(change.type==="removed") return;
+      const data=change.doc.data();
+      if(!data.nombre||data.popularidad===undefined) return;
+      // Actualizar en ambos arrays
+      [grupos,gruposExtra].forEach(arr=>{
+        const g=arr.find(x=>x.nombre===data.nombre);
+        if(g&&g.popularidad!==data.popularidad){
+          g.popularidad=Math.max(data.popularidad, g.favoritosBase||0);
+          huboActualizacion=true;
+          // Actualizar SOLO el número en el botón sin re-renderizar toda la página
+          actualizarBtnPopularidadEnVivo(g.nombre, g.popularidad);
+        }
+      });
+    });
+    // Si hubo cambios importantes reordenar (sin re-render total)
+    if(huboActualizacion) reordenarPopularidadEnVivo();
+  },e=>console.warn("Listener popularidad:",e));
+}
+
+// Actualiza solo el número del botón ⭐ en el DOM sin refrescar toda la grid
+function actualizarBtnPopularidadEnVivo(nombre, total){
+  const btns=document.querySelectorAll(`.fav-btn`);
+  btns.forEach(btn=>{
+    if(btn.dataset.nombre===nombre){
+      const numEl=btn.querySelector(".fav-num");
+      if(numEl&&parseInt(numEl.textContent)!==total){
+        numEl.classList.remove("anim-sube");
+        void numEl.offsetWidth;
+        numEl.classList.add("anim-sube");
+        setTimeout(()=>{ numEl.textContent=total; },200);
+        numEl.addEventListener("animationend",()=>numEl.classList.remove("anim-sube"),{once:true});
+      }
+    }
+  });
+}
+
+// Reordena las cards por popularidad sin hacer un filtrar() completo
+function reordenarPopularidadEnVivo(){
+  // Solo re-render silencioso en background, no si el usuario está filtrando activamente
+  clearTimeout(window._reorderTimer);
+  window._reorderTimer=setTimeout(()=>filtrar(),2000);
 }
 
 /* --- LISTENERS EN TIEMPO REAL (Firestore onSnapshot) --- */
@@ -3238,6 +4001,7 @@ function iniciarListenersChat(){
   if(esAdmin(user)){
     actualizarBadgeAdminGlobal();
     attachAdminChatsListener();
+    attachSolicitudesListener();
   } else {
     // Si nunca se guardó índice de lectura local, inicializarlo:
     // - Si hay mensajes con leido===false del admin → índice antes de ellos (para mostrar badge)
@@ -3274,7 +4038,7 @@ function renderMensajes(msgs, contenedor, esAdminView){
   function convertirURLsALinks(texto){
     const urlRegex=/https?:\/\/[^\s<>]+/gi;
     return texto.replace(urlRegex,function(url){
-      return `<a href="${url}" target="_blank" rel="noopener" style="color:var(--verde);text-decoration:underline;word-break:break-all;font-weight:500">${url}</a>`;
+      return `<a href="${url}" target="_blank" rel="noopener" class="chat-link" style="word-break:break-all">${url}</a>`;
     });
   }
 
@@ -3312,7 +4076,7 @@ function renderMensajes(msgs, contenedor, esAdminView){
       </div>`;
     } else if(m.tipo==="imagen"){
       const claseAlign=m.de==="admin"?"admin":"usuario";
-      contenedor.innerHTML+=`<div class="chat-burbuja ${claseAlign}">
+      contenedor.innerHTML+=`<div class="chat-burbuja chat-burbuja-img ${claseAlign}">
         <img class="chat-img" src="${m.src}" alt="imagen" onclick="this.requestFullscreen&&this.requestFullscreen()">
         <div style="display:flex;justify-content:flex-end;margin-top:3px">${metaMensaje(m, esAdminView)}</div>
       </div>`;
@@ -3524,6 +4288,27 @@ function mostrarNotifAdmin(correoUsuario, ico, texto){
   // pero deja preparada la notificación para cuando el usuario abra el chat
 }
 
+/* --- LISTENER TIEMPO REAL: NUEVAS SOLICITUDES --- */
+let _listenerSolicitudes=null;
+let _prevSolicitudesCount=null;
+function attachSolicitudesListener(){
+  const user=obtenerSesion();
+  if(!esAdmin(user)||_listenerSolicitudes) return;
+  _listenerSolicitudes=_db.collection("solicitudes").onSnapshot(snap=>{
+    const todas=snap.docs.map(d=>d.data());
+    _solicitudesCache=todas;
+    const pendientes=todas.filter(s=>s.estado==="pendiente");
+    const num=pendientes.length;
+    // Notificar solo cuando el número aumenta
+    if(_prevSolicitudesCount!==null && num>_prevSolicitudesCount){
+      const diff=num-_prevSolicitudesCount;
+      mostrarNotifPush("🔔",`${diff} neue Gruppenanfrage${diff>1?"n":""}!`,`Insgesamt ${num} ausstehend.`,6000);
+    }
+    _prevSolicitudesCount=num;
+    _pintarSolicitudes();
+  },e=>console.warn("Solicitudes listener:",e));
+}
+
 /* --- ADMIN: RENDERIZAR SOLICITUDES --- */
 function renderAdminSolicitudes(){
   // Recargar solicitudes frescas de Firestore
@@ -3564,11 +4349,22 @@ function _pintarSolicitudes(){
         ${s.estado==="pendiente"?`
           <button class="btn-admin-sm save" onclick="adminAprobarSolicitud('${s.id}')" title="Grupo con 0 favoritos al inicio">✅ Aceptar</button>
           <button class="btn-admin-sm del" onclick="adminRechazarSolicitud('${s.id}')">❌ Ablehnen</button>
-        `:`<span style="font-size:12px;color:var(--sub)">—</span>`}
+        `:`<button class="btn-admin-sm del" onclick="adminBorrarSolicitud('${s.id}')" title="Solicitud löschen" style="font-size:12px;padding:3px 8px">🗑️ Löschen</button>`}
       </td>
     </tr>`).join("");
   const numPendientes=pendientes.length;
-  document.getElementById("tabSolicitudes").textContent=`🕐 Anfragen${numPendientes>0?` (${numPendientes})`:""}`;
+  // Texto del tab (sin badge, lo maneja el span)
+  document.getElementById("tabSolicitudes").childNodes[0].textContent="🕐 Anfragen";
+  const badgeEl=document.getElementById("badgeSolicitudes");
+  if(numPendientes>0){
+    badgeEl.textContent=numPendientes;
+    badgeEl.style.display="inline-block";
+    // Actualizar el título de la pestaña del navegador con contador
+    document.title=`(${numPendientes}) Neue Anfrage${numPendientes>1?"n":""} · Gruppen🇩🇪`;
+  } else {
+    badgeEl.style.display="none";
+    document.title="Gruppen🇩🇪 - WhatsApp & Telegram Gruppen finden";
+  }
 }
 
 function adminAprobarSolicitud(id){
@@ -3588,6 +4384,7 @@ function adminAprobarSolicitud(id){
     miembros:s.miembros||0,
     favoritosBase:0,
     favoritos:0,
+    popularidad: s.favoritosBase||0,
     fechaAprobacion:new Date().getTime()
   };
 
@@ -3595,6 +4392,20 @@ function adminAprobarSolicitud(id){
   gruposExtra.push(nuevoGrupo);
   grupos.push(nuevoGrupo);
   guardarGrupoFirestore(nuevoGrupo);
+
+  // Intentar obtener miembros reales automáticamente
+  obtenerMiembrosReales(s.link).then(real=>{
+    if(real!==null){
+      nuevoGrupo.miembros=real;
+      nuevoGrupo.miembrosActualizadoEn=Date.now();
+      // Actualizar en Firestore
+      _db.collection("grupos_extra").where("nombre","==",nuevoGrupo.nombre).get().then(snap=>{
+        snap.forEach(doc=>doc.ref.update({miembros:real, miembrosActualizadoEn:Date.now()}));
+      }).catch(()=>{});
+      filtrar(); // re-pintar cards con el número real
+      mostrarToast(`Mitglieder aktualisiert: ${real.toLocaleString("de-DE")} 👥`,"📊");
+    }
+  });
 
   // Notificar usuario por chat
   const msgAdmin={de:"admin",texto:`✅ Deine Gruppe *${s.nombre}* wurde genehmigt und ist jetzt auf Gruppen🇩🇪 sichtbar! 🎉 Jetzt haben andere die Möglichkeit, deine Gruppe zu favorisieren und ihr Ranking zu verbessern.`,hora:horaActual()};
@@ -3604,7 +4415,7 @@ function adminAprobarSolicitud(id){
   // Actualizar vista inmediatamente
   filtrar();
   renderAdminSolicitudes();
-  mostrarToast(`Gruppe „${s.nombre}" genehmigt und veröffentlicht mit 0 Favoritos ⭐`,"✅");
+  mostrarToast(`Gruppe „${s.nombre}" genehmigt und veröffentlicht ⭐`,"✅");
 }
 
 function adminRechazarSolicitud(id){
@@ -3621,6 +4432,50 @@ function adminRechazarSolicitud(id){
 
   renderAdminSolicitudes();
   mostrarToast(`Anfrage für „${s.nombre}" abgelehnt`,"❌");
+}
+
+/* ─── ADMIN: ACTUALIZAR MIEMBROS MANUALMENTE ─── */
+async function adminRefreshMiembros(idx, nombre, link){
+  const spanAdmin=document.getElementById(`miembros-admin-${idx}`);
+  if(spanAdmin) spanAdmin.textContent="⏳ …";
+  const real=await actualizarMiembrosGrupo(nombre, link);
+  if(real!==null){
+    if(spanAdmin) spanAdmin.textContent=real.toLocaleString("de-DE");
+    filtrar(); // actualizar card pública
+    mostrarToast(`👥 ${nombre}: ${real.toLocaleString("de-DE")} Mitglieder aktualisiert`,"📊");
+  } else {
+    if(spanAdmin) spanAdmin.textContent="N/A";
+    mostrarToast("Mitgliederzahl konnte nicht abgerufen werden (nur Telegram)","⚠️");
+  }
+}
+
+/* Auto-refresh cada 6 horas para grupos de Telegram activos */
+function iniciarAutoRefreshMiembros(){
+  const INTERVALO=6*60*60*1000; // 6h
+  async function ciclo(){
+    try{
+      const telegramGrupos=grupos.filter(g=>g.link&&g.link.includes("t.me"));
+      for(const g of telegramGrupos){
+        try{ await actualizarMiembrosGrupo(g.nombre, g.link); }
+        catch(e){ console.warn("actualizarMiembrosGrupo skip:",e); }
+        await new Promise(r=>setTimeout(r,2000));
+      }
+      try{ filtrar(); }catch(e){}
+    }catch(e){ console.warn("ciclo miembros error:",e); }
+  }
+  ciclo();
+  setInterval(ciclo, INTERVALO);
+}
+
+function adminBorrarSolicitud(id){
+  if(!confirm("Diese Anfrage wirklich löschen?")) return;
+  const solis=obtenerSolicitudes().filter(x=>x.id!==id);
+  _solicitudesCache=solis;
+  // Borrar también en Firestore
+  _db.collection("solicitudes").doc(id).delete().catch(()=>{});
+  guardarSolicitudes(solis);
+  renderAdminSolicitudes();
+  mostrarToast("Anfrage gelöscht","🗑️");
 }
 
 /* --- ADMIN: CHAT DESDE PANEL ADMIN --- */
@@ -4039,8 +4894,29 @@ function renderNotifHistorial(historial){
         <div style="font-size:11px;color:var(--sub);margin-top:2px">${fecha}</div>
       </div>
       <span style="font-size:11px;color:var(--verde);font-weight:700;flex-shrink:0">↩ Reenviar</span>
+      <button type="button" onclick="event.stopPropagation();eliminarNotifHistorial('${n.id}')"
+        title="Eliminar"
+        style="flex-shrink:0;width:26px;height:26px;border-radius:8px;border:1.5px solid var(--borde);
+               background:#fff;color:#d64545;cursor:pointer;display:flex;align-items:center;justify-content:center;
+               font-size:13px;transition:border-color .18s,background .18s"
+        onmouseenter="event.stopPropagation();this.style.borderColor='#d64545';this.style.background='#fdecec'"
+        onmouseleave="event.stopPropagation();this.style.borderColor='var(--borde)';this.style.background='#fff'">🗑</button>
     </div>`;
   }).join("");
+}
+
+async function eliminarNotifHistorial(id){
+  try{
+    const histSnap = await _db.collection("notificaciones").doc("historial").get();
+    let historial = histSnap.exists ? (histSnap.data().lista || []) : [];
+    historial = historial.filter(n => n.id !== id);
+    await _db.collection("notificaciones").doc("historial").set({lista: historial});
+    renderNotifHistorial(historial);
+    mostrarToast("Notificación eliminada","🗑");
+  }catch(e){
+    mostrarToast("Error al eliminar: "+e.message,"⚠️");
+    console.warn("FB eliminarNotif:",e);
+  }
 }
 
 function mostrarNotificacionGlobal(mensaje){
@@ -4071,6 +4947,8 @@ function cerrarNotifGlobal(){
 
 async function verificarNotificacionGlobal(){
   async function chequear(){
+    // Fix: no hacer requests cuando la pestaña está oculta (móvil en segundo plano)
+    if(document.hidden) return;
     try{
       const snap = await _db.collection("notificaciones").doc("global").get();
       if(!snap.exists) return;
@@ -4084,19 +4962,44 @@ async function verificarNotificacionGlobal(){
     }catch(e){console.warn("FB verificarNotif:",e);}
   }
   chequear(); // comprobación inmediata al cargar
-  setInterval(chequear, 5000); // polling cada 5 segundos
+  // Fix: reducir polling de 5s a 60s — en móvil el polling agresivo causaba reinicios
+  setInterval(chequear, 60000);
 }
 
-/* ===== SPLASH DISMISS ===== */
-/* El splash se quita en initFirebase al terminar de renderizar. Este bloque es solo fallback. */
-(function(){
-  const splash=document.getElementById("splash");
-  setTimeout(()=>{
-    if(splash && !splash.classList.contains("oculto")){
-      splash.classList.add("oculto");
-      setTimeout(()=>{ if(splash.parentNode) splash.parentNode.removeChild(splash); },520);
+/* ===== CONTROL DE VISIBILIDAD EN MÓVIL =====
+   Fix: pausar operaciones costosas cuando la app va a segundo plano
+   Evita reinicios y consumo de batería en iOS/Android */
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden){
+    // App en segundo plano: no hacer nada
+    console.log("[Móvil] App en segundo plano — pausando operaciones");
+  } else {
+    // App vuelve al primer plano: refrescar datos sin recargar
+    console.log("[Móvil] App en primer plano — reanudando");
+    // Solo refrescar si los datos tienen más de 5 minutos
+    if(typeof filtrar === "function"){
+      try{ filtrar(); }catch(e){}
     }
-  },2200);
+  }
+});
+
+/* ===== SPLASH DISMISS FALLBACK ===== */
+/* El splash se quita en initFirebase. Este bloque es fallback de emergencia. */
+(function(){
+  function forzarQuitarSplash(){
+    try{
+      var splash=document.getElementById("splash");
+      if(splash && !splash.classList.contains("oculto")){
+        document.querySelectorAll("body>*:not(#splash)").forEach(function(el){ el.style.visibility=""; });
+        splash.classList.add("oculto");
+        setTimeout(function(){ if(splash && splash.parentNode) splash.parentNode.removeChild(splash); },520);
+      }
+    }catch(e){ console.warn("fallback splash error:",e); }
+  }
+  // Intento a los 3.5s
+  setTimeout(forzarQuitarSplash, 3500);
+  // Intento final a los 6s — garantía absoluta
+  setTimeout(forzarQuitarSplash, 6000);
 })();
 (function inicializarChat(){
   const user=obtenerSesion();
@@ -4110,17 +5013,4 @@ async function verificarNotificacionGlobal(){
       document.getElementById("chatBadge").classList.add("visible");
     }
   }
-})();
-</script>
-<!-- FIREBASE LOADING OVERLAY -->
-<div id="fbLoading" style="display:none!important"></div>
-
-<!-- SPINNER CAMBIO DE IDIOMA -->
-<div id="langSpinner">
-  <div class="spin"></div>
-  <span id="langSpinnerTxt">Sprache wird geladen …</span>
-</div>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-
-</body>
-</html>
+})();</script></html>
