@@ -2935,7 +2935,7 @@ function compartirGrupo(btn,nombre,plataforma){
   const url=`${DOMINIO}?grupo=${encodeURIComponent(nombre)}`;
   const info=paginaDeGrupo(nombre);
   const paginaTxt=info?` (Seite ${info.pagina} von ${info.total})`:"";
-  const texto=`${nombre} · Gruppe auf ${plataforma}${paginaTxt} — gefunden auf ${DOMINIO}`;
+  const texto=`${nombre} · Gruppe auf ${plataforma}${paginaTxt}`;
 
   if(navigator.share){
     navigator.share({title:nombre,text:texto,url}).catch(()=>{});
