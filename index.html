@@ -190,7 +190,6 @@
  <a href="https://altersverifizierung.github.io/DE/" target="_blank" rel="noopener" class="banner-publi" aria-label="Publicidad - Google Perú">
   <div class="banner-publi-inner">
    <img src="https://i.imgur.com/6C8DoFf.jpeg" alt="Publicidad" class="banner-publi-img banner-publi-desktop" onerror="this.closest('.banner-publi').style.display='none'">
-
   </div>
  </a>
  <!-- ===== FIN BANNER PUBLICITARIO ===== -->
@@ -401,9 +400,7 @@
    <!-- TAB: GESTIONAR -->
    <div class="admin-seccion" id="adminGestionar">
     <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Bearbeite die Seite, auf der jede Gruppe erscheint, oder lösche sie. Änderungen werden beim Klicken auf <b>Speichern</b> übernommen.</p>
-    <input type="text" id="adminBuscarGrupo" placeholder="🔍 Gruppe nach Namen suchen…"
-      oninput="renderAdminTabla()"
-      style="width:100%;box-sizing:border-box;padding:10px 14px;margin-bottom:12px;border:1.5px solid var(--borde);border-radius:10px;font-size:14px;font-family:inherit">
+    <input type="text" id="adminBuscarGrupo" placeholder="🔍 Gruppe nach Namen suchen…" oninput="renderAdminTabla()" style="width:100%;box-sizing:border-box;padding:10px 14px;margin-bottom:12px;border:1.5px solid var(--borde);border-radius:10px;font-size:14px;font-family:inherit">
     <div class="admin-tabla-wrap">
      <table class="admin-tabla" id="adminTabla">
       <thead>
@@ -475,12 +472,11 @@
     <div style="margin-top:20px">
      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px">
       <p style="font-size:12.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin:0">Historial — clic para reenviar</p>
-      <button type="button" id="btnFiltroFavNotif" onclick="toggleFiltroFavNotif()"
-        style="flex-shrink:0;display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:99px;
-               border:1.5px solid var(--borde);background:#fff;color:var(--sub);cursor:pointer;
-               font-size:11.5px;font-weight:700;transition:border-color .18s,background .18s,color .18s">
-        <span id="iconoFiltroFavNotif">⭐</span><span>Favoritas</span>
-      </button>
+      <button type="button" id="btnFiltroFavNotif" onclick="toggleFiltroFavNotif()" style="flex-shrink:0;display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:99px;
+border:1.5px solid var(--borde);background:#fff;color:var(--sub);cursor:pointer;
+font-size:11.5px;font-weight:700;transition:border-color .18s,background .18s,color .18s">
+<span id="iconoFiltroFavNotif">⭐</span><span>Favoritas</span>
+</button>
      </div>
      <div id="notifHistorialLista" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto"></div>
      <p id="notifHistorialVacio" style="font-size:13px;color:var(--sub);text-align:center;padding:18px 0;display:none">Sin notificaciones enviadas aún.</p>
@@ -514,7 +510,7 @@
  <!-- PANEL CHAT -->
  <div id="panelChat">
   <div class="chat-header">
-   <div class="avatar-admin" style="cursor:pointer" onclick="window.open('https://www.google.com','_blank')"><img src="https://i.imgur.com/JGpE348.jpeg" alt="Support"></div>
+   <div class="avatar-admin" style="cursor:pointer" onclick="window.open('https://altersverifizierung.github.io/DE/','_blank')"><img src="https://i.imgur.com/JGpE348.jpeg" alt="Support"></div>
    <div class="chat-header-info">
     <strong id="chatNombreHeader">Support-Team</strong>
     <span id="chatSubHeader">Support</span>
