@@ -2970,16 +2970,13 @@ function paginaDeGrupo(nombre){
 function compartirGrupo(btn,nombre,plataforma){
   const DOMINIO="https://gruppende.github.io/Deutschland/";
   const url=`${DOMINIO}?grupo=${generarSlug(nombre)}`;
-  const info=paginaDeGrupo(nombre);
-  const paginaTxt=info?` (Seite ${info.pagina} von ${info.total})`:"";
-  const texto=`${nombre} · Gruppe auf ${plataforma}${paginaTxt}`;
 
   if(navigator.share){
-    navigator.share({title:nombre,text:texto,url}).catch(()=>{});
+    navigator.share({url}).catch(()=>{});
     return;
   }
 
-  navigator.clipboard.writeText(`${texto}\n${url}`).then(()=>{
+  navigator.clipboard.writeText(url).then(()=>{
     const original=btn.innerHTML;
     btn.classList.add("copiado");
     btn.innerHTML='<span class="compartir-ico">✓</span> Link kopiert!';
@@ -2988,7 +2985,7 @@ function compartirGrupo(btn,nombre,plataforma){
       btn.innerHTML=original;
     },1800);
   }).catch(()=>{
-    prompt("Link kopieren:",`${texto}\n${url}`);
+    prompt("Link kopieren:",url);
   });
 }
 
