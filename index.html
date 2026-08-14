@@ -724,7 +724,8 @@ Mit Google fortfahren
   }
 
   /* LOGO */
-  .logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .logo{display:flex;align-items:center;gap:10px;flex-shrink:0;-webkit-tap-highlight-color:transparent;outline:none}
+  .logo:focus,.logo:focus-visible{outline:none}
   .logo .mark{
     width:36px;height:36px;border-radius:10px;background:#ffffff22;
     display:flex;align-items:center;justify-content:center;
@@ -766,8 +767,9 @@ Mit Google fortfahren
     position:relative;overflow:hidden;
     box-shadow:0 2px 10px rgba(0,0,0,.15);
     transition:transform .18s, box-shadow .18s, background .18s;
-    white-space:nowrap;
+    white-space:nowrap;-webkit-tap-highlight-color:transparent;outline:none;
   }
+  .btn-agregar:focus,.btn-agregar:focus-visible{outline:none}
   .btn-agregar svg{flex-shrink:0;color:var(--verde-d)}
   .btn-agregar::after{
     content:"";position:absolute;inset:0;
@@ -792,7 +794,10 @@ Mit Google fortfahren
     font-weight:600;font-size:14px;cursor:pointer;
     text-decoration:none;white-space:nowrap;
     transition:background .18s, border-color .18s, transform .15s;
+    -webkit-tap-highlight-color:transparent;outline:none;
   }
+  #zonaSesion a:focus,#zonaSesion a:focus-visible,
+  #zonaSesion > button:not(.btn-avatar):focus,#zonaSesion > button:not(.btn-avatar):focus-visible{outline:none}
   #zonaSesion a:hover,
   #zonaSesion > button:not(.btn-avatar):hover{
     background:rgba(255,255,255,.18);
@@ -808,8 +813,9 @@ Mit Google fortfahren
     display:flex;align-items:center;justify-content:center;
     cursor:pointer;font-size:15px;font-weight:700;color:#fff;
     transition:border-color .18s, transform .15s;
-    overflow:hidden;
+    overflow:hidden;-webkit-tap-highlight-color:transparent;outline:none;
   }
+  .btn-avatar:focus,.btn-avatar:focus-visible{outline:none}
   .btn-avatar:hover{border-color:#fff;transform:scale(1.07)}
 
   /* lang-btn sin código de texto */
@@ -844,6 +850,8 @@ Mit Google fortfahren
     width:40px;height:40px;flex-shrink:0;transition:.2s;padding:0;
   }
   .btn-hamburger:hover{background:rgba(255,255,255,.28)}
+  .btn-hamburger:focus,.btn-hamburger:focus-visible{outline:none;box-shadow:none}
+  .btn-hamburger{-webkit-tap-highlight-color:transparent}
   .btn-hamburger span{
     display:block;width:18px;height:2px;background:#fff;border-radius:2px;
     transition:transform .28s ease,opacity .2s ease;transform-origin:center;
@@ -981,7 +989,9 @@ Mit Google fortfahren
     padding:12px 20px;border-radius:999px;border:1.5px solid var(--borde);
     background:#f5f7f6;color:var(--texto);font-size:15.5px;font-weight:500;
     cursor:pointer;white-space:nowrap;transition:.18s ease;user-select:none;
+    -webkit-tap-highlight-color:transparent;outline:none;
   }
+  .chip:focus,.chip:focus-visible{outline:none}
   .chip:hover{border-color:var(--verde);background:#edf7f0;transform:translateY(-1px)}
   .chip.activo{background:var(--verde);border-color:var(--verde);color:#fff;box-shadow:var(--sombra)}
   .chip .ico{font-size:18px}
@@ -1011,7 +1021,9 @@ Mit Google fortfahren
     background:#fff;border:1.5px solid var(--borde);border-radius:999px;
     padding:9px 16px;cursor:pointer;font-size:13.5px;font-weight:600;
     color:var(--texto);box-shadow:var(--sombra);transition:.2s;
+    -webkit-tap-highlight-color:transparent;outline:none;
   }
+  .plat-btn:focus,.plat-btn:focus-visible{outline:none}
   .plat-btn:hover{border-color:var(--verde);box-shadow:var(--sombra-hov)}
   .plat-btn .plat-ico{font-size:16px;line-height:1}
   .plat-btn .plat-chevron{font-size:10px;opacity:.6;transition:transform .25s}
@@ -1034,7 +1046,9 @@ Mit Google fortfahren
     display:flex;align-items:center;gap:10px;
     padding:11px 16px;cursor:pointer;font-size:14px;font-weight:500;
     color:var(--texto);transition:background .15s;
+    -webkit-tap-highlight-color:transparent;outline:none;
   }
+  .plat-option:focus,.plat-option:focus-visible{outline:none}
   .plat-option:hover{background:#f0f7f3}
   .plat-option.activa{background:#edf7f0;font-weight:700;color:var(--verde-d)}
   .plat-option .po-ico{font-size:18px;line-height:1;width:20px;text-align:center}
@@ -1116,7 +1130,9 @@ Mit Google fortfahren
     padding:10px 14px;border-radius:10px;color:var(--sub);text-decoration:none;
     font-weight:600;font-size:13.5px;background:#0000000a;border:1.5px solid #00000014;
     cursor:pointer;transition:transform .18s, background .18s, color .18s;
+    -webkit-tap-highlight-color:transparent;outline:none;
   }
+  .btn-compartir:focus,.btn-compartir:focus-visible{outline:none}
   .btn-compartir:hover{background:#1FAF551a;color:var(--verde-d);border-color:#1FAF5540;transform:translateY(-1px)}
   .btn-compartir.copiado{background:#1FAF55;color:#fff;border-color:#1FAF55}
 
@@ -1425,7 +1441,8 @@ Mit Google fortfahren
   .footer-redes a[aria-label="Instagram"]:hover{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)}
   .footer-col h4{color:#fff;font-size:14.5px;margin-bottom:14px;letter-spacing:.3px}
   .footer-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
-  .footer-col a{color:#9aa6a2;text-decoration:none;transition:color .18s}
+  .footer-col a{color:#9aa6a2;text-decoration:none;transition:color .18s;-webkit-tap-highlight-color:transparent;outline:none}
+  .footer-col a:focus,.footer-col a:focus-visible{outline:none}
   .footer-col a:hover{color:#fff}
   .footer-bottom{
     border-top:1px solid #202623;padding:18px 24px;max-width:1100px;margin:0 auto;
@@ -1464,7 +1481,9 @@ Mit Google fortfahren
     background:#fff;color:var(--verde-d);font-weight:700;font-size:14.5px;
     padding:11px 20px;border-radius:10px;border:none;cursor:pointer;white-space:nowrap;
     transition:transform .15s,box-shadow .15s;box-shadow:0 2px 8px rgba(0,0,0,.12);
+    -webkit-tap-highlight-color:transparent;outline:none;
   }
+  .btn-agregar-banner:focus,.btn-agregar-banner:focus-visible{outline:none}
   .btn-agregar-banner:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.18)}
   .btn-agregar-banner .plus{font-size:18px;line-height:1}
   @media (max-width:540px){
@@ -1636,7 +1655,9 @@ Mit Google fortfahren
     background:#fff;color:var(--verde-d);font-weight:700;font-size:14px;
     padding:8px 16px;border-radius:8px;border:none;cursor:pointer;
     transition:transform .15s,box-shadow .15s;
+    -webkit-tap-highlight-color:transparent;outline:none;
   }
+  .btn-agregar:focus,.btn-agregar:focus-visible{outline:none}
   .btn-agregar:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.18)}
   @media (max-width:640px){.btn-agregar{padding:8px 11px;font-size:0}.btn-agregar::before{content:"＋";font-size:18px}}
 
@@ -1776,6 +1797,9 @@ Mit Google fortfahren
     transition:transform .18s,box-shadow .18s;
   }
   #chatFlotante:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(31,175,85,.55)}
+  #chatFlotante:focus,#chatFlotante:focus-visible{outline:none;box-shadow:0 4px 18px rgba(31,175,85,.45)}
+  #chatFlotante:active{outline:none}
+  #chatFlotante{-webkit-tap-highlight-color:transparent}
   #chatFlotante.visible{display:flex}
   #chatBadge{
     position:absolute;top:-3px;right:-3px;background:#ef4444;color:#fff;
