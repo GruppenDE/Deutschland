@@ -1856,6 +1856,21 @@ Mit Google fortfahren
   .admin-tabla-wrap{max-height:340px;overflow-y:auto;border-radius:10px;border:1px solid var(--borde)}
   body.dark .admin-tabla-wrap{border-color:#262e2b}
 
+  /* Panel Administrador — versión escritorio: contenedor más grande y horizontal */
+  @media(min-width:701px){
+    .admin-modal{
+      width:min(1650px,97vw);
+      padding:32px 36px 34px;
+      max-height:88vh;overflow-y:auto;
+    }
+    .admin-tabs{grid-template-columns:repeat(6,1fr);gap:10px}
+    .admin-form-grid{grid-template-columns:1fr 1fr 1fr}
+    .admin-tabla-wrap{max-height:480px;overflow-x:visible}
+    .admin-tabla{table-layout:auto}
+    .admin-tabla th,.admin-tabla td{padding:9px 8px}
+    .paginas-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+  }
+
   /* Seiten verwalten — grilla de páginas */
   .paginas-grid{
     display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
@@ -3543,9 +3558,35 @@ function renderAdminTablaPagina(){
     <tr>
       <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.nombre}">${banderaPais(g.pais)} ${g.nombre}</td>
       <td>${g.categoria}</td>
-      <td>${g.plataforma}</td>
-      <td>${g.miembros>0?g.miembros.toLocaleString("de-DE"):"—"}</td>
-      <td>${totalFavoritos(g)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px">
+          <select id="plp_${i}" style="padding:4px 6px;border-radius:6px;border:1.5px solid var(--borde);font-size:12px">
+            <option value="WhatsApp" ${g.plataforma==="WhatsApp"?"selected":""}>WhatsApp</option>
+            <option value="Telegram" ${g.plataforma==="Telegram"?"selected":""}>Telegram</option>
+            <option value="Signal" ${g.plataforma==="Signal"?"selected":""}>Signal</option>
+          </select>
+          <button class="btn-admin-sm save" style="padding:4px 8px;font-size:12px"
+            onclick="adminGuardarPlataformaPagina(${i},'${g.nombre.replace(/'/g,"\\'")}')" title="Plattform speichern">💾</button>
+        </div>
+      </td>
+      <td style="min-width:130px">
+        <div style="display:flex;align-items:center;gap:4px">
+          <input type="number" min="0" value="${g.miembros||0}"
+            id="mbp_${i}" style="width:72px;padding:4px 6px;border:1.5px solid #d1fae5;border-radius:8px;font-size:13px;font-weight:600;color:#065f46;text-align:center"
+            placeholder="0">
+          <button class="btn-admin-sm save" style="padding:4px 8px;font-size:12px"
+            onclick="adminGuardarMiembrosPagina(${i},'${g.nombre.replace(/'/g,"\\'")}')">💾</button>
+        </div>
+      </td>
+      <td style="min-width:120px">
+        <div style="display:flex;align-items:center;gap:4px">
+          <input type="number" min="0" value="${totalFavoritos(g)}"
+            id="popp_${i}" style="width:72px;padding:4px 6px;border:1.5px solid #fde68a;border-radius:8px;font-size:13px;font-weight:700;color:#92400e;text-align:center"
+            placeholder="0">
+          <button class="btn-admin-sm save" style="padding:4px 8px;font-size:12px;background:#fef3c7;color:#92400e;border:1px solid #fde68a"
+            onclick="adminGuardarPopularidadPagina(${i},'${g.nombre.replace(/'/g,"\\'")}')">⭐</button>
+        </div>
+      </td>
       <td>
         <input type="number" min="1" value="${pf[g.nombre]||''}" placeholder="Auto"
           id="pfp_${i}" style="width:60px">
@@ -3579,6 +3620,58 @@ function adminGuardarPaginaDesdeDetalle(i,nombre){
 function adminEliminarDesdeDetalle(i,nombre){
   adminEliminar(i,nombre);
   renderAdminPaginas();
+}
+
+function adminGuardarPlataformaPagina(i,nombre){
+  const sel=document.getElementById(`plp_${i}`);
+  if(!sel) return;
+  const val=sel.value;
+  [grupos, gruposExtra].forEach(arr=>{
+    const g=arr.find(x=>x.nombre===nombre);
+    if(g) g.plataforma=val;
+  });
+  _db.collection("grupos_extra").where("nombre","==",nombre).get().then(snap=>{
+    snap.forEach(doc=>doc.ref.update({plataforma:val}).catch(console.warn));
+  }).catch(()=>{});
+  mostrarToast(`🔄 „${nombre}": Plattform auf ${val} gesetzt`,"🔄");
+  filtrar();
+  renderAdminTablaPagina();
+}
+
+function adminGuardarMiembrosPagina(i,nombre){
+  const input=document.getElementById(`mbp_${i}`);
+  if(!input) return;
+  const val=Math.max(0, parseInt(input.value)||0);
+  [grupos, gruposExtra].forEach(arr=>{
+    const g=arr.find(x=>x.nombre===nombre);
+    if(g){ g.miembros=val; g.miembrosActualizadoEn=Date.now(); }
+  });
+  _db.collection("grupos_extra").where("nombre","==",nombre).get().then(snap=>{
+    snap.forEach(doc=>doc.ref.update({miembros:val, miembrosActualizadoEn:Date.now()}));
+  }).catch(()=>{});
+  filtrar();
+  mostrarToast(`👥 „${nombre}": ${val.toLocaleString("de-DE")} Mitglieder gespeichert`,"✅");
+}
+
+function adminGuardarPopularidadPagina(i,nombre){
+  const input=document.getElementById(`popp_${i}`);
+  if(!input) return;
+  const val=Math.max(0, parseInt(input.value)||0);
+  [grupos, gruposExtra].forEach(arr=>{
+    const g=arr.find(x=>x.nombre===nombre);
+    if(g){ g.popularidad=val; g.favoritosBase=val; }
+  });
+  const popKey=nombre.replace(/[.#$[\]/]/g,"_");
+  _db.collection("popularidad").doc(popKey).set({
+    nombre,
+    popularidad: val
+  }).catch(e=>console.warn("FB popularidad:",e));
+  _db.collection("grupos_extra").where("nombre","==",nombre).get().then(snap=>{
+    snap.forEach(doc=>doc.ref.update({ popularidad:val, favoritosBase:val }));
+  }).catch(()=>{});
+  input.value=val;
+  filtrar();
+  mostrarToast(`⭐ „${nombre}": Popularität auf ${val.toLocaleString("de-DE")} gesetzt`,"⭐");
 }
 
 function poblarSelectAdmin(){
