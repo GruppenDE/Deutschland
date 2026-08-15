@@ -19,15 +19,15 @@
  <meta property="og:site_name" content="Gruppen🇩🇪">
  <meta property="og:title" content="Gruppen🇩🇪 – Verzeichnis für WhatsApp- und Telegram-Communitys">
  <meta property="og:description" content="Das Verzeichnis für WhatsApp- und Telegram-Communitys – finde deine Community.">
- <meta property="og:image" content="https://gruppende.github.io/Deutschland/icon-192x192.png">
+ <meta property="og:image" content="https://gruppende.de/icon-192x192.png">
  <meta property="og:image:width" content="192">
  <meta property="og:image:height" content="192">
- <meta property="og:url" content="https://gruppende.github.io/Deutschland/">
+ <meta property="og:url" content="https://gruppende.de/">
  <!-- Twitter Card -->
  <meta name="twitter:card" content="summary">
  <meta name="twitter:title" content="Gruppen🇩🇪 – Verzeichnis für WhatsApp- und Telegram-Communitys">
  <meta name="twitter:description" content="Das Verzeichnis für WhatsApp- und Telegram-Communitys – finde deine Community.">
- <meta name="twitter:image" content="https://gruppende.github.io/Deutschland/icon-192x192.png">
+ <meta name="twitter:image" content="https://gruppende.de/icon-192x192.png">
  <!-- ═══ /Open Graph ═══ -->
  <!-- Apple Touch Icons (iOS) -->
  <link rel="apple-touch-icon" sizes="152x152" href="icon-152x152.png">
@@ -4675,7 +4675,7 @@ function adminAprobarSolicitud(id){
   agregarMensajeChat(s.usuarioCorreo, msgAdmin);
 
   // Enviar automáticamente el enlace de compartir de su grupo (enlace propio del sitio, no el de WhatsApp/Telegram)
-  const DOMINIO_COMPARTIR="https://gruppende.github.io/Deutschland/";
+  const DOMINIO_COMPARTIR="https://gruppende.de/";
   const urlCompartir=`${DOMINIO_COMPARTIR}?grupo=${generarSlug(s.nombre)}`;
   const msgEnlace={de:"admin",texto:`🔗 Hier ist dein Teilen-Link, um deine Gruppe zu bewerben:\n${urlCompartir}`,hora:horaActual()};
   agregarMensajeChat(s.usuarioCorreo, msgEnlace);
