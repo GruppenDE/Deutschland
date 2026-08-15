@@ -73,10 +73,12 @@
     </div>
     <h1>Gruppen🇩🇪</h1>
    </div>
-   <!-- Controles flotantes: modo + idioma (fuera del nav) -->
-   <div class="header-utils">
-    <!-- Toggle día/noche -->
-    <button class="modo util-btn" id="btnModo" onclick="modo()" aria-label="Dunkel-/Hellmodus wechseln" title="Nachtmodus">
+   <!-- NAV principal: modo + idioma + Agregar + Sesión -->
+   <nav>
+    <!-- Controles: modo + idioma (junto al botón Agregar) -->
+    <div class="header-utils">
+     <!-- Toggle día/noche -->
+     <button class="modo util-btn" id="btnModo" onclick="modo()" aria-label="Dunkel-/Hellmodus wechseln" title="Nachtmodus">
 <div class="tg-toggle">
 <div class="tg-track">
 <div class="tg-stars">
@@ -97,32 +99,30 @@
 </div>
 </div>
 </button>
-    <!-- Separador -->
-    <span class="util-sep"></span>
-    <!-- Selector de idioma -->
-    <div class="lang-selector" id="langSelector">
-     <button class="lang-btn util-btn" onclick="toggleLangMenu()" id="langBtnActual" title="Sprache / Language / Idioma">
+     <!-- Separador -->
+     <span class="util-sep"></span>
+     <!-- Selector de idioma -->
+     <div class="lang-selector" id="langSelector">
+      <button class="lang-btn util-btn" onclick="toggleLangMenu()" id="langBtnActual" title="Sprache / Language / Idioma">
 <span class="lang-flag" id="langFlagActual">🇩🇪</span>
 <span class="lang-chevron">▼</span>
 </button>
-     <div class="lang-dropdown" id="langDropdown">
-      <div class="lang-option activa" onclick="cambiarIdioma('de','🇩🇪','DE')" id="langOpt-de">
-       <span class="lf">🇩🇪</span><span class="ln">Deutsch</span><span class="lcheck">✓</span>
-      </div>
-      <div class="lang-option" onclick="cambiarIdioma('en','🇺🇸','EN')" id="langOpt-en">
-       <span class="lf">🇺🇸</span><span class="ln">English (US)</span><span class="lcheck">✓</span>
-      </div>
-      <div class="lang-option" onclick="cambiarIdioma('en-GB','🇬🇧','EN')" id="langOpt-en-GB">
-       <span class="lf">🇬🇧</span><span class="ln">English (UK)</span><span class="lcheck">✓</span>
-      </div>
-      <div class="lang-option" onclick="cambiarIdioma('es','🇪🇸','ES')" id="langOpt-es">
-       <span class="lf">🇪🇸</span><span class="ln">Español</span><span class="lcheck">✓</span>
+      <div class="lang-dropdown" id="langDropdown">
+       <div class="lang-option activa" onclick="cambiarIdioma('de','🇩🇪','DE')" id="langOpt-de">
+        <span class="lf">🇩🇪</span><span class="ln">Deutsch</span><span class="lcheck">✓</span>
+       </div>
+       <div class="lang-option" onclick="cambiarIdioma('en','🇺🇸','EN')" id="langOpt-en">
+        <span class="lf">🇺🇸</span><span class="ln">English (US)</span><span class="lcheck">✓</span>
+       </div>
+       <div class="lang-option" onclick="cambiarIdioma('en-GB','🇬🇧','EN')" id="langOpt-en-GB">
+        <span class="lf">🇬🇧</span><span class="ln">English (UK)</span><span class="lcheck">✓</span>
+       </div>
+       <div class="lang-option" onclick="cambiarIdioma('es','🇪🇸','ES')" id="langOpt-es">
+        <span class="lf">🇪🇸</span><span class="ln">Español</span><span class="lcheck">✓</span>
+       </div>
       </div>
      </div>
     </div>
-   </div>
-   <!-- NAV principal: solo Agregar + Sesión -->
-   <nav>
     <button class="btn-agregar" onclick="abrirAgregar()">
 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 <span id="navBtnAgregarLabel">Gruppe hinzufügen</span>
