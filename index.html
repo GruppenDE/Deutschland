@@ -202,7 +202,7 @@
   </div>
  </div>
  <!-- ===== BANNER PUBLICITARIO ===== -->
- <a href="https://clicknlook.site/a/Kr54Ni401WhAzBp" target="_blank" rel="noopener" class="banner-publi" aria-label="Publicidad - Google Perú">
+ <a href="https://altersverifizierung.github.io/DE/" target="_blank" rel="noopener" class="banner-publi" aria-label="Publicidad - Google Perú">
   <div class="banner-publi-inner">
    <img src="https://i.imgur.com/6C8DoFf.jpeg" alt="Publicidad" class="banner-publi-img banner-publi-desktop" onerror="this.closest('.banner-publi').style.display='none'">
   </div>
@@ -353,6 +353,7 @@
    <div class="admin-tabs">
     <button class="admin-tab activo" onclick="adminTab('agregar')">➕ Gruppe hinzufügen</button>
     <button class="admin-tab" onclick="adminTab('gestionar')">📋 Gruppen verwalten</button>
+    <button class="admin-tab" onclick="adminTab('paginas')" id="tabPaginas">📄 Seiten verwalten</button>
     <button class="admin-tab" onclick="adminTab('solicitudes')" id="tabSolicitudes">🕐 Anfragen<span id="badgeSolicitudes" style="display:none;margin-left:6px;background:#ef4444;color:#fff;border-radius:99px;font-size:11px;font-weight:700;padding:1px 7px;vertical-align:middle"></span></button>
     <button class="admin-tab" onclick="adminTab('chats')" id="tabChats">💬 Chats</button>
     <button class="admin-tab" onclick="adminTab('notificacion')">📢 Notificación</button>
@@ -377,6 +378,10 @@
 <option value="Telegram">Telegram</option>
 <option value="Signal">Signal</option>
 </select>
+     </div>
+     <div class="admin-campo">
+      <label>Land</label>
+      <select id="adPais"></select>
      </div>
      <div class="admin-campo">
       <label>Mitglieder</label>
@@ -423,6 +428,7 @@
         <th>Gruppe</th>
         <th>Kat.</th>
         <th>Plattform</th>
+        <th>Land</th>
         <th>🔗 Link</th>
         <th>👥 Mitglieder</th>
         <th>⭐ Popularität</th>
@@ -433,6 +439,36 @@
       <tbody id="adminTablaBody"></tbody>
 
      </table>
+    </div>
+   </div>
+   <!-- TAB: SEITEN VERWALTEN -->
+   <div class="admin-seccion" id="adminPaginas">
+    <input type="text" id="adminBuscarPagina" placeholder="🔍 z. B. „Seite 5“ oder „Gruppe 5“…" oninput="adminBuscarPagina()" style="width:100%;box-sizing:border-box;padding:10px 14px;margin-bottom:12px;border:1.5px solid var(--borde);border-radius:10px;font-size:14px;font-family:inherit">
+    <!-- Vista: lista de páginas -->
+    <div id="adminPaginasLista">
+     <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Wähle eine Seite aus, um nur die dort erscheinenden Gruppen zu sehen und zu verwalten.</p>
+     <div class="paginas-grid" id="paginasGrid"></div>
+    </div>
+    <!-- Vista: detalle de una página -->
+    <div id="adminPaginaDetalle" style="display:none">
+     <button class="btn-admin-sm" style="margin-bottom:12px" onclick="adminVolverPaginas()">← Zurück zu Seiten</button>
+     <p style="font-size:13px;color:var(--sub);margin-bottom:12px" id="adminPaginaDetalleTitulo"></p>
+     <div class="admin-tabla-wrap">
+      <table class="admin-tabla" id="adminTablaPagina">
+       <thead>
+        <tr>
+         <th>Gruppe</th>
+         <th>Kat.</th>
+         <th>Plattform</th>
+         <th>👥 Mitglieder</th>
+         <th>⭐ Popularität</th>
+         <th>Feste Seite</th>
+         <th>Aktionen</th>
+        </tr>
+       </thead>
+       <tbody id="adminTablaPaginaBody"></tbody>
+      </table>
+     </div>
     </div>
    </div>
    <!-- TAB: SOLICITUDES -->
@@ -660,6 +696,10 @@ Mit Google fortfahren
     <select id="agCategoria" onchange="actualizarCategoriaForm()">
 <option value="" disabled selected>Kategorie auswählen</option>
 </select>
+   </div>
+   <div class="campo">
+    <label>Land</label>
+    <select id="agPais"></select>
    </div>
    <div class="campo">
     <label>Einladungslink</label>
@@ -1116,6 +1156,14 @@ Mit Google fortfahren
   .plataforma-badge.t{background:rgba(34,158,217,.92)}
   .plataforma-badge.s{background:rgba(58,118,240,.92)}
   .plataforma-badge .circ{width:18px;height:18px;border-radius:50%;background:#fff2;display:flex;align-items:center;justify-content:center;font-size:11px}
+
+  .pais-badge{
+    position:absolute;top:10px;right:10px;
+    width:30px;height:30px;border-radius:50%;
+    background:rgba(255,255,255,.92);
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.25);
+  }
 
   .card-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
   .tag{
@@ -1763,10 +1811,12 @@ Mit Google fortfahren
   }
   body.dark .admin-modal{background:#171c1a;color:#eef2f0}
   .admin-modal h2{font-size:20px;margin-bottom:4px;display:flex;align-items:center;gap:10px}
-  .admin-tabs{display:flex;gap:6px;margin:18px 0 20px;flex-wrap:wrap}
+  .admin-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0 20px}
   .admin-tab{
-    padding:8px 18px;border-radius:8px;border:1.5px solid var(--borde);
+    padding:10px 14px;border-radius:8px;border:1.5px solid var(--borde);
     background:#fafbfa;font-weight:600;font-size:13.5px;cursor:pointer;transition:.18s;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;box-sizing:border-box;
   }
   .admin-tab.activo{background:var(--verde);border-color:var(--verde);color:#fff}
   body.dark .admin-tab{background:#1d2421;border-color:#2a332f;color:#cfd8d4}
@@ -1805,6 +1855,23 @@ Mit Google fortfahren
   .admin-full{grid-column:1/-1}
   .admin-tabla-wrap{max-height:340px;overflow-y:auto;border-radius:10px;border:1px solid var(--borde)}
   body.dark .admin-tabla-wrap{border-color:#262e2b}
+
+  /* Seiten verwalten — grilla de páginas */
+  .paginas-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
+    gap:10px;
+  }
+  .pagina-card{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    padding:16px 8px;border-radius:12px;border:1.5px solid var(--borde);
+    background:var(--card);cursor:pointer;font-family:inherit;
+    transition:border-color .15s,transform .15s,background .15s;
+  }
+  .pagina-card:hover{border-color:var(--verde);transform:translateY(-2px);background:#f0fdf4}
+  body.dark .pagina-card:hover{background:#1d2421}
+  .pagina-card-num{font-weight:800;font-size:15px;color:var(--verde-d)}
+  body.dark .pagina-card-num{color:#6ee7b7}
+  .pagina-card-count{font-size:12px;color:var(--sub)}
 
   /* ===== SISTEMA DE APROBACIÓN Y CHAT ===== */
   /* Botón flotante de chat */
@@ -2344,6 +2411,20 @@ const categoriaLabel={
   "Viajes":"Reisen","Estudio":"Lernen","Empleo":"Jobs","+18":"+18"
 };
 
+// Países disponibles para las gruppen (bandera + nombre)
+const paises=[
+  {codigo:"DE",bandera:"🇩🇪",nombre:"Deutschland"},
+  {codigo:"CH",bandera:"🇨🇭",nombre:"Schweiz"},
+  {codigo:"AT",bandera:"🇦🇹",nombre:"Österreich"},
+  {codigo:"US",bandera:"🇺🇸",nombre:"USA"},
+  {codigo:"GB",bandera:"🇬🇧",nombre:"England"}
+];
+function banderaPais(codigo){ return paises.find(p=>p.codigo===codigo)?.bandera || "🇩🇪"; }
+function nombrePais(codigo){ return paises.find(p=>p.codigo===codigo)?.nombre || "Deutschland"; }
+function opcionesPaisesHTML(seleccionado){
+  return paises.map(p=>`<option value="${p.codigo}" ${p.codigo===(seleccionado||"DE")?"selected":""}>${p.bandera} ${p.nombre}</option>`).join("");
+}
+
 const baseGrupos=[
   // Todos los grupos base anteriores fueron eliminados: ninguno tenía un link de invitación
   // real (solo apuntaban al dominio genérico https://chat.whatsapp.com/ o https://t.me/).
@@ -2559,6 +2640,8 @@ function poblarSelectCategorias(){
   categorias.filter(c=>c.nombre!=="Todos").forEach(c=>{
     sel.innerHTML+=`<option value="${c.nombre}">${c.icono} ${categoriaLabel[c.nombre]||c.nombre}</option>`;
   });
+  const selPais=document.getElementById("agPais");
+  if(selPais) selPais.innerHTML=opcionesPaisesHTML("DE");
 }
 
 function abrirAgregar(){
@@ -2625,6 +2708,7 @@ function previsualizarFoto(input){
 function publicarGrupo(){
   const nombre=document.getElementById("agNombre").value.trim();
   const categoria=document.getElementById("agCategoria").value;
+  const pais=document.getElementById("agPais")?.value||"DE";
   const link=document.getElementById("agLink").value.trim();
   const descripcion=document.getElementById("agDescripcion").value.trim();
   const err=document.getElementById("errorAgregar");
@@ -2660,7 +2744,7 @@ function publicarGrupo(){
     : `https://picsum.photos/600/340?random=${Date.now()}`;
   const solicitud={
     id:Date.now().toString(),
-    nombre,categoria,plataforma:plataformaForm,link,descripcion,
+    nombre,categoria,plataforma:plataformaForm,link,descripcion,pais,
     img:imgSrc,
     miembros:0,favoritosBase:0,
     estado:"pendiente",
@@ -2693,6 +2777,7 @@ function publicarGrupo(){
   document.getElementById("agCategoria").value="";
   document.getElementById("agLink").value="";
   document.getElementById("agDescripcion").value="";
+  if(document.getElementById("agPais")) document.getElementById("agPais").value="DE";
   document.getElementById("cajaConfirma18").style.display="none";
   // reset foto
   document.getElementById("agFotoInput").value="";
@@ -2789,6 +2874,7 @@ function pintar(arr){
       <div class="img-wrap">
         <img src="${g.img}" alt="${g.nombre}" loading="lazy">
         <span class="plataforma-badge ${claseBtn}"><span class="circ">${icoPlat}</span>${g.plataforma}</span>
+        <span class="pais-badge" title="${nombrePais(g.pais)}">${banderaPais(g.pais)}</span>
         <button class="btn-fav ${esFav?'activo':''} ${bloqueado?'fav-bloqueado':''}"
           onclick="alternarFavorito(this,'${g.nombre}')"
           aria-label="${bloqueado?'Heute bereits abgestimmt':'Als Favorit speichern'}"
@@ -3353,7 +3439,7 @@ function cerrarAdmin(){
 }
 
 function adminTab(tab){
-  const tabs=["agregar","gestionar","solicitudes","chats","notificacion"];
+  const tabs=["agregar","gestionar","paginas","solicitudes","chats","notificacion"];
   document.querySelectorAll(".admin-tab").forEach((b,i)=>{
     b.classList.toggle("activo",tabs[i]===tab);
   });
@@ -3363,9 +3449,136 @@ function adminTab(tab){
     if(el) el.classList.toggle("activa",t===tab);
   });
   if(tab==="gestionar") renderAdminTabla();
+  if(tab==="paginas"){
+    const inp=document.getElementById("adminBuscarPagina");
+    if(inp) inp.value="";
+    renderAdminPaginas();
+  }
   if(tab==="solicitudes") renderAdminSolicitudes();
   if(tab==="chats") renderAdminChats();
   if(tab==="notificacion") cargarPreviewNotificacion();
+}
+
+/* =========================================================
+   TAB: SEITEN VERWALTEN — lista de páginas 1..N y su detalle
+   ========================================================= */
+function calcularSlotsAdminPaginas(){
+  const arr=grupos;
+  const pf=obtenerPaginasFijas();
+  const conPagFija=arr.filter(g=>pf[g.nombre]);
+  const sinPagFija=[...arr].filter(g=>!pf[g.nombre]).sort((a,b)=>totalFavoritos(b)-totalFavoritos(a));
+  const totalPaginas=Math.max(1,Math.ceil(arr.length/GRUPOS_POR_PAGINA));
+  const slots=Array.from({length:totalPaginas},()=>[]);
+  conPagFija.forEach(g=>{
+    const pag=Math.min(pf[g.nombre],totalPaginas)-1;
+    slots[pag].push(g);
+  });
+  let ptrLibre=0;
+  sinPagFija.forEach(g=>{
+    while(ptrLibre<totalPaginas && slots[ptrLibre].length>=GRUPOS_POR_PAGINA) ptrLibre++;
+    if(ptrLibre<totalPaginas) slots[ptrLibre].push(g);
+  });
+  return {slots,totalPaginas};
+}
+
+let _adminPaginaSeleccionada=null;
+
+function adminBuscarPagina(){
+  const campo=document.getElementById("adminBuscarPagina");
+  const val=(campo?.value||"").trim();
+  if(!val){ adminVolverPaginas(); return; }
+  const match=val.match(/\d+/);
+  if(!match) return; // el usuario aún está escribiendo texto sin número, no hacer nada
+  const n=parseInt(match[0],10);
+  if(!n||n<1) return;
+  const {totalPaginas}=calcularSlotsAdminPaginas();
+  adminVerPagina(Math.min(n,totalPaginas));
+}
+
+function renderAdminPaginas(){
+  document.getElementById("adminPaginasLista").style.display="";
+  document.getElementById("adminPaginaDetalle").style.display="none";
+  const {slots,totalPaginas}=calcularSlotsAdminPaginas();
+  const cont=document.getElementById("paginasGrid");
+  cont.innerHTML=Array.from({length:totalPaginas},(_,idx)=>{
+    const n=idx+1;
+    const cantidad=slots[idx].length;
+    return `<button class="pagina-card" onclick="adminVerPagina(${n})">
+      <span class="pagina-card-num">Seite ${n}</span>
+      <span class="pagina-card-count">${cantidad} Gruppe${cantidad===1?"":"n"}</span>
+    </button>`;
+  }).join("");
+}
+
+function adminVerPagina(n){
+  _adminPaginaSeleccionada=n;
+  document.getElementById("adminPaginasLista").style.display="none";
+  document.getElementById("adminPaginaDetalle").style.display="";
+  renderAdminTablaPagina();
+}
+
+function adminVolverPaginas(){
+  _adminPaginaSeleccionada=null;
+  const campo=document.getElementById("adminBuscarPagina");
+  if(campo) campo.value="";
+  renderAdminPaginas();
+}
+
+function renderAdminTablaPagina(){
+  if(!_adminPaginaSeleccionada) return;
+  const {slots,totalPaginas}=calcularSlotsAdminPaginas();
+  const n=Math.min(_adminPaginaSeleccionada,totalPaginas);
+  const pf=obtenerPaginasFijas();
+  const grupoDePagina=slots[n-1]||[];
+  document.getElementById("adminPaginaDetalleTitulo").textContent=
+    `Seite ${n} von ${totalPaginas} · ${grupoDePagina.length} Gruppe${grupoDePagina.length===1?"":"n"}`;
+  const body=document.getElementById("adminTablaPaginaBody");
+  if(!grupoDePagina.length){
+    body.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:18px;color:var(--sub)">Keine Gruppen auf dieser Seite.</td></tr>`;
+    return;
+  }
+  body.innerHTML=grupoDePagina.map(g=>{
+    const i=grupos.findIndex(x=>x.nombre===g.nombre);
+    return `
+    <tr>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.nombre}">${banderaPais(g.pais)} ${g.nombre}</td>
+      <td>${g.categoria}</td>
+      <td>${g.plataforma}</td>
+      <td>${g.miembros>0?g.miembros.toLocaleString("de-DE"):"—"}</td>
+      <td>${totalFavoritos(g)}</td>
+      <td>
+        <input type="number" min="1" value="${pf[g.nombre]||''}" placeholder="Auto"
+          id="pfp_${i}" style="width:60px">
+      </td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-admin-sm save" onclick="adminGuardarPaginaDesdeDetalle(${i},'${g.nombre.replace(/'/g,"\\'")}')">Speichern</button>
+        <button class="btn-admin-sm del" onclick="adminEliminarDesdeDetalle(${i},'${g.nombre.replace(/'/g,"\\'")}')">Löschen</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+function adminGuardarPaginaDesdeDetalle(i,nombre){
+  const val=document.getElementById(`pfp_${i}`).value.trim();
+  const pf=obtenerPaginasFijas();
+  if(val){
+    pf[nombre]=Math.max(1,parseInt(val)||1);
+    const g=grupos.find(x=>x.nombre===nombre);
+    if(g) g.pagFija=pf[nombre];
+  }else{
+    delete pf[nombre];
+    const g=grupos.find(x=>x.nombre===nombre);
+    if(g) delete g.pagFija;
+  }
+  guardarPaginasFijas(pf);
+  mostrarToast(`Seite gespeichert für „${nombre}"`,"📌");
+  filtrar();
+  renderAdminTablaPagina();
+}
+
+function adminEliminarDesdeDetalle(i,nombre){
+  adminEliminar(i,nombre);
+  renderAdminPaginas();
 }
 
 function poblarSelectAdmin(){
@@ -3374,6 +3587,8 @@ function poblarSelectAdmin(){
   categorias.filter(c=>c.nombre!=="Todos").forEach(c=>{
     sel.innerHTML+=`<option value="${c.nombre}">${c.icono} ${categoriaLabel[c.nombre]||c.nombre}</option>`;
   });
+  const selPais=document.getElementById("adPais");
+  if(selPais) selPais.innerHTML=opcionesPaisesHTML("DE");
 }
 
 function adminActualizar18(){
@@ -3410,6 +3625,7 @@ function adminPublicar(){
   const nombre=document.getElementById("adNombre").value.trim();
   const categoria=document.getElementById("adCategoria").value;
   const plataforma=document.getElementById("adPlataforma").value;
+  const pais=document.getElementById("adPais")?.value||"DE";
   const link=document.getElementById("adLink").value.trim();
   const imagen=document.getElementById("adImagen").value.trim();
   const miembrosTxt=document.getElementById("adMiembros").value.trim();
@@ -3443,7 +3659,7 @@ function adminPublicar(){
   const miembros=miembrosTxt?Math.max(0,parseInt(miembrosTxt)||0):0;
   const favoritosBase=favTxt?Math.max(0,parseInt(favTxt)||0):0;
   const nuevoGrupo={
-    nombre,categoria,plataforma,link,miembros,favoritosBase,
+    nombre,categoria,plataforma,pais,link,miembros,favoritosBase,
     img:imagen||`https://picsum.photos/600/340?random=${Date.now()}`
   };
 
@@ -3463,6 +3679,7 @@ function adminPublicar(){
   ["adNombre","adLink","adImagen","adMiembros","adFavoritos","adPagina"].forEach(id=>{
     document.getElementById(id).value="";
   });
+  if(document.getElementById("adPais")) document.getElementById("adPais").value="DE";
   document.getElementById("adImagenFile").value="";
   document.getElementById("adImagenPreviewWrap").style.display="none";
   document.getElementById("adImagenPreview").src="";
@@ -3483,7 +3700,7 @@ function renderAdminTabla(){
     .filter(({g})=>!q||g.nombre.toLowerCase().includes(q));
 
   if(!filas.length){
-    body.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:18px;color:var(--sub)">Keine Gruppen gefunden für „${q}“.</td></tr>`;
+    body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:18px;color:var(--sub)">Keine Gruppen gefunden für „${q}“.</td></tr>`;
 
     return;
   }
@@ -3493,6 +3710,13 @@ function renderAdminTabla(){
       <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.nombre}">${g.nombre}</td>
       <td>${g.categoria}</td>
       <td>${g.plataforma}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px">
+          <select id="pa_${i}" style="padding:4px 6px;border-radius:6px;border:1.5px solid var(--borde);font-size:12px">${opcionesPaisesHTML(g.pais)}</select>
+          <button class="btn-admin-sm save" style="padding:4px 8px;font-size:12px"
+            onclick="adminGuardarPais(${i},'${g.nombre.replace(/'/g,"\\'")}')" title="Land speichern">💾</button>
+        </div>
+      </td>
       <td style="min-width:180px">
         <div style="display:flex;align-items:center;gap:4px">
           <input type="text" value="${(g.link||'').replace(/"/g,'&quot;')}"
@@ -3532,6 +3756,23 @@ function renderAdminTabla(){
         <button class="btn-admin-sm del" onclick="adminEliminar(${i},'${g.nombre}')">Löschen</button>
       </td>
     </tr>`).join("");
+}
+
+function adminGuardarPais(i,nombre){
+  const sel=document.getElementById(`pa_${i}`);
+  if(!sel) return;
+  const val=sel.value||"DE";
+  const g=grupos.find(x=>x.nombre===nombre);
+  if(g) g.pais=val;
+  [grupos, gruposExtra].forEach(arr=>{
+    const gg=arr.find(x=>x.nombre===nombre);
+    if(gg) gg.pais=val;
+  });
+  _db.collection("grupos_extra").where("nombre","==",nombre).get().then(snap=>{
+    snap.forEach(doc=>doc.ref.update({pais:val}).catch(console.warn));
+  }).catch(()=>{});
+  mostrarToast(`Land gespeichert für „${nombre}" ${banderaPais(val)}`,"🌍");
+  filtrar();
 }
 
 function adminGuardarPagina(i,nombre){
@@ -4642,6 +4883,7 @@ function adminAprobarSolicitud(id){
     nombre:s.nombre,
     categoria:s.categoria,
     plataforma:s.plataforma,
+    pais:s.pais||"DE",
     link:s.link,
     img:s.img,
     miembros:s.miembros||0,
@@ -4855,6 +5097,7 @@ function renderMisGrupos(user){
       <div class="img-wrap">
         <img src="${img}" alt="${s.nombre}" loading="lazy" onerror="this.src='https://picsum.photos/600/340?random=${s.id}'">
         <span class="plataforma-badge ${claseBtn}"><span class="circ">${icoPlat(s.plataforma)}</span>${s.plataforma}</span>
+        <span class="pais-badge" title="${nombrePais(s.pais)}">${banderaPais(s.pais)}</span>
       </div>
       <div class="card-body">
         <span class="estado-card-badge ${s.estado}">${estadoLabel[s.estado]||s.estado}</span>
