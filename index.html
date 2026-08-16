@@ -347,8 +347,12 @@
  <!-- SECCIÓN PERFIL PÚBLICO DE USUARIO -->
  <div id="panelPerfilUsuario">
   <div class="mis-grupos-seccion">
-   <div class="perfil-cerrar-row">
+   <div class="perfil-cerrar-row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
     <button onclick="cerrarPerfilUsuario()" class="btn-cerrar-perfil" title="Schließen"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg> Zurück</button>
+    <button class="btn-perfil-agregar" onclick="abrirAgregar()">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+<span>Gruppe hinzufügen</span>
+</button>
    </div>
    <div id="perfilUsuarioHeader" class="perfil-header-pro"></div>
    <div id="perfilUsuarioGrid" class="mis-grupos-grid"></div>
@@ -1871,6 +1875,14 @@ Mit Google fortfahren
   .btn-cerrar-perfil:hover svg{transform:translateX(-2px)}
   body.dark .btn-cerrar-perfil{background:var(--verde);border-color:var(--verde);color:#fff}
   body.dark .btn-cerrar-perfil:hover{background:var(--verde-d);border-color:var(--verde-d)}
+  .btn-perfil-agregar{
+    background:var(--verde);border:1.5px solid var(--verde);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;
+    padding:9px 18px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;
+    transition:.18s;letter-spacing:.1px;white-space:nowrap;
+  }
+  .btn-perfil-agregar:hover{background:var(--verde-d);border-color:var(--verde-d)}
+  body.dark .btn-perfil-agregar{background:var(--verde);border-color:var(--verde)}
+  body.dark .btn-perfil-agregar:hover{background:var(--verde-d);border-color:var(--verde-d)}
   .perfil-header-pro{margin:14px 0 30px}
   .perfil-banner{
     height:130px;border-radius:var(--radio) var(--radio) 0 0;
