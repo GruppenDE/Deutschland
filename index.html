@@ -3407,22 +3407,66 @@ async function iniciarSesion(){
 }
 
 async function googleSignIn(){
+  // Firebase Auth (signInWithPopup/Redirect) no funciona si el archivo se abre
+  // directamente desde el disco (file://). Debe servirse por http:// o https://
+  if(location.protocol==="file:"){
+    mostrarToast("⚠️ Die Google-Anmeldung funktioniert nicht, wenn die Datei direkt vom Computer geöffnet wird (file://). Die Seite muss über http:// oder https:// aufgerufen werden (z. B. über euren Webserver oder Hosting).","⚠️");
+    return;
+  }
   try{
     const result=await _auth.signInWithPopup(_googleProvider);
-    const gUser=result.user;
-    const nombre=gUser.displayName||"Google-Nutzer";
-    const correo=(gUser.email||"usuario@gmail.com").toLowerCase();
-    // Guardar/actualizar usuario en Firestore
-    await guardarUsuarioFirestore({nombre,correo,metodo:"google"});
-    guardarSesion({nombre,correo,metodo:"google"});
-    cerrarAuth();
-    mostrarToast(`Willkommen, ${nombre}! 🎉`,"🔵");
-    await cargarDatosUsuario(correo);
-    pintarSesion();
-    iniciarListenersChat();
+    await _procesarUsuarioGoogle(result.user);
   }catch(e){
     console.warn("Google Sign-In error:",e);
-    mostrarToast("Google-Anmeldung fehlgeschlagen: "+e.message,"⚠️");
+    if(e.code==="auth/popup-blocked"||e.code==="auth/cancelled-popup-request"||e.code==="auth/popup-closed-by-user"){
+      // El navegador bloqueó el popup: reintentar con redirección de página completa
+      try{
+        await _auth.signInWithRedirect(_googleProvider);
+        return; // la página se recarga; el resultado se procesa en _procesarRedirectGoogle()
+      }catch(e2){
+        console.warn("Google Sign-In redirect error:",e2);
+        mostrarToast("Google-Anmeldung fehlgeschlagen: "+(e2.message||e2.code),"⚠️");
+      }
+      return;
+    }
+    if(e.code==="auth/unauthorized-domain"){
+      mostrarToast("⚠️ Diese Domain ist in Firebase nicht für die Google-Anmeldung autorisiert. Füge sie unter Firebase Console → Authentication → Settings → Authorized domains hinzu.","⚠️");
+      return;
+    }
+    if(e.code==="auth/operation-not-supported-in-this-environment"){
+      mostrarToast("⚠️ Die Google-Anmeldung wird in dieser Umgebung nicht unterstützt (z. B. lokale Datei). Öffne die Seite über http:// oder https://.","⚠️");
+      return;
+    }
+    mostrarToast("Google-Anmeldung fehlgeschlagen: "+(e.message||e.code),"⚠️");
+  }
+}
+
+async function _procesarUsuarioGoogle(gUser){
+  const nombre=gUser.displayName||"Google-Nutzer";
+  const correo=(gUser.email||"usuario@gmail.com").toLowerCase();
+  // Guardar/actualizar usuario en Firestore
+  await guardarUsuarioFirestore({nombre,correo,metodo:"google"});
+  guardarSesion({nombre,correo,metodo:"google"});
+  cerrarAuth();
+  mostrarToast(`Willkommen, ${nombre}! 🎉`,"🔵");
+  await cargarDatosUsuario(correo);
+  pintarSesion();
+  iniciarListenersChat();
+}
+
+// Procesa el resultado cuando se usó signInWithRedirect (respaldo si el popup fue bloqueado)
+async function _procesarRedirectGoogle(){
+  if(location.protocol==="file:") return;
+  try{
+    const result=await _auth.getRedirectResult();
+    if(result && result.user){
+      await _procesarUsuarioGoogle(result.user);
+    }
+  }catch(e){
+    if(e && e.code && e.code!=="auth/no-auth-event"){
+      console.warn("Google redirect result error:",e);
+      mostrarToast("Google-Anmeldung fehlgeschlagen: "+(e.message||e.code),"⚠️");
+    }
   }
 }
 
@@ -4230,6 +4274,7 @@ async function initFirebase(){
   try{ verificarNotificacionGlobal(); }catch(e){ console.warn("verificarNotif:",e); }
   setTimeout(iniciarAutoRefreshMiembros, 3000);
   try{ iniciarFCM(); }catch(e){ console.warn("iniciarFCM:",e); }
+  try{ _procesarRedirectGoogle(); }catch(e){ console.warn("_procesarRedirectGoogle:",e); }
 }
 
 // Iniciar cuando el DOM esté listo — con manejo de error para garantizar que el splash siempre se quite
