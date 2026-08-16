@@ -347,16 +347,10 @@
  <!-- SECCIÓN PERFIL PÚBLICO DE USUARIO -->
  <div id="panelPerfilUsuario">
   <div class="mis-grupos-seccion">
-   <div class="mis-grupos-header">
-    <div style="display:flex;align-items:center;gap:10px">
-     <div style="width:36px;height:36px;border-radius:10px;background:var(--verde);display:flex;align-items:center;justify-content:center;font-size:18px">👤</div>
-     <div>
-      <h2 style="font-size:20px;margin:0" id="perfilUsuarioNombre">Profil</h2>
-      <p style="font-size:12.5px;color:var(--sub);margin:0" id="perfilUsuarioSubtitle">Aktive Gruppen</p>
-     </div>
-    </div>
-    <button onclick="cerrarPerfilUsuario()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub);line-height:1;padding:4px" title="Schließen">✕</button>
+   <div class="perfil-cerrar-row">
+    <button onclick="cerrarPerfilUsuario()" class="btn-cerrar-perfil" title="Schließen">← Zurück</button>
    </div>
+   <div id="perfilUsuarioHeader" class="perfil-header-pro"></div>
    <div id="perfilUsuarioGrid" class="mis-grupos-grid"></div>
   </div>
  </div>
@@ -658,6 +652,61 @@ Mit Google fortfahren
 </button>
     <p class="pie-auth">Bereits ein Konto? <a onclick="cambiarTab('login')">Jetzt anmelden</a></p>
    </div>
+  </div>
+ </div>
+ <!-- MODAL — EDITAR PERFIL -->
+ <div class="overlay" id="overlayEditarPerfil">
+  <div class="modal modal-grande">
+   <button class="cerrar" onclick="cerrarEditarPerfil()">✕</button>
+   <h2>Profil bearbeiten</h2>
+   <p class="sub">Lade ein Profilfoto hoch und erzähle anderen etwas über dich.</p>
+
+   <div class="foto-perfil-upload">
+    <label class="foto-perfil-circulo" id="fotoPerfilCirculo" for="inputFotoPerfil">
+     <span id="fotoPerfilPlaceholder" style="font-size:34px">👤</span>
+     <span class="cam-ico">📷</span>
+    </label>
+    <input type="file" id="inputFotoPerfil" accept="image/*" style="display:none" onchange="previsualizarFotoPerfil(event)">
+    <span style="font-size:12px;color:var(--sub);text-align:center">Klicke auf das Bild, um ein Profilfoto hochzuladen</span>
+   </div>
+
+   <div class="campo">
+    <label>Biografie</label>
+    <textarea id="perfilBio" rows="3" maxlength="220" placeholder="Erzähl etwas über dich…" oninput="actualizarContadorBio()"></textarea>
+    <div class="contador-bio"><span id="contadorBioNum">0</span>/220</div>
+   </div>
+
+   <div class="campo campo-red-wrap">
+    <label>Facebook</label>
+    <div style="position:relative">
+     <span class="ic-red"><svg width="15" height="15" viewBox="0 0 24 24" fill="#1877F2"><path d="M22 12.06C22 6.505 17.523 2 12 2S2 6.505 2 12.06c0 5.02 3.657 9.184 8.438 9.94v-7.03H7.898v-2.91h2.54V9.845c0-2.507 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562v1.878h2.773l-.443 2.91h-2.33V22c4.78-.756 8.437-4.92 8.437-9.94z"/></svg></span>
+     <input type="text" id="perfilFacebook" placeholder="https://facebook.com/dein.name">
+    </div>
+   </div>
+   <div class="campo campo-red-wrap">
+    <label>Instagram</label>
+    <div style="position:relative">
+     <span class="ic-red"><svg width="15" height="15" viewBox="0 0 24 24" fill="#dd2a7b"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.8.24 2.22.4.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.35 1.05.4 2.22.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.24 1.8-.4 2.22-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.05.35-2.22.4-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.24-2.22-.4-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.35-1.05-.4-2.22C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.24-1.8.4-2.22.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.05-.35 2.22-.4C8.42 2.21 8.8 2.2 12 2.2M12 0C8.74 0 8.33.01 7.05.07c-1.28.06-2.15.26-2.91.56-.79.31-1.46.72-2.13 1.38-.67.67-1.07 1.34-1.38 2.13-.3.76-.5 1.63-.56 2.91C.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.28.26 2.15.56 2.91.31.79.72 1.46 1.38 2.13.67.67 1.34 1.07 2.13 1.38.76.3 1.63.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.28-.06 2.15-.26 2.91-.56.79-.31 1.46-.72 2.13-1.38.67-.67 1.07-1.34 1.38-2.13.3-.76.5-1.63.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.28-.26-2.15-.56-2.91-.31-.79-.72-1.46-1.38-2.13-.67-.67-1.34-1.07-2.13-1.38-.76-.3-1.63-.5-2.91-.56C15.67.01 15.26 0 12 0zm0 5.84A6.16 6.16 0 1 0 12 18.16 6.16 6.16 0 0 0 12 5.84zm0 10.16A4 4 0 1 1 12 8a4 4 0 0 1 0 8zm6.4-10.4a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0z"/></svg></span>
+     <input type="text" id="perfilInstagram" placeholder="https://instagram.com/dein.name">
+    </div>
+   </div>
+   <div class="campo campo-red-wrap">
+    <label>Snapchat</label>
+    <div style="position:relative">
+     <span class="ic-red"><svg width="15" height="15" viewBox="0 0 24 24" fill="#111"><path d="M12.03 2c-3.5 0-5.7 2.53-5.7 5.65 0 .5.02.98.05 1.4-.6.14-1.13.3-1.5.5-.4.2-.5.5-.35.85.13.3.7 1.15 1.9 1.55-.08.28-.32.7-1 .95-.35.13-.5.5-.32.85.35.68 1.5 1.15 2.85 1.2.05.35.13.9-.1 1.25-.35.55-1.55 1-3.05 1.15-.35.03-.6.3-.55.65.1.7 1.5 1.35 2.9 1.55.1.25.25.65.55.9.5.4 1.35.15 2.25-.1.6-.17 1.2-.35 1.75-.35s1.15.18 1.75.35c.9.25 1.75.5 2.25.1.3-.25.45-.65.55-.9 1.4-.2 2.8-.85 2.9-1.55.05-.35-.2-.62-.55-.65-1.5-.15-2.7-.6-3.05-1.15-.23-.35-.15-.9-.1-1.25 1.35-.05 2.5-.52 2.85-1.2.18-.35.03-.72-.32-.85-.68-.25-.92-.67-1-.95 1.2-.4 1.77-1.25 1.9-1.55.15-.35.05-.65-.35-.85-.37-.2-.9-.36-1.5-.5.03-.42.05-.9.05-1.4C17.73 4.53 15.53 2 12.03 2z"/></svg></span>
+     <input type="text" id="perfilSnapchat" placeholder="dein_snapchat_name">
+    </div>
+   </div>
+   <div class="campo campo-red-wrap">
+    <label>Twitter / X</label>
+    <div style="position:relative">
+     <span class="ic-red"><svg width="15" height="15" viewBox="0 0 24 24" fill="#0f1419"><path d="M18.9 2H22l-7.6 8.7L23.3 22h-7.1l-5.6-6.7L4.1 22H1l8.1-9.3L.9 2h7.3l5.1 6.1L18.9 2zm-1.2 18h1.7L6.4 3.9H4.6L17.7 20z"/></svg></span>
+     <input type="text" id="perfilTwitter" placeholder="https://x.com/dein_usuario">
+    </div>
+   </div>
+
+   <p class="error-campo" id="errorEditarPerfil"></p>
+   <button class="btn-principal" onclick="guardarPerfilUsuario()">Speichern</button>
   </div>
  </div>
  <!-- MODAL AVISO FOTO — todas las demás categorías -->
@@ -1809,6 +1858,96 @@ Mit Google fortfahren
     grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--sub);
   }
   .mis-grupos-vacio .e{font-size:42px;display:block;margin-bottom:12px}
+
+  /* ===== PERFIL PROFESIONAL — banner, avatar, bio, redes sociales ===== */
+  .perfil-cerrar-row{padding:18px 0 0}
+  .btn-cerrar-perfil{
+    background:none;border:none;color:var(--sub);font-weight:600;font-size:13.5px;cursor:pointer;
+    padding:6px 4px;display:inline-flex;align-items:center;gap:4px;transition:color .18s;
+  }
+  .btn-cerrar-perfil:hover{color:var(--verde-d)}
+  .perfil-header-pro{margin:14px 0 30px}
+  .perfil-banner{
+    height:130px;border-radius:var(--radio) var(--radio) 0 0;
+    background:linear-gradient(120deg,var(--verde) 0%,var(--verde-d) 55%,#0d5c2a 100%);
+    position:relative;overflow:hidden;
+  }
+  .perfil-banner::after{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(circle at 85% 15%,rgba(255,255,255,.22),transparent 55%);
+  }
+  .perfil-card-pro{
+    background:var(--card);border:1px solid var(--borde);border-top:none;
+    border-radius:0 0 var(--radio) var(--radio);
+    box-shadow:var(--sombra);padding:0 26px 26px;position:relative;
+  }
+  body.dark .perfil-card-pro{border-color:#2a332f}
+  @media(max-width:600px){.perfil-card-pro{padding:0 16px 22px}}
+  .perfil-top-row{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .perfil-avatar-wrap{
+    width:96px;height:96px;border-radius:50%;background:#eef4f1;border:4px solid var(--card);
+    box-shadow:0 4px 14px rgba(0,0,0,.18);margin-top:-48px;position:relative;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+    font-size:34px;font-weight:800;color:var(--verde-d);flex-shrink:0;
+  }
+  .perfil-avatar-wrap img{width:100%;height:100%;object-fit:cover}
+  .btn-editar-perfil{
+    display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;
+    border:1.5px solid var(--borde);background:#fafbfa;color:var(--texto);font-weight:600;
+    font-size:13px;cursor:pointer;transition:.18s;white-space:nowrap;margin-top:12px;
+  }
+  .btn-editar-perfil:hover{border-color:var(--verde);background:#edf7f0;color:var(--verde-d)}
+  body.dark .btn-editar-perfil{background:#1d2421;border-color:#2a332f;color:#eef2f0}
+  .perfil-info-nombre{padding-top:12px}
+  .perfil-info-nombre h2{font-size:21px;margin:0}
+  .perfil-info-nombre p{font-size:13px;color:var(--sub);margin:2px 0 0}
+  .perfil-bio-pro{
+    font-size:14px;line-height:1.55;color:var(--texto);margin:14px 0 0;max-width:640px;
+    white-space:pre-line;
+  }
+  .perfil-bio-pro.vacio{color:var(--sub);font-style:italic}
+  .perfil-redes-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .red-social-btn{
+    display:inline-flex;align-items:center;gap:7px;padding:7px 13px 7px 7px;border-radius:999px;
+    font-size:13px;font-weight:600;text-decoration:none;color:#fff;transition:transform .15s,box-shadow .15s;
+    box-shadow:0 2px 6px rgba(0,0,0,.12);
+  }
+  .red-social-btn:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,.2)}
+  .red-social-btn.facebook{background:#1877F2}
+  .red-social-btn.instagram{background:linear-gradient(135deg,#f58529,#dd2a7b,#8134af,#515bd4)}
+  .red-social-btn.snapchat{background:#FFFC00;color:#1c2422}
+  .red-social-btn.twitter{background:#0f1419}
+  .red-social-btn .circ{
+    width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.25);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .red-social-btn.snapchat .circ{background:rgba(0,0,0,.1)}
+  #panelPerfilUsuario .mis-grupos-grid{margin-top:6px}
+
+  /* ===== MODAL EDITAR PERFIL ===== */
+  .foto-perfil-upload{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:18px}
+  .foto-perfil-circulo{
+    width:96px;height:96px;border-radius:50%;background:#fafbfa;border:2px dashed var(--borde);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;cursor:pointer;
+    color:var(--sub);transition:border-color .18s;flex-shrink:0;
+  }
+  .foto-perfil-circulo:hover{border-color:var(--verde)}
+  .foto-perfil-circulo img{width:100%;height:100%;object-fit:cover}
+  .foto-perfil-circulo .cam-ico{
+    position:absolute;bottom:0;right:0;width:28px;height:28px;border-radius:50%;
+    background:var(--verde);color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:13px;border:2px solid var(--card);
+  }
+  body.dark .foto-perfil-circulo{background:#1d2421;border-color:#2a332f}
+  .campo textarea{
+    padding:11px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:14px;
+    outline:none;background:#fafbfa;transition:border-color .18s;resize:vertical;font-family:inherit;
+  }
+  body.dark .campo textarea{background:#1d2421;border-color:#2a332f;color:#fff}
+  .campo textarea:focus{border-color:var(--verde)}
+  .contador-bio{font-size:11px;color:var(--sub);text-align:right;margin-top:-8px}
+  .campo-red-wrap .ic-red{position:absolute;left:11px;top:50%;transform:translateY(-50%);display:flex;pointer-events:none}
+  .campo-red-wrap input{padding-left:36px!important}
   /* badge de estado en la card del usuario */
   .estado-card-badge{
     display:inline-flex;align-items:center;gap:5px;
@@ -3491,16 +3630,22 @@ function pintarSesion(){
   }
   document.getElementById("chatFlotante").classList.add("visible");
   const inicial=user.nombre.trim().charAt(0).toUpperCase();
+  const tieneFoto=!!user.foto;
+  const avatarHTML=tieneFoto
+    ?`<img src="${user.foto}" alt="${user.nombre}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+    :(esAdmin(user)?'<img src="https://i.imgur.com/JGpE348.jpeg" alt="Admin" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':inicial);
   const adminBtn=esAdmin(user)
     ?`<button onclick="abrirAdmin();document.getElementById('menuUsuario').classList.remove('abierto')" style="color:#d97706;font-weight:700">⚙️ Admin-Panel</button>`
     :"";
   zona.innerHTML=`
     <div class="chip-usuario" onclick="alternarMenuUsuario()">
-      <div class="avatar" style="${esAdmin(user)?'overflow:hidden;padding:0':''}">${esAdmin(user)?'<img src="https://i.imgur.com/JGpE348.jpeg" alt="Admin" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':inicial}</div>
+      <div class="avatar" style="${(tieneFoto||esAdmin(user))?'overflow:hidden;padding:0':''}">${avatarHTML}</div>
       <span>${user.nombre.split(" ")[0]}</span>
       <div class="menu-usuario" id="menuUsuario">
         ${adminBtn}
         <button onclick="abrirMisGrupos();document.getElementById('menuUsuario').classList.remove('abierto')">👤 Meine Gruppen</button>
+        <button onclick="document.getElementById('menuUsuario').classList.remove('abierto');abrirPerfilUsuario('${user.correo.replace(/'/g,"\\'")}')">🪪 Mein Profil ansehen</button>
+        <button onclick="document.getElementById('menuUsuario').classList.remove('abierto');abrirEditarPerfil()">✏️ Profil bearbeiten</button>
         <button onclick="cerrarSesion()">Abmelden</button>
       </div>
     </div>`;
@@ -5357,6 +5502,15 @@ function svgPlataformaPerfil(plataforma){
 
 function abrirPerfilUsuario(correo){
   if(!correo){ mostrarToast("Kein Profil für diese Gruppe verfügbar","⚠️"); return; }
+  const headerCarga=document.getElementById("perfilUsuarioHeader");
+  if(headerCarga){
+    headerCarga.innerHTML=`
+      <div class="perfil-banner"></div>
+      <div class="perfil-card-pro">
+        <div class="perfil-avatar-wrap"><span style="opacity:.4">⏳</span></div>
+        <div class="perfil-info-nombre"><h2>Profil wird geladen…</h2></div>
+      </div>`;
+  }
   renderPerfilUsuario(correo);
   document.getElementById("grid").style.display="none";
   document.getElementById("paginacion").style.display="none";
@@ -5379,13 +5533,69 @@ function cerrarPerfilUsuario(){
   document.getElementById("resultadoInfo").style.display="";
 }
 
-function renderPerfilUsuario(correo){
+/* Íconos de redes sociales para los botones del perfil (fondo de color, ícono blanco/negro) */
+function svgRedIcono(tipo){
+  const iconos={
+    facebook:`<svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M22 12.06C22 6.505 17.523 2 12 2S2 6.505 2 12.06c0 5.02 3.657 9.184 8.438 9.94v-7.03H7.898v-2.91h2.54V9.845c0-2.507 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562v1.878h2.773l-.443 2.91h-2.33V22c4.78-.756 8.437-4.92 8.437-9.94z"/></svg>`,
+    instagram:`<svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.8.24 2.22.4.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.35 1.05.4 2.22.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.24 1.8-.4 2.22-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.05.35-2.22.4-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.24-2.22-.4-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.35-1.05-.4-2.22C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.24-1.8.4-2.22.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.05-.35 2.22-.4C8.42 2.21 8.8 2.2 12 2.2M12 0C8.74 0 8.33.01 7.05.07c-1.28.06-2.15.26-2.91.56-.79.31-1.46.72-2.13 1.38-.67.67-1.07 1.34-1.38 2.13-.3.76-.5 1.63-.56 2.91C.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.28.26 2.15.56 2.91.31.79.72 1.46 1.38 2.13.67.67 1.34 1.07 2.13 1.38.76.3 1.63.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.28-.06 2.15-.26 2.91-.56.79-.31 1.46-.72 2.13-1.38.67-.67 1.07-1.34 1.38-2.13.3-.76.5-1.63.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.28-.26-2.15-.56-2.91-.31-.79-.72-1.46-1.38-2.13-.67-.67-1.34-1.07-2.13-1.38-.76-.3-1.63-.5-2.91-.56C15.67.01 15.26 0 12 0zm0 5.84A6.16 6.16 0 1 0 12 18.16 6.16 6.16 0 0 0 12 5.84zm0 10.16A4 4 0 1 1 12 8a4 4 0 0 1 0 8zm6.4-10.4a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0z"/></svg>`,
+    snapchat:`<svg width="12" height="12" viewBox="0 0 24 24" fill="#1c2422"><path d="M12.03 2c-3.5 0-5.7 2.53-5.7 5.65 0 .5.02.98.05 1.4-.6.14-1.13.3-1.5.5-.4.2-.5.5-.35.85.13.3.7 1.15 1.9 1.55-.08.28-.32.7-1 .95-.35.13-.5.5-.32.85.35.68 1.5 1.15 2.85 1.2.05.35.13.9-.1 1.25-.35.55-1.55 1-3.05 1.15-.35.03-.6.3-.55.65.1.7 1.5 1.35 2.9 1.55.1.25.25.65.55.9.5.4 1.35.15 2.25-.1.6-.17 1.2-.35 1.75-.35s1.15.18 1.75.35c.9.25 1.75.5 2.25.1.3-.25.45-.65.55-.9 1.4-.2 2.8-.85 2.9-1.55.05-.35-.2-.62-.55-.65-1.5-.15-2.7-.6-3.05-1.15-.23-.35-.15-.9-.1-1.25 1.35-.05 2.5-.52 2.85-1.2.18-.35.03-.72-.32-.85-.68-.25-.92-.67-1-.95 1.2-.4 1.77-1.25 1.9-1.55.15-.35.05-.65-.35-.85-.37-.2-.9-.36-1.5-.5.03-.42.05-.9.05-1.4C17.73 4.53 15.53 2 12.03 2z"/></svg>`,
+    twitter:`<svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M18.9 2H22l-7.6 8.7L23.3 22h-7.1l-5.6-6.7L4.1 22H1l8.1-9.3L.9 2h7.3l5.1 6.1L18.9 2zm-1.2 18h1.7L6.4 3.9H4.6L17.7 20z"/></svg>`
+  };
+  return iconos[tipo]||"";
+}
+/* Normaliza lo que el usuario haya escrito (usuario, @usuario o URL completa) a un enlace usable */
+function normalizarUrlRed(tipo,valor){
+  if(!valor) return "";
+  valor=valor.trim();
+  if(/^https?:\/\//i.test(valor)) return valor;
+  const limpio=valor.replace(/^@/,"");
+  const bases={
+    facebook:"https://facebook.com/",
+    instagram:"https://instagram.com/",
+    snapchat:"https://snapchat.com/add/",
+    twitter:"https://x.com/"
+  };
+  return (bases[tipo]||"")+limpio;
+}
+
+async function renderPerfilUsuario(correo){
   const gruposUsuario=grupos.filter(g=>g.creadorCorreo===correo);
-  const nombre=(gruposUsuario[0]&&gruposUsuario[0].creadorNombre)||"Benutzer";
-  const nombreEl=document.getElementById("perfilUsuarioNombre");
-  const subtitleEl=document.getElementById("perfilUsuarioSubtitle");
-  if(nombreEl) nombreEl.textContent=`👤 ${nombre}`;
-  if(subtitleEl) subtitleEl.textContent=`${gruposUsuario.length} aktive Gruppe${gruposUsuario.length===1?"":"n"}`;
+  const datosUsuario=await obtenerUsuarioFirestore(correo)||{};
+  const nombre=datosUsuario.nombre||(gruposUsuario[0]&&gruposUsuario[0].creadorNombre)||"Benutzer";
+  const bio=(datosUsuario.bio||"").trim();
+  const foto=datosUsuario.foto||"";
+  const redes=datosUsuario.redes||{};
+  const sesion=obtenerSesion();
+  const esPropio=!!(sesion&&sesion.correo===correo);
+  const inicial=nombre.trim().charAt(0).toUpperCase();
+  const avatarHTML=foto?`<img src="${foto}" alt="${nombre}">`:`<span>${inicial}</span>`;
+  const redesArr=["facebook","instagram","snapchat","twitter"].filter(t=>redes[t]);
+  const nombreRed={facebook:"Facebook",instagram:"Instagram",snapchat:"Snapchat",twitter:"Twitter"};
+  const redesHTML=redesArr.length
+    ?`<div class="perfil-redes-row">${redesArr.map(t=>`
+        <a class="red-social-btn ${t}" href="${normalizarUrlRed(t,redes[t]).replace(/"/g,'&quot;')}" target="_blank" rel="noopener">
+          <span class="circ">${svgRedIcono(t)}</span>${nombreRed[t]}
+        </a>`).join("")}</div>`
+    :"";
+  const bioEscapada=bio.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+  const header=document.getElementById("perfilUsuarioHeader");
+  if(header){
+    header.innerHTML=`
+      <div class="perfil-banner"></div>
+      <div class="perfil-card-pro">
+        <div class="perfil-top-row">
+          <div class="perfil-avatar-wrap">${avatarHTML}</div>
+          ${esPropio?`<button class="btn-editar-perfil" onclick="abrirEditarPerfil()">✏️ Profil bearbeiten</button>`:""}
+        </div>
+        <div class="perfil-info-nombre">
+          <h2>${nombre}</h2>
+          <p>${gruposUsuario.length} aktive Gruppe${gruposUsuario.length===1?"":"n"}</p>
+        </div>
+        <p class="perfil-bio-pro${bio?"":" vacio"}">${bio?bioEscapada:"Dieser Benutzer hat noch keine Biografie hinzugefügt."}</p>
+        ${redesHTML}
+      </div>`;
+  }
 
   const grid=document.getElementById("perfilUsuarioGrid");
   if(!grid) return;
@@ -5435,6 +5645,108 @@ function renderPerfilUsuario(correo){
     </div>`;
   }).join("");
 }
+/* =========================================================
+   EDITAR MI PERFIL — foto, biografía, redes sociales
+   ========================================================= */
+let _fotoPerfilTemp=null;
+
+function previsualizarFotoPerfil(event){
+  const file=event.target.files&&event.target.files[0];
+  if(!file) return;
+  if(!file.type.startsWith("image/")){ mostrarToast("Bitte wähle eine Bilddatei aus","⚠️"); return; }
+  if(file.size>8*1024*1024){ mostrarToast("Das Bild ist zu groß (max. 8 MB)","⚠️"); return; }
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      const tam=240;
+      const canvas=document.createElement("canvas");
+      canvas.width=tam;canvas.height=tam;
+      const ctx=canvas.getContext("2d");
+      const lado=Math.min(img.width,img.height);
+      const sx=(img.width-lado)/2, sy=(img.height-lado)/2;
+      ctx.drawImage(img,sx,sy,lado,lado,0,0,tam,tam);
+      _fotoPerfilTemp=canvas.toDataURL("image/jpeg",0.82);
+      const circulo=document.getElementById("fotoPerfilCirculo");
+      if(circulo) circulo.innerHTML=`<img src="${_fotoPerfilTemp}" alt="Vorschau"><span class="cam-ico">📷</span>`;
+    };
+    img.onerror=function(){ mostrarToast("Bild konnte nicht geladen werden","⚠️"); };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function actualizarContadorBio(){
+  const el=document.getElementById("perfilBio");
+  const num=document.getElementById("contadorBioNum");
+  if(el&&num) num.textContent=el.value.length;
+}
+
+async function abrirEditarPerfil(){
+  const user=obtenerSesion();
+  if(!user){ mostrarToast("Bitte melde dich zuerst an","⚠️"); abrirAuth("login"); return; }
+  _fotoPerfilTemp=null;
+  const err=document.getElementById("errorEditarPerfil");
+  if(err) err.textContent="";
+  document.getElementById("overlayEditarPerfil").classList.add("abierto");
+
+  const datos=await obtenerUsuarioFirestore(user.correo)||{};
+  document.getElementById("perfilBio").value=datos.bio||"";
+  actualizarContadorBio();
+  const redes=datos.redes||{};
+  document.getElementById("perfilFacebook").value=redes.facebook||"";
+  document.getElementById("perfilInstagram").value=redes.instagram||"";
+  document.getElementById("perfilSnapchat").value=redes.snapchat||"";
+  document.getElementById("perfilTwitter").value=redes.twitter||"";
+
+  const circulo=document.getElementById("fotoPerfilCirculo");
+  const foto=datos.foto||user.foto;
+  if(circulo){
+    if(foto){
+      circulo.innerHTML=`<img src="${foto}" alt="Foto"><span class="cam-ico">📷</span>`;
+    }else{
+      const inicial=(user.nombre||"?").trim().charAt(0).toUpperCase();
+      circulo.innerHTML=`<span style="font-size:34px;font-weight:800;color:var(--verde-d)">${inicial}</span><span class="cam-ico">📷</span>`;
+    }
+  }
+}
+
+function cerrarEditarPerfil(){
+  document.getElementById("overlayEditarPerfil").classList.remove("abierto");
+}
+
+async function guardarPerfilUsuario(){
+  const user=obtenerSesion();
+  if(!user) return;
+  const err=document.getElementById("errorEditarPerfil");
+  const bio=document.getElementById("perfilBio").value.trim().slice(0,220);
+  const redes={
+    facebook:document.getElementById("perfilFacebook").value.trim(),
+    instagram:document.getElementById("perfilInstagram").value.trim(),
+    snapchat:document.getElementById("perfilSnapchat").value.trim(),
+    twitter:document.getElementById("perfilTwitter").value.trim()
+  };
+  try{
+    const correoKey=user.correo.replace(/[.#$[\]]/g,"_");
+    const datosActualizar={bio,redes};
+    if(_fotoPerfilTemp) datosActualizar.foto=_fotoPerfilTemp;
+    await _db.collection("usuarios").doc(correoKey).set(datosActualizar,{merge:true});
+
+    const sesionActualizada=Object.assign({},user,{bio,redes});
+    if(_fotoPerfilTemp) sesionActualizada.foto=_fotoPerfilTemp;
+    guardarSesion(sesionActualizada);
+
+    cerrarEditarPerfil();
+    mostrarToast("Profil aktualisiert","✅");
+
+    const panelAbierto=document.getElementById("panelPerfilUsuario")?.classList.contains("abierto");
+    if(panelAbierto) renderPerfilUsuario(user.correo);
+  }catch(e){
+    if(err) err.textContent="Fehler beim Speichern: "+(e.message||e);
+    console.warn("FB guardarPerfil:",e);
+  }
+}
+
 function toggleDrawer(){
   const drawer=document.getElementById("navDrawer");
   const overlay=document.getElementById("navOverlay");
