@@ -708,6 +708,20 @@ Mit Google fortfahren
      <input type="text" id="perfilTwitter" placeholder="https://x.com/dein_usuario">
     </div>
    </div>
+   <div class="campo campo-red-wrap">
+    <label>Telegram</label>
+    <div style="position:relative">
+     <span class="ic-red"><svg width="15" height="15" viewBox="0 0 24 24" fill="#26A5E4"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></span>
+     <input type="text" id="perfilTelegram" placeholder="https://t.me/dein_usuario">
+    </div>
+   </div>
+   <div class="campo campo-red-wrap">
+    <label>WhatsApp</label>
+    <div style="position:relative">
+     <span class="ic-red"><svg width="15" height="15" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg></span>
+     <input type="text" id="perfilWhatsapp" placeholder="+49 176 12345678 oder https://wa.me/49...">
+    </div>
+   </div>
 
    <p class="error-campo" id="errorEditarPerfil"></p>
    <button class="btn-principal" onclick="guardarPerfilUsuario()">Speichern</button>
@@ -1939,6 +1953,8 @@ Mit Google fortfahren
   .red-social-btn.instagram{background:linear-gradient(135deg,#f58529,#dd2a7b,#8134af,#515bd4)}
   .red-social-btn.snapchat{background:#FFFC00;color:#1c2422}
   .red-social-btn.twitter{background:#0f1419}
+  .red-social-btn.telegram{background:#26A5E4}
+  .red-social-btn.whatsapp{background:#25D366}
   .red-social-btn .circ{
     width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.25);
     display:flex;align-items:center;justify-content:center;flex-shrink:0;
@@ -5594,21 +5610,28 @@ function svgRedIcono(tipo){
     facebook:`<svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M22 12.06C22 6.505 17.523 2 12 2S2 6.505 2 12.06c0 5.02 3.657 9.184 8.438 9.94v-7.03H7.898v-2.91h2.54V9.845c0-2.507 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562v1.878h2.773l-.443 2.91h-2.33V22c4.78-.756 8.437-4.92 8.437-9.94z"/></svg>`,
     instagram:`<svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.8.24 2.22.4.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.35 1.05.4 2.22.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.24 1.8-.4 2.22-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.05.35-2.22.4-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.24-2.22-.4-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.35-1.05-.4-2.22C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.24-1.8.4-2.22.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.05-.35 2.22-.4C8.42 2.21 8.8 2.2 12 2.2M12 0C8.74 0 8.33.01 7.05.07c-1.28.06-2.15.26-2.91.56-.79.31-1.46.72-2.13 1.38-.67.67-1.07 1.34-1.38 2.13-.3.76-.5 1.63-.56 2.91C.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.28.26 2.15.56 2.91.31.79.72 1.46 1.38 2.13.67.67 1.34 1.07 2.13 1.38.76.3 1.63.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.28-.06 2.15-.26 2.91-.56.79-.31 1.46-.72 2.13-1.38.67-.67 1.07-1.34 1.38-2.13.3-.76.5-1.63.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.28-.26-2.15-.56-2.91-.31-.79-.72-1.46-1.38-2.13-.67-.67-1.34-1.07-2.13-1.38-.76-.3-1.63-.5-2.91-.56C15.67.01 15.26 0 12 0zm0 5.84A6.16 6.16 0 1 0 12 18.16 6.16 6.16 0 0 0 12 5.84zm0 10.16A4 4 0 1 1 12 8a4 4 0 0 1 0 8zm6.4-10.4a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0z"/></svg>`,
     snapchat:`<svg width="12" height="12" viewBox="0 0 24 24" fill="#1c2422"><path d="M12.03 2c-3.5 0-5.7 2.53-5.7 5.65 0 .5.02.98.05 1.4-.6.14-1.13.3-1.5.5-.4.2-.5.5-.35.85.13.3.7 1.15 1.9 1.55-.08.28-.32.7-1 .95-.35.13-.5.5-.32.85.35.68 1.5 1.15 2.85 1.2.05.35.13.9-.1 1.25-.35.55-1.55 1-3.05 1.15-.35.03-.6.3-.55.65.1.7 1.5 1.35 2.9 1.55.1.25.25.65.55.9.5.4 1.35.15 2.25-.1.6-.17 1.2-.35 1.75-.35s1.15.18 1.75.35c.9.25 1.75.5 2.25.1.3-.25.45-.65.55-.9 1.4-.2 2.8-.85 2.9-1.55.05-.35-.2-.62-.55-.65-1.5-.15-2.7-.6-3.05-1.15-.23-.35-.15-.9-.1-1.25 1.35-.05 2.5-.52 2.85-1.2.18-.35.03-.72-.32-.85-.68-.25-.92-.67-1-.95 1.2-.4 1.77-1.25 1.9-1.55.15-.35.05-.65-.35-.85-.37-.2-.9-.36-1.5-.5.03-.42.05-.9.05-1.4C17.73 4.53 15.53 2 12.03 2z"/></svg>`,
-    twitter:`<svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M18.9 2H22l-7.6 8.7L23.3 22h-7.1l-5.6-6.7L4.1 22H1l8.1-9.3L.9 2h7.3l5.1 6.1L18.9 2zm-1.2 18h1.7L6.4 3.9H4.6L17.7 20z"/></svg>`
+    twitter:`<svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M18.9 2H22l-7.6 8.7L23.3 22h-7.1l-5.6-6.7L4.1 22H1l8.1-9.3L.9 2h7.3l5.1 6.1L18.9 2zm-1.2 18h1.7L6.4 3.9H4.6L17.7 20z"/></svg>`,
+    telegram:`<svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>`,
+    whatsapp:`<svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>`
   };
   return iconos[tipo]||"";
 }
-/* Normaliza lo que el usuario haya escrito (usuario, @usuario o URL completa) a un enlace usable */
+/* Normaliza lo que el usuario haya escrito (usuario, @usuario, teléfono o URL completa) a un enlace usable */
 function normalizarUrlRed(tipo,valor){
   if(!valor) return "";
   valor=valor.trim();
   if(/^https?:\/\//i.test(valor)) return valor;
+  if(tipo==="whatsapp"){
+    const soloDigitos=valor.replace(/[^\d]/g,"");
+    return "https://wa.me/"+soloDigitos;
+  }
   const limpio=valor.replace(/^@/,"");
   const bases={
     facebook:"https://facebook.com/",
     instagram:"https://instagram.com/",
     snapchat:"https://snapchat.com/add/",
-    twitter:"https://x.com/"
+    twitter:"https://x.com/",
+    telegram:"https://t.me/"
   };
   return (bases[tipo]||"")+limpio;
 }
@@ -5624,8 +5647,8 @@ async function renderPerfilUsuario(correo){
   const esPropio=!!(sesion&&sesion.correo===correo);
   const inicial=nombre.trim().charAt(0).toUpperCase();
   const avatarHTML=foto?`<img src="${foto}" alt="${nombre}">`:`<span>${inicial}</span>`;
-  const redesArr=["facebook","instagram","snapchat","twitter"].filter(t=>redes[t]);
-  const nombreRed={facebook:"Facebook",instagram:"Instagram",snapchat:"Snapchat",twitter:"Twitter"};
+  const redesArr=["facebook","instagram","snapchat","twitter","telegram","whatsapp"].filter(t=>redes[t]);
+  const nombreRed={facebook:"Facebook",instagram:"Instagram",snapchat:"Snapchat",twitter:"Twitter",telegram:"Telegram",whatsapp:"WhatsApp"};
   const redesHTML=redesArr.length
     ?`<div class="perfil-redes-row">${redesArr.map(t=>`
         <a class="red-social-btn ${t}" href="${normalizarUrlRed(t,redes[t]).replace(/"/g,'&quot;')}" target="_blank" rel="noopener">
@@ -5753,6 +5776,8 @@ async function abrirEditarPerfil(){
   document.getElementById("perfilInstagram").value=redes.instagram||"";
   document.getElementById("perfilSnapchat").value=redes.snapchat||"";
   document.getElementById("perfilTwitter").value=redes.twitter||"";
+  document.getElementById("perfilTelegram").value=redes.telegram||"";
+  document.getElementById("perfilWhatsapp").value=redes.whatsapp||"";
 
   const circulo=document.getElementById("fotoPerfilCirculo");
   const foto=datos.foto||user.foto;
@@ -5779,7 +5804,9 @@ async function guardarPerfilUsuario(){
     facebook:document.getElementById("perfilFacebook").value.trim(),
     instagram:document.getElementById("perfilInstagram").value.trim(),
     snapchat:document.getElementById("perfilSnapchat").value.trim(),
-    twitter:document.getElementById("perfilTwitter").value.trim()
+    twitter:document.getElementById("perfilTwitter").value.trim(),
+    telegram:document.getElementById("perfilTelegram").value.trim(),
+    whatsapp:document.getElementById("perfilWhatsapp").value.trim()
   };
   try{
     const correoKey=user.correo.replace(/[.#$[\]]/g,"_");
