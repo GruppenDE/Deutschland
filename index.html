@@ -344,6 +344,22 @@
    <div id="misGruposGrid" class="mis-grupos-grid"></div>
   </div>
  </div>
+ <!-- SECCIÓN PERFIL PÚBLICO DE USUARIO -->
+ <div id="panelPerfilUsuario">
+  <div class="mis-grupos-seccion">
+   <div class="mis-grupos-header">
+    <div style="display:flex;align-items:center;gap:10px">
+     <div style="width:36px;height:36px;border-radius:10px;background:var(--verde);display:flex;align-items:center;justify-content:center;font-size:18px">👤</div>
+     <div>
+      <h2 style="font-size:20px;margin:0" id="perfilUsuarioNombre">Profil</h2>
+      <p style="font-size:12.5px;color:var(--sub);margin:0" id="perfilUsuarioSubtitle">Aktive Gruppen</p>
+     </div>
+    </div>
+    <button onclick="cerrarPerfilUsuario()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub);line-height:1;padding:4px" title="Schließen">✕</button>
+   </div>
+   <div id="perfilUsuarioGrid" class="mis-grupos-grid"></div>
+  </div>
+ </div>
  <!-- PANEL ADMINISTRADOR -->
  <div id="panelAdmin">
   <div class="admin-modal">
@@ -432,6 +448,7 @@
         <th>🔗 Link</th>
         <th>👥 Mitglieder</th>
         <th>⭐ Popularität</th>
+        <th>👤 Ersteller</th>
         <th>Feste Seite</th>
         <th>Aktionen</th>
        </tr>
@@ -1165,6 +1182,16 @@ Mit Google fortfahren
     font-size:16px;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.25);
   }
 
+  .creador-badge{
+    position:absolute;top:46px;left:10px;display:flex;align-items:center;gap:5px;
+    padding:4px 10px 4px 7px;border-radius:999px;font-size:11.5px;font-weight:600;color:#fff;
+    background:rgba(0,0,0,.5);backdrop-filter:blur(2px);cursor:pointer;border:none;
+    max-width:calc(100% - 20px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    transition:background .15s;font-family:inherit;
+  }
+  .creador-badge:hover{background:rgba(0,0,0,.72)}
+  .creador-badge .creador-ico{font-size:11px;line-height:1}
+
   .card-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
   .tag{
     align-self:flex-start;font-size:11.5px;font-weight:600;color:var(--verde-d);
@@ -1759,6 +1786,8 @@ Mit Google fortfahren
   /* ===== SECCIÓN MEINE GRUPPEN (inline) ===== */
   #panelMisGrupos{display:none}
   #panelMisGrupos.abierto{display:block}
+  #panelPerfilUsuario{display:none}
+  #panelPerfilUsuario.abierto{display:block}
   .mis-grupos-seccion{
     max-width:1100px;margin:0 auto;padding:0 24px 40px;
   }
@@ -2889,6 +2918,9 @@ function pintar(arr){
       <div class="img-wrap">
         <img src="${g.img}" alt="${g.nombre}" loading="lazy">
         <span class="plataforma-badge ${claseBtn}"><span class="circ">${icoPlat}</span>${g.plataforma}</span>
+        ${g.creadorNombre?`<button type="button" class="creador-badge" onclick="event.stopPropagation();abrirPerfilUsuario('${(g.creadorCorreo||'').replace(/'/g,"\\'")}')" title="Profil von ${g.creadorNombre.replace(/"/g,'&quot;')} ansehen">
+          <span class="creador-ico">👤</span>${g.creadorNombre}
+        </button>`:""}
         <span class="pais-badge" title="${nombrePais(g.pais)}">${banderaPais(g.pais)}</span>
         <button class="btn-fav ${esFav?'activo':''} ${bloqueado?'fav-bloqueado':''}"
           onclick="alternarFavorito(this,'${g.nombre}')"
@@ -3793,7 +3825,7 @@ function renderAdminTabla(){
     .filter(({g})=>!q||g.nombre.toLowerCase().includes(q));
 
   if(!filas.length){
-    body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:18px;color:var(--sub)">Keine Gruppen gefunden für „${q}“.</td></tr>`;
+    body.innerHTML=`<tr><td colspan="10" style="text-align:center;padding:18px;color:var(--sub)">Keine Gruppen gefunden für „${q}“.</td></tr>`;
 
     return;
   }
@@ -3838,6 +3870,18 @@ function renderAdminTabla(){
             placeholder="0">
           <button class="btn-admin-sm save" style="padding:4px 8px;font-size:12px;background:#fef3c7;color:#92400e;border:1px solid #fde68a"
             onclick="adminGuardarPopularidad(${i},'${g.nombre}')">⭐</button>
+        </div>
+      </td>
+      <td style="min-width:150px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <input type="text" value="${(g.creadorNombre||'').replace(/"/g,'&quot;')}"
+            id="crn_${i}" placeholder="Name" style="width:130px;padding:4px 6px;border:1.5px solid #e9d5ff;border-radius:8px;font-size:12px;color:#6b21a8">
+          <div style="display:flex;align-items:center;gap:4px">
+            <input type="email" value="${(g.creadorCorreo||'').replace(/"/g,'&quot;')}"
+              id="crc_${i}" placeholder="E-Mail" style="width:130px;padding:4px 6px;border:1.5px solid #e9d5ff;border-radius:8px;font-size:12px;color:#6b21a8">
+            <button class="btn-admin-sm save" style="padding:4px 8px;font-size:12px;background:#f3e8ff;color:#6b21a8;border:1px solid #e9d5ff"
+              onclick="adminGuardarCreador(${i},'${g.nombre.replace(/'/g,"\\'")}')" title="Ersteller speichern">💾</button>
+          </div>
         </div>
       </td>
       <td>
@@ -3964,6 +4008,49 @@ function adminGuardarPopularidad(i, nombre){
   // 5. Re-pintar cards públicas en tiempo real
   filtrar();
   mostrarToast(`⭐ „${nombre}": Popularität auf ${val.toLocaleString("de-DE")} gesetzt`,"⭐");
+}
+
+function adminGuardarCreador(i, nombre){
+  const inputNombre=document.getElementById(`crn_${i}`);
+  const inputCorreo=document.getElementById(`crc_${i}`);
+  if(!inputNombre||!inputCorreo) return;
+  const nombreCreador=inputNombre.value.trim();
+  const correoCreador=inputCorreo.value.trim().toLowerCase();
+
+  if(correoCreador && !correoCreador.includes("@")){
+    mostrarToast("⚠️ Bitte eine gültige E-Mail-Adresse eingeben","⚠️");
+    return;
+  }
+  if(correoCreador && !nombreCreador){
+    mostrarToast("⚠️ Bitte auch einen Namen für den Ersteller eingeben","⚠️");
+    return;
+  }
+
+  // 1. Actualizar en memoria (ambos arrays)
+  [grupos, gruposExtra].forEach(arr=>{
+    const g=arr.find(x=>x.nombre===nombre);
+    if(g){
+      if(nombreCreador){ g.creadorNombre=nombreCreador; g.creadorCorreo=correoCreador||g.creadorCorreo||""; }
+      else{ delete g.creadorNombre; delete g.creadorCorreo; }
+    }
+  });
+
+  // 2. Guardar en Firestore
+  _db.collection("grupos_extra").where("nombre","==",nombre).get().then(snap=>{
+    snap.forEach(doc=>{
+      if(nombreCreador){
+        doc.ref.update({ creadorNombre:nombreCreador, creadorCorreo:correoCreador||"" });
+      }else{
+        doc.ref.update({
+          creadorNombre: firebase.firestore.FieldValue.delete(),
+          creadorCorreo: firebase.firestore.FieldValue.delete()
+        });
+      }
+    });
+  }).catch(e=>console.warn("FB creador:",e));
+
+  filtrar(); // re-pintar cards públicas con el nuevo badge
+  mostrarToast(nombreCreador?`👤 „${nombre}": Ersteller auf ${nombreCreador} gesetzt`:`👤 „${nombre}": Ersteller entfernt`,"✅");
 }
 
 function adminEliminar(i,nombre){
@@ -4983,7 +5070,9 @@ function adminAprobarSolicitud(id){
     favoritosBase:0,
     favoritos:0,
     popularidad: s.favoritosBase||0,
-    fechaAprobacion:new Date().getTime()
+    fechaAprobacion:new Date().getTime(),
+    creadorCorreo:s.usuarioCorreo,
+    creadorNombre:s.usuarioNombre
   };
 
   // Agregar a ambos arrays (gruposExtra y grupos)
@@ -5212,7 +5301,95 @@ function renderMisGrupos(user){
   }).join("");
 }
 
-/* ===== DRAWER MÓVIL ===== */
+/* ===== PERFIL PÚBLICO DE USUARIO (grupos activos) ===== */
+function svgPlataformaPerfil(plataforma){
+  if(plataforma==="WhatsApp")
+    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>`;
+  if(plataforma==="Signal")
+    return `<svg width="14" height="14" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="24" fill="rgba(0,0,0,0)"/><circle cx="24" cy="24" r="18.5" fill="none" stroke="white" stroke-width="2.6" stroke-dasharray="4.8 3.2" stroke-linecap="round"/><path d="M24 11.5c-6.9 0-12.5 5.3-12.5 11.85 0 2.9 1.1 5.54 2.91 7.57l-1.91 7.08 7.23-2.34A12.7 12.7 0 0 0 24 36.35c6.9 0 12.5-5.3 12.5-11.85S30.9 11.5 24 11.5z" fill="white"/></svg>`;
+  return `<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>`;
+}
+
+function abrirPerfilUsuario(correo){
+  if(!correo){ mostrarToast("Kein Profil für diese Gruppe verfügbar","⚠️"); return; }
+  renderPerfilUsuario(correo);
+  document.getElementById("grid").style.display="none";
+  document.getElementById("paginacion").style.display="none";
+  document.getElementById("buscar").style.display="none";
+  document.getElementById("resultadoInfo").style.display="none";
+  document.getElementById("panelMisGrupos")?.classList.remove("abierto");
+  const panel=document.getElementById("panelPerfilUsuario");
+  const footer=document.querySelector("footer");
+  if(footer && panel.nextElementSibling!==footer){
+    footer.parentNode.insertBefore(panel,footer);
+  }
+  panel.classList.add("abierto");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function cerrarPerfilUsuario(){
+  document.getElementById("panelPerfilUsuario").classList.remove("abierto");
+  document.getElementById("grid").style.display="";
+  document.getElementById("paginacion").style.display="";
+  document.getElementById("buscar").style.display="";
+  document.getElementById("resultadoInfo").style.display="";
+}
+
+function renderPerfilUsuario(correo){
+  const gruposUsuario=grupos.filter(g=>g.creadorCorreo===correo);
+  const nombre=(gruposUsuario[0]&&gruposUsuario[0].creadorNombre)||"Benutzer";
+  const nombreEl=document.getElementById("perfilUsuarioNombre");
+  const subtitleEl=document.getElementById("perfilUsuarioSubtitle");
+  if(nombreEl) nombreEl.textContent=`👤 ${nombre}`;
+  if(subtitleEl) subtitleEl.textContent=`${gruposUsuario.length} aktive Gruppe${gruposUsuario.length===1?"":"n"}`;
+
+  const grid=document.getElementById("perfilUsuarioGrid");
+  if(!grid) return;
+  if(!gruposUsuario.length){
+    grid.innerHTML=`
+      <div class="mis-grupos-vacio">
+        <span class="e">📭</span>
+        <strong style="display:block;font-size:16px;margin-bottom:8px">Keine aktiven Gruppen</strong>
+        <p style="margin:0;font-size:14px">Dieser Benutzer hat aktuell keine veröffentlichten Gruppen.</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML=gruposUsuario.map(g=>{
+    const claseBtn=g.plataforma==="WhatsApp"?"w":g.plataforma==="Signal"?"s":"t";
+    const esFav=favoritos.has(g.nombre);
+    const bloqueado=!puedeVotar(g.nombre);
+    return `
+    <div class="card">
+      <div class="img-wrap">
+        <img src="${g.img}" alt="${g.nombre}" loading="lazy">
+        <span class="plataforma-badge ${claseBtn}"><span class="circ">${svgPlataformaPerfil(g.plataforma)}</span>${g.plataforma}</span>
+        <span class="pais-badge" title="${nombrePais(g.pais)}">${banderaPais(g.pais)}</span>
+        <button class="btn-fav ${esFav?'activo':''} ${bloqueado?'fav-bloqueado':''}"
+          onclick="alternarFavorito(this,'${g.nombre}')"
+          aria-label="${bloqueado?'Heute bereits abgestimmt':'Als Favorit speichern'}"
+          title="${bloqueado?'Du kannst in '+tiempoRestante(g.nombre)+' wieder abstimmen':'Als Favorit markieren'}">
+          <span class="fav-ico">${esFav?'⭐':'☆'}</span>
+          <span class="fav-num">${totalFavoritos(g)}</span>
+        </button>
+      </div>
+      <div class="card-body">
+        <span class="tag ${g.categoria==='+18'?'plus18':''}">${categorias.find(c=>c.nombre===g.categoria)?.icono||""} ${categoriaLabel[g.categoria]||g.categoria}</span>
+        <h3>${g.nombre}</h3>
+        <div class="meta">
+          👥 ${g.miembros>0?g.miembros.toLocaleString("de-DE"):"—"} Mitglieder
+        </div>
+        <div class="acciones">
+          <a class="btn-unirse ${claseBtn}" target="_blank" rel="noopener" href="${g.link}">
+            Gruppe beitreten <span class="flecha">→</span>
+          </a>
+          <button class="btn-compartir" type="button" onclick="compartirGrupo(this,'${g.nombre.replace(/'/g,"\\'")}','${g.plataforma}')">
+            <span class="compartir-ico">🔗</span> Teilen
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
 function toggleDrawer(){
   const drawer=document.getElementById("navDrawer");
   const overlay=document.getElementById("navOverlay");
