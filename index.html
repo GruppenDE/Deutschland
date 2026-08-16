@@ -667,7 +667,9 @@ Mit Google fortfahren
 
    <div class="foto-perfil-upload">
     <label class="foto-perfil-circulo" id="fotoPerfilCirculo" for="inputFotoPerfil">
-     <span id="fotoPerfilPlaceholder" style="font-size:34px">👤</span>
+     <span class="foto-perfil-inner">
+      <span id="fotoPerfilPlaceholder" style="font-size:34px">👤</span>
+     </span>
      <span class="cam-ico">📷</span>
     </label>
     <input type="file" id="inputFotoPerfil" accept="image/*" style="display:none" onchange="previsualizarFotoPerfil(event)">
@@ -725,6 +727,20 @@ Mit Google fortfahren
 
    <p class="error-campo" id="errorEditarPerfil"></p>
    <button class="btn-principal" onclick="guardarPerfilUsuario()">Speichern</button>
+  </div>
+ </div>
+ <!-- MODAL — EDITAR LINK DE GRUPO (usuario) -->
+ <div class="overlay" id="overlayEditarLinkGrupo">
+  <div class="modal">
+   <button class="cerrar" onclick="cerrarEditarLinkGrupo()">✕</button>
+   <h2>Link bearbeiten</h2>
+   <p class="sub">Ist dein Gruppenlink abgelaufen? Trage hier den neuen Link für „<span id="editarLinkGrupoNombre"></span>" ein.</p>
+   <div class="campo">
+    <label>Neuer Gruppenlink</label>
+    <input type="text" id="editarLinkGrupoInput" placeholder="https://chat.whatsapp.com/… oder https://t.me/…">
+   </div>
+   <p class="error-campo" id="errorEditarLinkGrupo"></p>
+   <button class="btn-principal" onclick="guardarLinkGrupoUsuario()">Speichern</button>
   </div>
  </div>
  <!-- MODAL AVISO FOTO — todas las demás categorías -->
@@ -1965,18 +1981,21 @@ Mit Google fortfahren
   /* ===== MODAL EDITAR PERFIL ===== */
   .foto-perfil-upload{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:18px}
   .foto-perfil-circulo{
-    width:96px;height:96px;border-radius:50%;background:#fafbfa;border:2px dashed var(--borde);
-    display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;cursor:pointer;
-    color:var(--sub);transition:border-color .18s;flex-shrink:0;
+    width:96px;height:96px;border-radius:50%;position:relative;cursor:pointer;flex-shrink:0;display:block;
   }
-  .foto-perfil-circulo:hover{border-color:var(--verde)}
-  .foto-perfil-circulo img{width:100%;height:100%;object-fit:cover}
+  .foto-perfil-inner{
+    width:100%;height:100%;border-radius:50%;background:#fafbfa;border:2px dashed var(--borde);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+    color:var(--sub);transition:border-color .18s;
+  }
+  .foto-perfil-circulo:hover .foto-perfil-inner{border-color:var(--verde)}
+  .foto-perfil-inner img{width:100%;height:100%;object-fit:cover}
   .foto-perfil-circulo .cam-ico{
-    position:absolute;bottom:0;right:0;width:28px;height:28px;border-radius:50%;
+    position:absolute;bottom:-2px;right:-2px;width:28px;height:28px;border-radius:50%;
     background:var(--verde);color:#fff;display:flex;align-items:center;justify-content:center;
-    font-size:13px;border:2px solid var(--card);
+    font-size:13px;border:2px solid var(--card);box-shadow:0 1px 4px rgba(0,0,0,.2);
   }
-  body.dark .foto-perfil-circulo{background:#1d2421;border-color:#2a332f}
+  body.dark .foto-perfil-inner{background:#1d2421;border-color:#2a332f}
   .campo textarea{
     padding:11px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:14px;
     outline:none;background:#fafbfa;transition:border-color .18s;resize:vertical;font-family:inherit;
@@ -5543,14 +5562,73 @@ function renderMisGrupos(user){
             ?`<a class="btn-unirse ${claseBtn}" target="_blank" rel="noopener" href="${s.link}">Gruppe öffnen <span class="flecha">→</span></a>
               <button class="btn-compartir" type="button" onclick="compartirGrupo(this,'${s.nombre.replace(/'/g,"\\'")}','${s.plataforma}')">
                 <span class="compartir-ico">🔗</span> Teilen
+              </button>
+              <button class="btn-compartir" type="button" onclick="abrirEditarLinkGrupo('${s.id}')">
+                <span class="compartir-ico">✏️</span> Link bearbeiten
               </button>`
-            :`<button class="btn-unirse ${claseBtn}" disabled style="opacity:.5;cursor:not-allowed">
-                ${s.estado==="pendiente"?"⏳ Wird geprüft…":"❌ Abgelehnt"}
-              </button>`}
+            :s.estado==="pendiente"
+            ?`<button class="btn-unirse ${claseBtn}" disabled style="opacity:.5;cursor:not-allowed">⏳ Wird geprüft…</button>
+              <button class="btn-compartir" type="button" onclick="abrirEditarLinkGrupo('${s.id}')">
+                <span class="compartir-ico">✏️</span> Link bearbeiten
+              </button>`
+            :`<button class="btn-unirse ${claseBtn}" disabled style="opacity:.5;cursor:not-allowed">❌ Abgelehnt</button>`}
         </div>
       </div>
     </div>`;
   }).join("");
+}
+
+/* ===== EDITAR LINK DE GRUPO (usuario, ej. link caducado) ===== */
+let _solicitudEditandoLink=null;
+function abrirEditarLinkGrupo(idSolicitud){
+  const user=obtenerSesion();
+  if(!user){ mostrarToast("Bitte anmelden","🔒"); return; }
+  const s=obtenerSolicitudes().find(x=>x.id===idSolicitud && x.usuarioCorreo===user.correo);
+  if(!s){ mostrarToast("Gruppe nicht gefunden","⚠️"); return; }
+  _solicitudEditandoLink=s.id;
+  document.getElementById("editarLinkGrupoNombre").textContent=s.nombre;
+  document.getElementById("editarLinkGrupoInput").value=s.link||"";
+  document.getElementById("errorEditarLinkGrupo").textContent="";
+  document.getElementById("overlayEditarLinkGrupo").classList.add("abierto");
+}
+function cerrarEditarLinkGrupo(){
+  document.getElementById("overlayEditarLinkGrupo").classList.remove("abierto");
+  _solicitudEditandoLink=null;
+}
+function guardarLinkGrupoUsuario(){
+  const user=obtenerSesion();
+  if(!user||!_solicitudEditandoLink) return;
+  const err=document.getElementById("errorEditarLinkGrupo");
+  const input=document.getElementById("editarLinkGrupoInput");
+  const val=input.value.trim();
+  if(!val){ err.textContent="Bitte einen Link eingeben."; return; }
+  if(!/^https?:\/\//i.test(val)){ err.textContent="Der Link muss mit http:// oder https:// beginnen."; return; }
+
+  const solis=obtenerSolicitudes();
+  const s=solis.find(x=>x.id===_solicitudEditandoLink && x.usuarioCorreo===user.correo);
+  if(!s){ err.textContent="Gruppe nicht gefunden."; return; }
+
+  // 1. Actualizar la solicitud (fuente de la tarjeta en "Meine Gruppen")
+  s.link=val;
+  guardarSolicitudes(solis);
+
+  // 2. Si el grupo ya está aprobado y visible públicamente, actualizar también ahí
+  if(s.estado==="aprobado"){
+    [grupos, gruposExtra].forEach(arr=>{
+      const g=arr.find(x=>x.nombre===s.nombre && x.creadorCorreo===user.correo);
+      if(g){ g.link=val; g.linkActualizadoEn=Date.now(); }
+    });
+    _db.collection("grupos_extra").where("nombre","==",s.nombre).get().then(snap=>{
+      snap.forEach(doc=>{
+        if(doc.data().creadorCorreo===user.correo) doc.ref.update({link:val, linkActualizadoEn:Date.now()});
+      });
+    }).catch(e=>console.warn("FB link usuario:",e));
+    filtrar(); // re-pintar cards públicas con el nuevo link
+  }
+
+  cerrarEditarLinkGrupo();
+  renderMisGrupos(user);
+  mostrarToast(`🔗 „${s.nombre}": Link aktualisiert`,"✅");
 }
 
 /* ===== PERFIL PÚBLICO DE USUARIO (grupos activos) ===== */
@@ -5746,7 +5824,7 @@ function previsualizarFotoPerfil(event){
       ctx.drawImage(img,sx,sy,lado,lado,0,0,tam,tam);
       _fotoPerfilTemp=canvas.toDataURL("image/jpeg",0.82);
       const circulo=document.getElementById("fotoPerfilCirculo");
-      if(circulo) circulo.innerHTML=`<img src="${_fotoPerfilTemp}" alt="Vorschau"><span class="cam-ico">📷</span>`;
+      if(circulo) circulo.innerHTML=`<span class="foto-perfil-inner"><img src="${_fotoPerfilTemp}" alt="Vorschau"></span><span class="cam-ico">📷</span>`;
     };
     img.onerror=function(){ mostrarToast("Bild konnte nicht geladen werden","⚠️"); };
     img.src=e.target.result;
@@ -5783,10 +5861,10 @@ async function abrirEditarPerfil(){
   const foto=datos.foto||user.foto;
   if(circulo){
     if(foto){
-      circulo.innerHTML=`<img src="${foto}" alt="Foto"><span class="cam-ico">📷</span>`;
+      circulo.innerHTML=`<span class="foto-perfil-inner"><img src="${foto}" alt="Foto"></span><span class="cam-ico">📷</span>`;
     }else{
       const inicial=(user.nombre||"?").trim().charAt(0).toUpperCase();
-      circulo.innerHTML=`<span style="font-size:34px;font-weight:800;color:var(--verde-d)">${inicial}</span><span class="cam-ico">📷</span>`;
+      circulo.innerHTML=`<span class="foto-perfil-inner"><span style="font-size:34px;font-weight:800;color:var(--verde-d)">${inicial}</span></span><span class="cam-ico">📷</span>`;
     }
   }
 }
