@@ -5516,6 +5516,11 @@ function abrirPerfilUsuario(correo){
   document.getElementById("paginacion").style.display="none";
   document.getElementById("buscar").style.display="none";
   document.getElementById("resultadoInfo").style.display="none";
+  document.querySelector(".cat-bar").style.display="none";
+  document.querySelector(".banner-agregar").style.display="none";
+  document.querySelector(".banner-publi").style.display="none";
+  document.getElementById("bannerGrupoCompartido").style.display="none";
+  document.querySelector(".plat-wrap").style.display="none";
   document.getElementById("panelMisGrupos")?.classList.remove("abierto");
   const panel=document.getElementById("panelPerfilUsuario");
   const footer=document.querySelector("footer");
@@ -5531,6 +5536,10 @@ function cerrarPerfilUsuario(){
   document.getElementById("paginacion").style.display="";
   document.getElementById("buscar").style.display="";
   document.getElementById("resultadoInfo").style.display="";
+  document.querySelector(".cat-bar").style.display="";
+  document.querySelector(".banner-agregar").style.display="";
+  document.querySelector(".banner-publi").style.display="";
+  document.querySelector(".plat-wrap").style.display="";
 }
 
 /* Íconos de redes sociales para los botones del perfil (fondo de color, ícono blanco/negro) */
