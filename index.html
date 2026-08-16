@@ -1243,7 +1243,12 @@ Mit Google fortfahren
     transition:background .15s;font-family:inherit;
   }
   .creador-badge:hover{background:rgba(0,0,0,.72)}
-  .creador-badge .creador-ico{font-size:11px;line-height:1}
+  .creador-badge .creador-avatar-wrap{
+    width:16px;height:16px;border-radius:50%;flex-shrink:0;position:relative;overflow:hidden;
+    background:var(--verde);display:flex;align-items:center;justify-content:center;
+  }
+  .creador-badge .creador-foto{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+  .creador-badge .creador-inicial{font-size:9.5px;font-weight:700;line-height:1;color:#fff}
 
   .card-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
   .tag{
@@ -3074,8 +3079,8 @@ function pintar(arr){
       <div class="img-wrap">
         <img src="${g.img}" alt="${g.nombre}" loading="lazy">
         <span class="plataforma-badge ${claseBtn}"><span class="circ">${icoPlat}</span>${g.plataforma}</span>
-        ${g.creadorNombre?`<button type="button" class="creador-badge" onclick="event.stopPropagation();abrirPerfilUsuario('${(g.creadorCorreo||'').replace(/'/g,"\\'")}')" title="Profil von ${g.creadorNombre.replace(/"/g,'&quot;')} ansehen">
-          <span class="creador-ico">👤</span>${g.creadorNombre}
+        ${g.creadorNombre?`<button type="button" class="creador-badge" data-correo="${(g.creadorCorreo||'').replace(/"/g,'&quot;')}" onclick="event.stopPropagation();abrirPerfilUsuario('${(g.creadorCorreo||'').replace(/'/g,"\\'")}')" title="Profil von ${g.creadorNombre.replace(/"/g,'&quot;')} ansehen">
+          <span class="creador-avatar-wrap"><img class="creador-foto" src="" alt=""><span class="creador-inicial">${(g.creadorNombre||'?').trim().charAt(0).toUpperCase()}</span></span>${g.creadorNombre}
         </button>`:""}
         <span class="pais-badge" title="${nombrePais(g.pais)}">${banderaPais(g.pais)}</span>
         <button class="btn-fav ${esFav?'activo':''} ${bloqueado?'fav-bloqueado':''}"
@@ -3106,12 +3111,36 @@ function pintar(arr){
   }).join("");
 
   pintarPaginacion(totalPaginas);
+  cargarFotosCreadores();
 
   // animación de entrada (se aplica siempre que se pintan tarjetas: búsqueda, filtro, carga inicial o paginación)
   grid.classList.remove("animando");
   void grid.offsetWidth;
   grid.classList.add("animando");
   setTimeout(()=>grid.classList.remove("animando"),600);
+}
+
+let _fotosCreadorCache={};
+async function cargarFotosCreadores(){
+  const botones=[...document.querySelectorAll('.creador-badge[data-correo]')].filter(b=>b.dataset.correo);
+  const correos=[...new Set(botones.map(b=>b.dataset.correo))];
+  await Promise.all(correos.map(async correo=>{
+    if(_fotosCreadorCache[correo]===undefined){
+      try{
+        const datos=await obtenerUsuarioFirestore(correo);
+        _fotosCreadorCache[correo]=(datos&&datos.foto)||"";
+      }catch(e){ _fotosCreadorCache[correo]=""; }
+    }
+  }));
+  botones.forEach(b=>{
+    const foto=_fotosCreadorCache[b.dataset.correo];
+    if(foto){
+      const img=b.querySelector(".creador-foto");
+      const inicial=b.querySelector(".creador-inicial");
+      if(img){ img.src=foto; img.style.display="block"; }
+      if(inicial) inicial.style.display="none";
+    }
+  });
 }
 
 function pintarPaginacion(totalPaginas){
