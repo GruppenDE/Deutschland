@@ -1914,6 +1914,28 @@ Mit Google fortfahren
   }
   .mis-grupos-vacio .e{font-size:42px;display:block;margin-bottom:12px}
 
+  /* ===== GRUPOS EN EL PERFIL DE USUARIO — siempre 2 columnas, tarjetas compactas ===== */
+  #perfilUsuarioGrid{
+    grid-template-columns:repeat(2,1fr)!important;
+    gap:12px;
+  }
+  @media(max-width:600px){#perfilUsuarioGrid{gap:8px}}
+  #perfilUsuarioGrid .card-body{padding:9px 10px 10px;gap:4px}
+  #perfilUsuarioGrid .card h3{font-size:12.5px;line-height:1.25}
+  #perfilUsuarioGrid .tag{font-size:9.5px;padding:2px 7px}
+  #perfilUsuarioGrid .meta{font-size:10px;gap:4px}
+  #perfilUsuarioGrid .plataforma-badge{font-size:9.5px;padding:3px 7px 3px 4px;top:6px;left:6px;gap:3px}
+  #perfilUsuarioGrid .plataforma-badge .circ{width:13px;height:13px;font-size:8px}
+  #perfilUsuarioGrid .pais-badge{width:20px;height:20px;font-size:11px;top:6px;right:6px}
+  #perfilUsuarioGrid .creador-badge{top:28px;left:6px;font-size:9px;padding:3px 7px 3px 5px}
+  #perfilUsuarioGrid .creador-badge .creador-avatar-wrap{width:12px;height:12px}
+  #perfilUsuarioGrid .creador-badge .creador-inicial{font-size:7.5px}
+  #perfilUsuarioGrid .btn-fav{height:26px;min-width:28px;font-size:11px;padding:0 7px;bottom:6px;right:6px}
+  #perfilUsuarioGrid .btn-fav .fav-num{font-size:10px}
+  #perfilUsuarioGrid .acciones{gap:6px;padding-top:6px}
+  #perfilUsuarioGrid .btn-unirse{font-size:11px;padding:7px 8px;gap:5px;border-radius:8px}
+  #perfilUsuarioGrid .btn-compartir{font-size:10px;padding:6px 8px;border-radius:8px}
+
   /* ===== PERFIL PROFESIONAL — banner, avatar, bio, redes sociales ===== */
   .perfil-cerrar-row{padding:18px 0 0}
   .btn-cerrar-perfil{
