@@ -699,6 +699,26 @@ Mit Google fortfahren
     <div class="contador-bio"><span id="contadorBioNum">0</span>/220</div>
    </div>
 
+   <div class="campo-fila">
+    <div class="campo">
+     <label>Geschlecht</label>
+     <select id="perfilGenero">
+      <option value="">— Keine Angabe —</option>
+      <option value="masculino">♂ Männlich</option>
+      <option value="femenino">♀ Weiblich</option>
+      <option value="otro">⚧ Divers</option>
+     </select>
+    </div>
+    <div class="campo">
+     <label>Geburtsdatum</label>
+     <input type="date" id="perfilFechaNacimiento" max="">
+    </div>
+   </div>
+   <div class="campo">
+    <label>Standort</label>
+    <input type="text" id="perfilUbicacion" placeholder="z. B. 10115 Berlin, Deutschland" maxlength="80">
+   </div>
+
    <div class="campo campo-red-wrap">
     <label>Facebook</label>
     <div style="position:relative">
@@ -1996,6 +2016,8 @@ Mit Google fortfahren
   body.dark .perfil-card-pro{border-color:#2a332f}
   @media(max-width:600px){.perfil-card-pro{padding:0 16px 22px}}
   .perfil-top-row{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
+  .perfil-top-botones{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+  .perfil-top-botones .btn-editar-perfil.copiado{border-color:var(--verde);background:#edf7f0;color:var(--verde-d)}
   .perfil-avatar-wrap{
     width:128px;height:128px;border-radius:50%;background:#eef4f1;border:4px solid var(--card);
     box-shadow:0 4px 14px rgba(0,0,0,.18);margin:-64px auto 0;position:relative;
@@ -2037,6 +2059,42 @@ Mit Google fortfahren
   }
   .red-social-btn.snapchat .circ{background:rgba(0,0,0,.1)}
   #panelPerfilUsuario .mis-grupos-grid{margin-top:6px}
+
+  /* ===== CHIPS DE DATOS DEL PERFIL (género, edad, ubicación, miembro desde) ===== */
+  .perfil-datos-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;justify-content:center}
+  .perfil-dato-chip{
+    display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:999px;
+    background:#f1f4f2;color:var(--texto);font-size:13.5px;font-weight:600;
+  }
+  body.dark .perfil-dato-chip{background:#1d2421;color:#eef2f0}
+  .perfil-dato-chip .ic{font-size:15px;line-height:1}
+
+  /* ===== FILA DE ESTADÍSTICAS (grupos / suscriptores / vistas) ===== */
+  .perfil-stats-row{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    border-top:1px solid var(--borde);margin-top:20px;
+  }
+  body.dark .perfil-stats-row{border-color:#2a332f}
+  .perfil-stat{
+    text-align:center;padding:20px 8px;border-right:1px solid var(--borde);
+  }
+  body.dark .perfil-stat{border-color:#2a332f}
+  .perfil-stat:last-child{border-right:none}
+  .perfil-stat .num{font-size:26px;font-weight:800;color:var(--verde-d);line-height:1.1}
+  .perfil-stat .lbl{font-size:12px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;margin-top:4px}
+
+  .btn-seguir{
+    display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;
+    border:1.5px solid var(--verde);background:var(--verde);color:#fff;font-weight:600;
+    font-size:13px;cursor:pointer;transition:.18s;white-space:nowrap;margin-top:12px;
+  }
+  .btn-seguir:hover{background:var(--verde-d);border-color:var(--verde-d)}
+  .btn-seguir.activo{background:transparent;color:var(--verde-d)}
+  .btn-seguir.activo:hover{background:#c0392b1a;border-color:#c0392b;color:#c0392b}
+
+  /* ===== MODAL EDITAR PERFIL — campos en fila (género + fecha de nacimiento) ===== */
+  .campo-fila{display:flex;gap:12px;flex-wrap:wrap}
+  .campo-fila .campo{flex:1;min-width:140px}
 
   /* ===== MODAL EDITAR PERFIL ===== */
   .banner-perfil-wrap{margin-bottom:18px}
@@ -3472,6 +3530,60 @@ function compartirGrupo(btn,nombre,plataforma){
   });
 }
 
+function compartirPerfilUsuario(btn,correo,nombre){
+  const DOMINIO="https://gruppende.de/";
+  const slug=generarSlug(nombre||"");
+  const url=slug?`${DOMINIO}?usuario=${slug}`:`${DOMINIO}?usuario=${encodeURIComponent(correo)}`;
+
+  if(navigator.share){
+    navigator.share({url,title:nombre?`Profil von ${nombre}`:undefined}).catch(()=>{});
+    return;
+  }
+
+  const original=btn.innerHTML;
+  navigator.clipboard.writeText(url).then(()=>{
+    btn.classList.add("copiado");
+    btn.innerHTML='<span>✓</span> Link kopiert!';
+    setTimeout(()=>{
+      btn.classList.remove("copiado");
+      btn.innerHTML=original;
+    },1800);
+  }).catch(()=>{
+    prompt("Link kopieren:",url);
+  });
+}
+
+/* Busca el correo de un usuario a partir del "slug" de su nombre visible en la URL.
+   1) Primero entre los grupos ya cargados (rápido, sin red).
+   2) Si no aparece ahí, consulta la colección de usuarios en Firestore. */
+async function correoPorSlugUsuario(slug){
+  if(!slug) return null;
+  if(typeof grupos!=="undefined"&&grupos.length){
+    const g=grupos.find(g=>g.creadorNombre&&generarSlug(g.creadorNombre)===slug);
+    if(g&&g.creadorCorreo) return g.creadorCorreo;
+  }
+  const sesion=obtenerSesion();
+  if(sesion&&sesion.nombre&&generarSlug(sesion.nombre)===slug) return sesion.correo;
+  try{
+    const snap=await _db.collection("usuarios").get();
+    for(const doc of snap.docs){
+      const datos=doc.data();
+      if(datos.nombre&&generarSlug(datos.nombre)===slug) return datos.correo||null;
+    }
+  }catch(e){ console.warn("correoPorSlugUsuario:",e); }
+  return null;
+}
+
+async function aplicarPerfilDesdeURL(){
+  const params=new URLSearchParams(window.location.search);
+  const usuario=params.get("usuario");
+  if(!usuario) return;
+  // Compatibilidad con enlaces antiguos que usaban el correo directamente
+  const correo=usuario.includes("@")?usuario:await correoPorSlugUsuario(usuario);
+  if(!correo){ mostrarToast("Dieses Profil konnte nicht gefunden werden","⚠️"); return; }
+  abrirPerfilUsuario(correo);
+}
+
 function alternarFavorito(btn,nombre){
   if(!puedeVotar(nombre)){
     const resta=tiempoRestante(nombre);
@@ -3617,7 +3729,7 @@ async function obtenerUsuarioFirestore(correo){
 async function guardarUsuarioFirestore(userData){
   const correoKey=userData.correo.replace(/[.#$[\]]/g,"_");
   try{
-    await _db.collection("usuarios").doc(correoKey).set(userData);
+    await _db.collection("usuarios").doc(correoKey).set(userData,{merge:true});
   }catch(e){ console.warn("FB guardarUsuario:",e); }
 }
 let _usuariosCache=[];
@@ -3673,7 +3785,7 @@ async function registrar(){
 
   const existente=await obtenerUsuarioFirestore(correo);
   if(existente){err.textContent="Ein Konto mit dieser E-Mail-Adresse existiert bereits.";return}
-  const userData={nombre,correo,pass};
+  const userData={nombre,correo,pass,creadoEn:new Date().toISOString()};
   await guardarUsuarioFirestore(userData);
   _usuariosCache.push(userData);
   guardarSesion({nombre,correo,metodo:"correo"});
@@ -3749,8 +3861,11 @@ async function googleSignIn(){
 async function _procesarUsuarioGoogle(gUser){
   const nombre=gUser.displayName||"Google-Nutzer";
   const correo=(gUser.email||"usuario@gmail.com").toLowerCase();
-  // Guardar/actualizar usuario en Firestore
-  await guardarUsuarioFirestore({nombre,correo,metodo:"google"});
+  // Guardar/actualizar usuario en Firestore (merge:true conserva bio/foto/etc. en logins posteriores)
+  const existente=await obtenerUsuarioFirestore(correo);
+  const datosGoogle={nombre,correo,metodo:"google"};
+  if(!existente) datosGoogle.creadoEn=new Date().toISOString();
+  await guardarUsuarioFirestore(datosGoogle);
   guardarSesion({nombre,correo,metodo:"google"});
   cerrarAuth();
   mostrarToast(`Willkommen, ${nombre}! 🎉`,"🔵");
@@ -4571,6 +4686,7 @@ async function initFirebase(){
     _cargandoGrupos=false;
     filtrar();
     try{ aplicarGrupoDesdeURL(); }catch(e){ console.warn("aplicarGrupoDesdeURL:",e); }
+    aplicarPerfilDesdeURL().catch(e=>console.warn("aplicarPerfilDesdeURL:",e));
 
   }catch(e){
     console.warn("Firebase init error:",e);
@@ -4578,6 +4694,7 @@ async function initFirebase(){
     // Fix: pintar igual para no dejar skeletons infinitos
     try{ filtrar(); }catch(fe){ console.warn("filtrar fallback:",fe); }
     try{ aplicarGrupoDesdeURL(); }catch(fe){ console.warn("aplicarGrupoDesdeURL fallback:",fe); }
+    aplicarPerfilDesdeURL().catch(fe=>console.warn("aplicarPerfilDesdeURL fallback:",fe));
   }
 
   try{ iniciarListenersChat(); }catch(e){ console.warn("iniciarListenersChat:",e); }
@@ -5803,6 +5920,61 @@ let _perfilUsuarioPagina=1;
 let _perfilUsuarioCorreoActual=null;
 const PERFIL_USUARIO_POR_PAGINA=8;
 
+/* ===== Datos derivados del perfil: edad, "miembro desde", género, seguir ===== */
+function calcularEdad(fechaISO){
+  if(!fechaISO) return null;
+  const nacimiento=new Date(fechaISO+"T00:00:00");
+  if(isNaN(nacimiento)) return null;
+  const hoy=new Date();
+  let edad=hoy.getFullYear()-nacimiento.getFullYear();
+  const m=hoy.getMonth()-nacimiento.getMonth();
+  if(m<0||(m===0&&hoy.getDate()<nacimiento.getDate())) edad--;
+  return edad>=0&&edad<130?edad:null;
+}
+function formatearMesAno(fechaISO){
+  if(!fechaISO) return null;
+  const fecha=new Date(fechaISO);
+  if(isNaN(fecha)) return null;
+  const mes=String(fecha.getMonth()+1).padStart(2,"0");
+  return `${mes}/${fecha.getFullYear()}`;
+}
+const GENERO_INFO={
+  masculino:{icono:"♂",label:"Männlich"},
+  femenino:{icono:"♀",label:"Weiblich"},
+  otro:{icono:"⚧",label:"Divers"}
+};
+
+async function alternarSeguirUsuario(btn,correoObjetivo){
+  const sesion=obtenerSesion();
+  if(!sesion){ mostrarToast("Bitte melde dich zuerst an","⚠️"); abrirAuth("login"); return; }
+  if(sesion.correo===correoObjetivo) return;
+  btn.disabled=true;
+  try{
+    const correoKey=correoObjetivo.replace(/[.#$[\]]/g,"_");
+    const miKey=correoAKey(sesion.correo);
+    const ref=_db.collection("usuarios").doc(correoKey);
+    const suscRef=ref.collection("suscriptores").doc(miKey);
+    const yaSigue=btn.classList.contains("activo");
+    if(yaSigue){
+      await suscRef.delete();
+      await ref.set({suscriptoresCount:firebase.firestore.FieldValue.increment(-1)},{merge:true});
+      btn.classList.remove("activo");
+      btn.innerHTML="➕ Folgen";
+    }else{
+      await suscRef.set({correo:sesion.correo,desde:new Date().toISOString()});
+      await ref.set({suscriptoresCount:firebase.firestore.FieldValue.increment(1)},{merge:true});
+      btn.classList.add("activo");
+      btn.innerHTML="✓ Folgst du";
+    }
+    const numEl=document.getElementById("perfilStatSuscriptores");
+    if(numEl) numEl.textContent=Math.max(0,parseInt(numEl.textContent,10)+(yaSigue?-1:1));
+  }catch(e){
+    console.warn("alternarSeguirUsuario:",e);
+    mostrarToast("Aktion konnte nicht ausgeführt werden","⚠️");
+  }
+  btn.disabled=false;
+}
+
 async function renderPerfilUsuario(correo,pagina){
   const gruposUsuario=grupos.filter(g=>g.creadorCorreo===correo);
   if(pagina) _perfilUsuarioPagina=pagina;
@@ -5831,6 +6003,50 @@ async function renderPerfilUsuario(correo,pagina){
     :"";
   const bioEscapada=bio.replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
+  /* ===== Chips de datos: género, edad, ubicación, miembro desde ===== */
+  const chips=[];
+  const infoGenero=GENERO_INFO[datosUsuario.genero];
+  if(infoGenero) chips.push(`<span class="perfil-dato-chip"><span class="ic">${infoGenero.icono}</span>${infoGenero.label}</span>`);
+  const edad=calcularEdad(datosUsuario.fechaNacimiento);
+  if(edad!==null) chips.push(`<span class="perfil-dato-chip"><span class="ic">🎂</span>${edad} Jahre</span>`);
+  if(datosUsuario.ubicacion) chips.push(`<span class="perfil-dato-chip"><span class="ic">📍</span>${datosUsuario.ubicacion.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</span>`);
+  const miembroDesde=formatearMesAno(datosUsuario.creadoEn);
+  if(miembroDesde) chips.push(`<span class="perfil-dato-chip"><span class="ic">📅</span>${miembroDesde}</span>`);
+  const chipsHTML=chips.length?`<div class="perfil-datos-row">${chips.join("")}</div>`:"";
+
+  /* ===== Botón seguir (solo si no es mi propio perfil) ===== */
+  let yaSigue=false;
+  if(!esPropio&&sesion){
+    try{
+      const correoKey=correo.replace(/[.#$[\]]/g,"_");
+      const suscDoc=await _db.collection("usuarios").doc(correoKey)
+        .collection("suscriptores").doc(correoAKey(sesion.correo)).get();
+      yaSigue=suscDoc.exists;
+    }catch(e){ console.warn("check seguir:",e); }
+  }
+  const btnSeguirHTML=(!esPropio&&sesion)
+    ?`<button class="btn-seguir ${yaSigue?"activo":""}" onclick="alternarSeguirUsuario(this,'${correo.replace(/'/g,"\\'")}')">${yaSigue?"✓ Folgst du":"➕ Folgen"}</button>`
+    :"";
+
+  /* ===== Registrar vista de perfil (no cuenta las vistas del propio dueño) ===== */
+  const vistasPrevias=datosUsuario.vistas||0;
+  const vistasMostradas=esPropio?vistasPrevias:vistasPrevias+1;
+  if(!esPropio){
+    try{
+      const correoKey=correo.replace(/[.#$[\]]/g,"_");
+      _db.collection("usuarios").doc(correoKey)
+        .set({vistas:firebase.firestore.FieldValue.increment(1)},{merge:true}).catch(()=>{});
+    }catch(e){ console.warn("registrar vista:",e); }
+  }
+  const suscriptoresCount=datosUsuario.suscriptoresCount||0;
+
+  const statsHTML=`
+    <div class="perfil-stats-row">
+      <div class="perfil-stat"><div class="num">${gruposUsuario.length}</div><div class="lbl">Gruppen</div></div>
+      <div class="perfil-stat"><div class="num" id="perfilStatSuscriptores">${suscriptoresCount}</div><div class="lbl">Abonnenten</div></div>
+      <div class="perfil-stat"><div class="num">${vistasMostradas}</div><div class="lbl">Profilaufrufe</div></div>
+    </div>`;
+
   const header=document.getElementById("perfilUsuarioHeader");
   if(header){
     header.innerHTML=`
@@ -5838,14 +6054,20 @@ async function renderPerfilUsuario(correo,pagina){
       <div class="perfil-card-pro">
         <div class="perfil-top-row">
           <div class="perfil-avatar-wrap">${avatarHTML}</div>
-          ${esPropio?`<button class="btn-editar-perfil" onclick="abrirEditarPerfil()">✏️ Profil bearbeiten</button>`:""}
+          <div class="perfil-top-botones">
+            ${esPropio?`<button class="btn-editar-perfil" onclick="abrirEditarPerfil()">✏️ Profil bearbeiten</button>`:""}
+            <button class="btn-editar-perfil" onclick="compartirPerfilUsuario(this,'${correo.replace(/'/g,"\\'")}','${nombre.replace(/'/g,"\\'")}')">🔗 Profil teilen</button>
+            ${btnSeguirHTML}
+          </div>
         </div>
         <div class="perfil-info-nombre">
           <h2>${nombre}</h2>
           <p>${gruposUsuario.length} aktive Gruppe${gruposUsuario.length===1?"":"n"}</p>
         </div>
         <p class="perfil-bio-pro${bio?"":" vacio"}">${bio?bioEscapada:"Dieser Benutzer hat noch keine Biografie hinzugefügt."}</p>
+        ${chipsHTML}
         ${redesHTML}
+        ${statsHTML}
       </div>`;
   }
 
@@ -6078,6 +6300,13 @@ async function abrirEditarPerfil(){
   _bannerPerfilRenderPreview();
   document.getElementById("perfilBio").value=datos.bio||"";
   actualizarContadorBio();
+  document.getElementById("perfilGenero").value=datos.genero||"";
+  const inputFecha=document.getElementById("perfilFechaNacimiento");
+  if(inputFecha){
+    inputFecha.max=new Date().toISOString().slice(0,10);
+    inputFecha.value=datos.fechaNacimiento||"";
+  }
+  document.getElementById("perfilUbicacion").value=datos.ubicacion||"";
   const redes=datos.redes||{};
   document.getElementById("perfilFacebook").value=redes.facebook||"";
   document.getElementById("perfilInstagram").value=redes.instagram||"";
@@ -6107,6 +6336,9 @@ async function guardarPerfilUsuario(){
   if(!user) return;
   const err=document.getElementById("errorEditarPerfil");
   const bio=document.getElementById("perfilBio").value.trim().slice(0,220);
+  const genero=document.getElementById("perfilGenero").value;
+  const fechaNacimiento=document.getElementById("perfilFechaNacimiento").value;
+  const ubicacion=document.getElementById("perfilUbicacion").value.trim().slice(0,80);
   const redes={
     facebook:document.getElementById("perfilFacebook").value.trim(),
     instagram:document.getElementById("perfilInstagram").value.trim(),
@@ -6117,12 +6349,12 @@ async function guardarPerfilUsuario(){
   };
   try{
     const correoKey=user.correo.replace(/[.#$[\]]/g,"_");
-    const datosActualizar={bio,redes};
+    const datosActualizar={bio,redes,genero,fechaNacimiento,ubicacion};
     if(_fotoPerfilTemp) datosActualizar.foto=_fotoPerfilTemp;
     if(_bannerPerfilTemp!==null) datosActualizar.banner=_bannerPerfilTemp;
     await _db.collection("usuarios").doc(correoKey).set(datosActualizar,{merge:true});
 
-    const sesionActualizada=Object.assign({},user,{bio,redes});
+    const sesionActualizada=Object.assign({},user,{bio,redes,genero,fechaNacimiento,ubicacion});
     if(_fotoPerfilTemp) sesionActualizada.foto=_fotoPerfilTemp;
     if(_bannerPerfilTemp!==null) sesionActualizada.banner=_bannerPerfilTemp;
     guardarSesion(sesionActualizada);
