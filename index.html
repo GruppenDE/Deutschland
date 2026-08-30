@@ -665,6 +665,22 @@ Mit Google fortfahren
    <h2>Profil bearbeiten</h2>
    <p class="sub">Lade ein Profilfoto hoch und erzähle anderen etwas über dich.</p>
 
+   <div class="banner-perfil-wrap">
+    <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">Banner</label>
+    <div class="banner-perfil-preview" id="bannerPerfilPreview">
+     <img id="bannerPerfilImg" alt="Banner" style="display:none">
+     <span class="banner-perfil-placeholder" id="bannerPerfilPlaceholder">🖼️<br>Banner hinzufügen</span>
+     <button type="button" class="banner-perfil-cambiar" onclick="document.getElementById('inputBannerPerfil').click()" title="Bild ändern">📷</button>
+     <button type="button" class="banner-perfil-quitar" id="bannerPerfilQuitarBtn" style="display:none" onclick="_bannerPerfilQuitar()" title="Entfernen">✕</button>
+    </div>
+    <div class="banner-perfil-zoom-row" id="bannerPerfilZoomRow" style="display:none">
+     <span style="font-size:15px">🔍</span>
+     <input type="range" id="bannerZoomRange" min="100" max="250" value="100" oninput="_bannerAjustarZoom(this.value)">
+    </div>
+    <input type="file" id="inputBannerPerfil" accept="image/*" style="display:none" onchange="previsualizarBannerPerfil(event)">
+    <span style="font-size:12px;color:var(--sub);text-align:center;display:block;margin-top:6px">Ziehe das Bild, um es zu positionieren. Mit dem Regler zoomst du hinein.</span>
+   </div>
+
    <div class="foto-perfil-upload">
     <label class="foto-perfil-circulo" id="fotoPerfilCirculo" for="inputFotoPerfil">
      <span class="foto-perfil-inner">
@@ -1925,9 +1941,15 @@ Mit Google fortfahren
     position:relative;overflow:hidden;
   }
   .perfil-banner::after{
-    content:"";position:absolute;inset:0;
+    content:"";position:absolute;inset:0;z-index:1;
     background:radial-gradient(circle at 85% 15%,rgba(255,255,255,.22),transparent 55%);
   }
+  .perfil-banner-img{animation:perfilBannerPulse 6s ease-in-out infinite}
+  @keyframes perfilBannerPulse{
+    0%,100%{transform:scale(var(--bz,1))}
+    50%{transform:scale(calc(var(--bz,1) * 1.08))}
+  }
+  @media(prefers-reduced-motion:reduce){.perfil-banner-img{animation:none}}
   .perfil-card-pro{
     background:var(--card);border:1px solid var(--borde);border-top:none;
     border-radius:0 0 var(--radio) var(--radio);
@@ -1979,6 +2001,31 @@ Mit Google fortfahren
   #panelPerfilUsuario .mis-grupos-grid{margin-top:6px}
 
   /* ===== MODAL EDITAR PERFIL ===== */
+  .banner-perfil-wrap{margin-bottom:18px}
+  .banner-perfil-preview{
+    position:relative;width:100%;height:130px;border-radius:var(--radio);
+    overflow:hidden;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;
+    background:linear-gradient(120deg,var(--verde) 0%,var(--verde-d) 55%,#0d5c2a 100%);
+    display:flex;align-items:center;justify-content:center;
+    border:1.5px solid var(--borde);
+  }
+  .banner-perfil-preview.arrastrando{cursor:grabbing}
+  .banner-perfil-preview img{
+    position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;
+    pointer-events:none;transform-origin:center;
+  }
+  .banner-perfil-placeholder{color:#fff;font-size:13px;font-weight:600;text-align:center;line-height:1.4;opacity:.9}
+  .banner-perfil-cambiar,.banner-perfil-quitar{
+    position:absolute;top:8px;width:32px;height:32px;border-radius:50%;
+    background:rgba(0,0,0,.45);color:#fff;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-size:15px;transition:.15s;z-index:2;
+  }
+  .banner-perfil-cambiar{right:8px}
+  .banner-perfil-quitar{right:48px;background:rgba(200,40,40,.75)}
+  .banner-perfil-cambiar:hover,.banner-perfil-quitar:hover{transform:scale(1.08)}
+  .banner-perfil-zoom-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+  .banner-perfil-zoom-row input[type=range]{flex:1}
+  body.dark .banner-perfil-preview{border-color:#2a332f}
   .foto-perfil-upload{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:18px}
   .foto-perfil-circulo{
     width:96px;height:96px;border-radius:50%;position:relative;cursor:pointer;flex-shrink:0;display:block;
@@ -5720,6 +5767,10 @@ async function renderPerfilUsuario(correo){
   const nombre=datosUsuario.nombre||(gruposUsuario[0]&&gruposUsuario[0].creadorNombre)||"Benutzer";
   const bio=(datosUsuario.bio||"").trim();
   const foto=datosUsuario.foto||"";
+  const banner=datosUsuario.banner||null;
+  const bannerHTML=(banner&&banner.img)
+    ?`<img class="perfil-banner-img" src="${banner.img}" alt="Banner" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${banner.x||50}% ${banner.y||50}%;--bz:${(banner.zoom||100)/100};transform-origin:center">`
+    :"";
   const redes=datosUsuario.redes||{};
   const sesion=obtenerSesion();
   const esPropio=!!(sesion&&sesion.correo===correo);
@@ -5738,7 +5789,7 @@ async function renderPerfilUsuario(correo){
   const header=document.getElementById("perfilUsuarioHeader");
   if(header){
     header.innerHTML=`
-      <div class="perfil-banner"></div>
+      <div class="perfil-banner">${bannerHTML}</div>
       <div class="perfil-card-pro">
         <div class="perfil-top-row">
           <div class="perfil-avatar-wrap">${avatarHTML}</div>
@@ -5805,6 +5856,113 @@ async function renderPerfilUsuario(correo){
    EDITAR MI PERFIL — foto, biografía, redes sociales
    ========================================================= */
 let _fotoPerfilTemp=null;
+let _bannerPerfilTemp=null;
+let _bannerDrag=null;
+
+function previsualizarBannerPerfil(event){
+  const file=event.target.files&&event.target.files[0];
+  if(!file) return;
+  if(!file.type.startsWith("image/")){ mostrarToast("Bitte wähle eine Bilddatei aus","⚠️"); return; }
+  if(file.size>8*1024*1024){ mostrarToast("Das Bild ist zu groß (max. 8 MB)","⚠️"); return; }
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      const maxW=1280;
+      let w=img.width,h=img.height;
+      if(w>maxW){ h=h*(maxW/w); w=maxW; }
+      const canvas=document.createElement("canvas");
+      canvas.width=w;canvas.height=h;
+      canvas.getContext("2d").drawImage(img,0,0,w,h);
+      _bannerPerfilTemp={img:canvas.toDataURL("image/jpeg",0.85),x:50,y:50,zoom:100};
+      _bannerPerfilRenderPreview();
+    };
+    img.onerror=function(){ mostrarToast("Bild konnte nicht geladen werden","⚠️"); };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function _bannerPerfilRenderPreview(){
+  const imgEl=document.getElementById("bannerPerfilImg");
+  const ph=document.getElementById("bannerPerfilPlaceholder");
+  const quitarBtn=document.getElementById("bannerPerfilQuitarBtn");
+  const zoomRow=document.getElementById("bannerPerfilZoomRow");
+  const zoomRange=document.getElementById("bannerZoomRange");
+  if(!imgEl) return;
+  if(_bannerPerfilTemp&&_bannerPerfilTemp.img){
+    imgEl.src=_bannerPerfilTemp.img;
+    imgEl.style.display="block";
+    imgEl.style.objectPosition=`${_bannerPerfilTemp.x}% ${_bannerPerfilTemp.y}%`;
+    imgEl.style.transform=`scale(${_bannerPerfilTemp.zoom/100})`;
+    if(ph) ph.style.display="none";
+    if(quitarBtn) quitarBtn.style.display="flex";
+    if(zoomRow) zoomRow.style.display="flex";
+    if(zoomRange) zoomRange.value=_bannerPerfilTemp.zoom;
+  }else{
+    imgEl.style.display="none";
+    imgEl.removeAttribute("src");
+    if(ph) ph.style.display="block";
+    if(quitarBtn) quitarBtn.style.display="none";
+    if(zoomRow) zoomRow.style.display="none";
+  }
+}
+
+function _bannerPerfilQuitar(){
+  _bannerPerfilTemp={img:null,x:50,y:50,zoom:100};
+  _bannerPerfilRenderPreview();
+  const input=document.getElementById("inputBannerPerfil");
+  if(input) input.value="";
+}
+
+function _bannerAjustarZoom(val){
+  if(!_bannerPerfilTemp||!_bannerPerfilTemp.img) return;
+  _bannerPerfilTemp.zoom=parseInt(val,10);
+  const imgEl=document.getElementById("bannerPerfilImg");
+  if(imgEl) imgEl.style.transform=`scale(${_bannerPerfilTemp.zoom/100})`;
+}
+
+function _bannerDragIniciar(e){
+  if(!_bannerPerfilTemp||!_bannerPerfilTemp.img) return;
+  const preview=document.getElementById("bannerPerfilPreview");
+  if(!preview) return;
+  const punto=e.touches?e.touches[0]:e;
+  _bannerDrag={
+    startX:punto.clientX,startY:punto.clientY,
+    origX:_bannerPerfilTemp.x,origY:_bannerPerfilTemp.y,
+    rect:preview.getBoundingClientRect()
+  };
+  preview.classList.add("arrastrando");
+  e.preventDefault();
+}
+function _bannerDragMover(e){
+  if(!_bannerDrag) return;
+  const punto=e.touches?e.touches[0]:e;
+  const dx=punto.clientX-_bannerDrag.startX;
+  const dy=punto.clientY-_bannerDrag.startY;
+  const pctX=(dx/_bannerDrag.rect.width)*100;
+  const pctY=(dy/_bannerDrag.rect.height)*100;
+  let nx=_bannerDrag.origX-pctX;
+  let ny=_bannerDrag.origY-pctY;
+  nx=Math.max(0,Math.min(100,nx));
+  ny=Math.max(0,Math.min(100,ny));
+  _bannerPerfilTemp.x=nx; _bannerPerfilTemp.y=ny;
+  const imgEl=document.getElementById("bannerPerfilImg");
+  if(imgEl) imgEl.style.objectPosition=`${nx}% ${ny}%`;
+  e.preventDefault();
+}
+function _bannerDragSoltar(){
+  if(!_bannerDrag) return;
+  _bannerDrag=null;
+  const preview=document.getElementById("bannerPerfilPreview");
+  if(preview) preview.classList.remove("arrastrando");
+}
+document.getElementById("bannerPerfilPreview")?.addEventListener("mousedown",_bannerDragIniciar);
+document.getElementById("bannerPerfilPreview")?.addEventListener("touchstart",_bannerDragIniciar,{passive:false});
+document.addEventListener("mousemove",_bannerDragMover);
+document.addEventListener("touchmove",_bannerDragMover,{passive:false});
+document.addEventListener("mouseup",_bannerDragSoltar);
+document.addEventListener("touchend",_bannerDragSoltar);
 
 function previsualizarFotoPerfil(event){
   const file=event.target.files&&event.target.files[0];
@@ -5842,11 +6000,14 @@ async function abrirEditarPerfil(){
   const user=obtenerSesion();
   if(!user){ mostrarToast("Bitte melde dich zuerst an","⚠️"); abrirAuth("login"); return; }
   _fotoPerfilTemp=null;
+  _bannerPerfilTemp=null;
   const err=document.getElementById("errorEditarPerfil");
   if(err) err.textContent="";
   document.getElementById("overlayEditarPerfil").classList.add("abierto");
 
   const datos=await obtenerUsuarioFirestore(user.correo)||{};
+  _bannerPerfilTemp=datos.banner?Object.assign({},datos.banner):null;
+  _bannerPerfilRenderPreview();
   document.getElementById("perfilBio").value=datos.bio||"";
   actualizarContadorBio();
   const redes=datos.redes||{};
@@ -5890,10 +6051,12 @@ async function guardarPerfilUsuario(){
     const correoKey=user.correo.replace(/[.#$[\]]/g,"_");
     const datosActualizar={bio,redes};
     if(_fotoPerfilTemp) datosActualizar.foto=_fotoPerfilTemp;
+    if(_bannerPerfilTemp!==null) datosActualizar.banner=_bannerPerfilTemp;
     await _db.collection("usuarios").doc(correoKey).set(datosActualizar,{merge:true});
 
     const sesionActualizada=Object.assign({},user,{bio,redes});
     if(_fotoPerfilTemp) sesionActualizada.foto=_fotoPerfilTemp;
+    if(_bannerPerfilTemp!==null) sesionActualizada.banner=_bannerPerfilTemp;
     guardarSesion(sesionActualizada);
 
     cerrarEditarPerfil();
