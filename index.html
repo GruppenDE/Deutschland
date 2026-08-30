@@ -5923,6 +5923,7 @@ function _bannerAjustarZoom(val){
 }
 
 function _bannerDragIniciar(e){
+  if(e.target.closest(".banner-perfil-cambiar,.banner-perfil-quitar")) return;
   if(!_bannerPerfilTemp||!_bannerPerfilTemp.img) return;
   const preview=document.getElementById("bannerPerfilPreview");
   if(!preview) return;
