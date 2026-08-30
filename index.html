@@ -356,6 +356,7 @@
    </div>
    <div id="perfilUsuarioHeader" class="perfil-header-pro"></div>
    <div id="perfilUsuarioGrid" class="mis-grupos-grid"></div>
+   <div id="perfilUsuarioPaginacion" class="perfil-paginacion"></div>
   </div>
  </div>
  <!-- PANEL ADMINISTRADOR -->
@@ -1935,6 +1936,21 @@ Mit Google fortfahren
   #perfilUsuarioGrid .acciones{gap:6px;padding-top:6px}
   #perfilUsuarioGrid .btn-unirse{font-size:11px;padding:7px 8px;gap:5px;border-radius:8px}
   #perfilUsuarioGrid .btn-compartir{font-size:10px;padding:6px 8px;border-radius:8px}
+
+  .perfil-paginacion{
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    margin-top:24px;flex-wrap:wrap;
+  }
+  .perfil-paginacion button{
+    min-width:34px;height:34px;padding:0 10px;border-radius:8px;
+    border:1.5px solid var(--borde);background:var(--card);color:var(--texto);
+    font-weight:600;font-size:13px;cursor:pointer;transition:.15s;
+  }
+  .perfil-paginacion button:hover:not(:disabled){border-color:var(--verde);color:var(--verde-d);background:#edf7f0}
+  .perfil-paginacion button.activa{background:var(--verde);border-color:var(--verde);color:#fff}
+  .perfil-paginacion button:disabled{opacity:.4;cursor:default}
+  body.dark .perfil-paginacion button{background:#1d2421;border-color:#2a332f;color:#eef2f0}
+  body.dark .perfil-paginacion button:hover:not(:disabled){background:#20302690}
 
   /* ===== PERFIL PROFESIONAL — banner, avatar, bio, redes sociales ===== */
   .perfil-cerrar-row{padding:18px 0 0}
@@ -5783,8 +5799,15 @@ function normalizarUrlRed(tipo,valor){
   return (bases[tipo]||"")+limpio;
 }
 
-async function renderPerfilUsuario(correo){
+let _perfilUsuarioPagina=1;
+let _perfilUsuarioCorreoActual=null;
+const PERFIL_USUARIO_POR_PAGINA=8;
+
+async function renderPerfilUsuario(correo,pagina){
   const gruposUsuario=grupos.filter(g=>g.creadorCorreo===correo);
+  if(pagina) _perfilUsuarioPagina=pagina;
+  if(_perfilUsuarioCorreoActual!==correo){ _perfilUsuarioPagina=1; }
+  _perfilUsuarioCorreoActual=correo;
   const datosUsuario=await obtenerUsuarioFirestore(correo)||{};
   const nombre=datosUsuario.nombre||(gruposUsuario[0]&&gruposUsuario[0].creadorNombre)||"Benutzer";
   const bio=(datosUsuario.bio||"").trim();
@@ -5827,6 +5850,7 @@ async function renderPerfilUsuario(correo){
   }
 
   const grid=document.getElementById("perfilUsuarioGrid");
+  const paginacion=document.getElementById("perfilUsuarioPaginacion");
   if(!grid) return;
   if(!gruposUsuario.length){
     grid.innerHTML=`
@@ -5835,10 +5859,17 @@ async function renderPerfilUsuario(correo){
         <strong style="display:block;font-size:16px;margin-bottom:8px">Keine aktiven Gruppen</strong>
         <p style="margin:0;font-size:14px">Dieser Benutzer hat aktuell keine veröffentlichten Gruppen.</p>
       </div>`;
+    if(paginacion) paginacion.innerHTML="";
     return;
   }
 
-  grid.innerHTML=gruposUsuario.map(g=>{
+  const totalPaginas=Math.max(1,Math.ceil(gruposUsuario.length/PERFIL_USUARIO_POR_PAGINA));
+  if(_perfilUsuarioPagina>totalPaginas) _perfilUsuarioPagina=totalPaginas;
+  if(_perfilUsuarioPagina<1) _perfilUsuarioPagina=1;
+  const inicio=(_perfilUsuarioPagina-1)*PERFIL_USUARIO_POR_PAGINA;
+  const gruposPagina=gruposUsuario.slice(inicio,inicio+PERFIL_USUARIO_POR_PAGINA);
+
+  grid.innerHTML=gruposPagina.map(g=>{
     const claseBtn=g.plataforma==="WhatsApp"?"w":g.plataforma==="Signal"?"s":"t";
     const esFav=favoritos.has(g.nombre);
     const bloqueado=!puedeVotar(g.nombre);
@@ -5873,6 +5904,20 @@ async function renderPerfilUsuario(correo){
       </div>
     </div>`;
   }).join("");
+
+  if(paginacion){
+    if(totalPaginas<=1){
+      paginacion.innerHTML="";
+    }else{
+      const botones=[];
+      botones.push(`<button ${_perfilUsuarioPagina===1?"disabled":""} onclick="renderPerfilUsuario('${correo.replace(/'/g,"\\'")}',${_perfilUsuarioPagina-1})" aria-label="Vorherige Seite">‹</button>`);
+      for(let p=1;p<=totalPaginas;p++){
+        botones.push(`<button class="${p===_perfilUsuarioPagina?'activa':''}" onclick="renderPerfilUsuario('${correo.replace(/'/g,"\\'")}',${p})">${p}</button>`);
+      }
+      botones.push(`<button ${_perfilUsuarioPagina===totalPaginas?"disabled":""} onclick="renderPerfilUsuario('${correo.replace(/'/g,"\\'")}',${_perfilUsuarioPagina+1})" aria-label="Nächste Seite">›</button>`);
+      paginacion.innerHTML=botones.join("");
+    }
+  }
 }
 /* =========================================================
    EDITAR MI PERFIL — foto, biografía, redes sociales
