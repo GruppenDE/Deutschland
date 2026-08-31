@@ -1320,6 +1320,19 @@ Mit Google fortfahren
     font-size:16px;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.25);
   }
 
+  .btn-editar-grupo-badge{
+    position:absolute;top:10px;right:46px;
+    width:30px;height:30px;border-radius:50%;
+    background:rgba(255,255,255,.92);border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.25);
+    transition:background .15s,transform .15s;padding:0;
+  }
+  .btn-editar-grupo-badge:hover{background:#fff;transform:scale(1.06)}
+  #perfilUsuarioGrid .btn-editar-grupo-badge{width:24px;height:24px;font-size:11px;top:6px;right:32px}
+  body.dark .btn-editar-grupo-badge{background:rgba(30,38,35,.9);color:#f0f4f2}
+  body.dark .btn-editar-grupo-badge:hover{background:#1e2623}
+
   .creador-badge{
     position:absolute;top:46px;left:10px;display:flex;align-items:center;gap:5px;
     padding:4px 10px 4px 7px;border-radius:999px;font-size:11.5px;font-weight:600;color:#fff;
@@ -5910,17 +5923,30 @@ function renderMisGrupos(user){
 
 /* ===== EDITAR GRUPO (nombre y link) del usuario ===== */
 let _solicitudEditandoLink=null;
-function abrirEditarLinkGrupo(idSolicitud){
-  const user=obtenerSesion();
-  if(!user){ mostrarToast("Bitte anmelden","🔒"); return; }
-  const s=obtenerSolicitudes().find(x=>x.id===idSolicitud && x.usuarioCorreo===user.correo);
-  if(!s){ mostrarToast("Gruppe nicht gefunden","⚠️"); return; }
+function _abrirModalEditarGrupo(s){
   _solicitudEditandoLink=s.id;
   document.getElementById("editarLinkGrupoNombre").textContent=s.nombre;
   document.getElementById("editarNombreGrupoInput").value=s.nombre||"";
   document.getElementById("editarLinkGrupoInput").value=s.link||"";
   document.getElementById("errorEditarLinkGrupo").textContent="";
   document.getElementById("overlayEditarLinkGrupo").classList.add("abierto");
+}
+function abrirEditarLinkGrupo(idSolicitud){
+  const user=obtenerSesion();
+  if(!user){ mostrarToast("Bitte anmelden","🔒"); return; }
+  const s=obtenerSolicitudes().find(x=>x.id===idSolicitud && x.usuarioCorreo===user.correo);
+  if(!s){ mostrarToast("Gruppe nicht gefunden","⚠️"); return; }
+  _abrirModalEditarGrupo(s);
+}
+/* Abrir el modal de edición desde el badge ✏️ en el perfil público del usuario
+   (ahí solo tenemos el nombre del grupo, no el id de la solicitud) */
+function abrirEditarGrupoDesdeGrid(nombreGrupo,correoCreador){
+  const user=obtenerSesion();
+  if(!user){ mostrarToast("Bitte anmelden","🔒"); return; }
+  if(user.correo!==correoCreador){ mostrarToast("Nur der Ersteller kann diese Gruppe bearbeiten","🔒"); return; }
+  const s=obtenerSolicitudes().find(x=>x.nombre===nombreGrupo && x.usuarioCorreo===correoCreador && x.estado==="aprobado");
+  if(!s){ mostrarToast("Gruppe nicht gefunden","⚠️"); return; }
+  _abrirModalEditarGrupo(s);
 }
 function cerrarEditarLinkGrupo(){
   document.getElementById("overlayEditarLinkGrupo").classList.remove("abierto");
@@ -5980,6 +6006,9 @@ function guardarLinkGrupoUsuario(){
 
   cerrarEditarLinkGrupo();
   renderMisGrupos(user);
+  if(typeof _perfilUsuarioCorreoActual!=="undefined" && _perfilUsuarioCorreoActual===user.correo){
+    renderPerfilUsuario(user.correo,_perfilUsuarioPagina);
+  }
   mostrarToast(`✏️ „${nuevoNombre}": Gruppe aktualisiert`,"✅");
 }
 
@@ -6251,6 +6280,7 @@ async function renderPerfilUsuario(correo,pagina){
         <img src="${g.img}" alt="${g.nombre}" loading="lazy">
         <span class="plataforma-badge ${claseBtn}"><span class="circ">${svgPlataformaPerfil(g.plataforma)}</span>${g.plataforma}</span>
         <span class="pais-badge" title="${nombrePais(g.pais)}">${banderaPais(g.pais)}</span>
+        ${esPropio?`<button type="button" class="btn-editar-grupo-badge" onclick="abrirEditarGrupoDesdeGrid('${g.nombre.replace(/'/g,"\\'")}','${correo.replace(/'/g,"\\'")}')" title="Gruppe bearbeiten" aria-label="Gruppe bearbeiten">✏️</button>`:""}
         <button class="btn-fav ${esFav?'activo':''} ${bloqueado?'fav-bloqueado':''}"
           onclick="alternarFavorito(this,'${g.nombre}')"
           aria-label="${bloqueado?'Heute bereits abgestimmt':'Als Favorit speichern'}"
