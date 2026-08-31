@@ -848,6 +848,11 @@ Mit Google fortfahren
     <textarea id="agDescripcion" placeholder="Beschreibe kurz, worum es in deiner Gruppe geht, welche Regeln gelten und welche Mitglieder ihr sucht …" rows="3" style="padding:11px 13px;border-radius:9px;border:1.5px solid var(--borde);font-size:14px;outline:none;background:#fafbfa;resize:vertical;transition:border-color .18s;font-family:inherit;line-height:1.5;width:100%;box-sizing:border-box" onfocus="this.style.borderColor='var(--verde)'" onblur="this.style.borderColor='var(--borde)'"></textarea>
    </div>
    <div class="campo">
+    <label>Hashtags (optional)</label>
+    <input type="text" id="agHashtags" placeholder="z. B. #Berlin #Freunde #Gaming" maxlength="120">
+    <span class="ayuda">Bis zu 5, getrennt durch Leerzeichen oder Komma.</span>
+   </div>
+   <div class="campo">
     <label>Gruppenfoto hochladen</label>
     <label id="agFotoLabel" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:11px 13px;border-radius:9px;border:1.5px dashed var(--borde);background:#fafbfa;transition:border-color .18s" onmouseenter="this.style.borderColor='var(--verde)'" onmouseleave="this.style.borderColor='var(--borde)'">
 <input type="file" id="agFotoInput" accept="image/*" style="display:none" onchange="previsualizarFoto(this)">
@@ -1324,6 +1329,16 @@ Mit Google fortfahren
   }
   .card h3{font-size:17.5px;line-height:1.3}
   .meta{color:var(--sub);font-size:13px;display:flex;align-items:center;gap:6px;margin-top:-2px}
+
+  .hashtags-grupo{display:flex;flex-wrap:wrap;gap:5px;margin-top:-2px}
+  .hashtag-chip{
+    font-size:11px;font-weight:600;color:var(--sub);background:#F0F2F1;
+    padding:3px 9px;border-radius:999px;cursor:pointer;border:none;
+    transition:background .15s,color .15s;
+  }
+  .hashtag-chip:hover{background:#1FAF551a;color:var(--verde-d)}
+  body.dark .hashtag-chip{background:#1d2421;color:#9aa79f}
+  body.dark .hashtag-chip:hover{background:#1FAF5526;color:#5dd68c}
 
   .acciones{display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:10px}
   .btn-unirse{
@@ -3088,12 +3103,29 @@ function previsualizarFoto(input){
   reader.readAsDataURL(file);
 }
 
+// Convierte el texto libre del campo Hashtags en un array limpio: ["#Berlin","#Gaming",...]
+// - Acepta separación por espacio, coma o salto de línea, con o sin "#" delante.
+// - Quita duplicados (sin importar mayúsculas/minúsculas) y limita a 5.
+function normalizarHashtags(texto){
+  if(!texto) return [];
+  return [...new Set(
+    texto
+      .split(/[\s,]+/)
+      .map(t=>t.trim())
+      .filter(Boolean)
+      .map(t=>"#"+t.replace(/^#+/,"").replace(/[^\p{L}\p{N}_]/gu,""))
+      .filter(t=>t.length>1)
+  )]
+  .slice(0,5);
+}
+
 function publicarGrupo(){
   const nombre=document.getElementById("agNombre").value.trim();
   const categoria=document.getElementById("agCategoria").value;
   const pais=document.getElementById("agPais")?.value||"DE";
   const link=document.getElementById("agLink").value.trim();
   const descripcion=document.getElementById("agDescripcion").value.trim();
+  const hashtags=normalizarHashtags(document.getElementById("agHashtags").value);
   const err=document.getElementById("errorAgregar");
 
   if(!nombre||!categoria||!link){err.textContent="Bitte Name, Kategorie und Link ausfüllen.";return}
@@ -3128,6 +3160,7 @@ function publicarGrupo(){
   const solicitud={
     id:Date.now().toString(),
     nombre,categoria,plataforma:plataformaForm,link,descripcion,pais,
+    hashtags,
     img:imgSrc,
     miembros:0,favoritosBase:0,
     estado:"pendiente",
@@ -3142,7 +3175,7 @@ function publicarGrupo(){
 
   const msgSistema={
     de:"sistema",
-    texto:`📋 Nueva solicitud de grupo:\n*${nombre}* (${categoria} · ${plataformaForm})${descripcion?'\n'+descripcion:''}`,
+    texto:`📋 Nueva solicitud de grupo:\n*${nombre}* (${categoria} · ${plataformaForm})${descripcion?'\n'+descripcion:''}${hashtags.length?'\n'+hashtags.join(' '):''}`,
     hora:horaActual(),
     solicitudId:solicitud.id
   };
@@ -3160,6 +3193,7 @@ function publicarGrupo(){
   document.getElementById("agCategoria").value="";
   document.getElementById("agLink").value="";
   document.getElementById("agDescripcion").value="";
+  document.getElementById("agHashtags").value="";
   if(document.getElementById("agPais")) document.getElementById("agPais").value="DE";
   document.getElementById("cajaConfirma18").style.display="none";
   // reset foto
@@ -3272,6 +3306,7 @@ function pintar(arr){
       <div class="card-body">
         <span class="tag ${g.categoria==='+18'?'plus18':''}">${categorias.find(c=>c.nombre===g.categoria)?.icono||""} ${categoriaLabel[g.categoria]||g.categoria}</span>
         <h3>${g.nombre}</h3>
+        ${g.hashtags&&g.hashtags.length?`<div class="hashtags-grupo">${g.hashtags.map(h=>`<button type="button" class="hashtag-chip" onclick="event.stopPropagation();buscarPorHashtag('${h.replace(/'/g,"\\'")}')">${h}</button>`).join("")}</div>`:""}
         <div class="meta" id="meta-miembros-${g.nombre.replace(/[^a-z0-9]/gi,'_')}">
           👥 <span class="miembros-num">${g.miembros>0?g.miembros.toLocaleString("de-DE"):"—"}</span> Mitglieder
           ${g.miembrosActualizadoEn?`<span class="miembros-ts" title="Zuletzt aktualisiert: ${new Date(g.miembrosActualizadoEn).toLocaleDateString('de-DE')}">✓</span>`:""}
@@ -3700,10 +3735,20 @@ function buscarCambio(){
   filtrar();
 }
 
+// Al hacer clic en un chip de hashtag: escribe el hashtag en la barra de búsqueda y filtra.
+function buscarPorHashtag(tag){
+  buscar.value=tag;
+  paginaActual=1;
+  filtrar();
+  buscar.scrollIntoView({behavior:"smooth",block:"center"});
+}
+
 function filtrar(){
   const q=buscar.value.toLowerCase();
   let filtrados=grupos.filter(g=>{
-    const coincideTexto=g.nombre.toLowerCase().includes(q)||g.plataforma.toLowerCase().includes(q);
+    const coincideTexto=g.nombre.toLowerCase().includes(q)
+      ||g.plataforma.toLowerCase().includes(q)
+      ||(g.hashtags||[]).some(h=>h.toLowerCase().includes(q));
     const coincideCategoria=categoriaActiva==="Todos"||g.categoria===categoriaActiva;
     const coincidePlataforma=plataformaActiva==="Todos"||g.plataforma===plataformaActiva;
     return coincideTexto&&coincideCategoria&&coincidePlataforma;
@@ -5562,6 +5607,8 @@ function adminAprobarSolicitud(id){
     pais:s.pais||"DE",
     link:s.link,
     img:s.img,
+    descripcion:s.descripcion||"",
+    hashtags:s.hashtags||[],
     miembros:s.miembros||0,
     favoritosBase:0,
     favoritos:0,
@@ -6135,6 +6182,7 @@ async function renderPerfilUsuario(correo,pagina){
       <div class="card-body">
         <span class="tag ${g.categoria==='+18'?'plus18':''}">${categorias.find(c=>c.nombre===g.categoria)?.icono||""} ${categoriaLabel[g.categoria]||g.categoria}</span>
         <h3>${g.nombre}</h3>
+        ${g.hashtags&&g.hashtags.length?`<div class="hashtags-grupo">${g.hashtags.map(h=>`<button type="button" class="hashtag-chip" onclick="event.stopPropagation();buscarPorHashtag('${h.replace(/'/g,"\\'")}')">${h}</button>`).join("")}</div>`:""}
         <div class="meta">
           👥 ${g.miembros>0?g.miembros.toLocaleString("de-DE"):"—"} Mitglieder
         </div>
