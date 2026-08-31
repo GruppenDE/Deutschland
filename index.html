@@ -5921,13 +5921,18 @@ function renderMisGrupos(user){
   }).join("");
 }
 
-/* ===== EDITAR GRUPO (nombre y link) del usuario ===== */
-let _solicitudEditandoLink=null;
-function _abrirModalEditarGrupo(s){
-  _solicitudEditandoLink=s.id;
-  document.getElementById("editarLinkGrupoNombre").textContent=s.nombre;
-  document.getElementById("editarNombreGrupoInput").value=s.nombre||"";
-  document.getElementById("editarLinkGrupoInput").value=s.link||"";
+/* ===== EDITAR GRUPO (nombre y link) del usuario =====
+   _grupoEditando guarda el contexto de edición: el nombre/creador reales
+   del grupo (fuente de verdad pública) y, si existe, el id de la solicitud
+   asociada (grupos creados vía formulario de usuario). Grupos publicados
+   directamente por el admin no tienen solicitud, y también deben poder
+   editarse. */
+let _grupoEditando=null;
+function _abrirModalEditarGrupo(nombre,link,contexto){
+  _grupoEditando=contexto;
+  document.getElementById("editarLinkGrupoNombre").textContent=nombre;
+  document.getElementById("editarNombreGrupoInput").value=nombre||"";
+  document.getElementById("editarLinkGrupoInput").value=link||"";
   document.getElementById("errorEditarLinkGrupo").textContent="";
   document.getElementById("overlayEditarLinkGrupo").classList.add("abierto");
 }
@@ -5936,26 +5941,34 @@ function abrirEditarLinkGrupo(idSolicitud){
   if(!user){ mostrarToast("Bitte anmelden","🔒"); return; }
   const s=obtenerSolicitudes().find(x=>x.id===idSolicitud && x.usuarioCorreo===user.correo);
   if(!s){ mostrarToast("Gruppe nicht gefunden","⚠️"); return; }
-  _abrirModalEditarGrupo(s);
+  _abrirModalEditarGrupo(s.nombre,s.link,{nombreAnterior:s.nombre,correoCreador:user.correo,solicitudId:s.id});
 }
-/* Abrir el modal de edición desde el badge ✏️ en el perfil público del usuario
-   (ahí solo tenemos el nombre del grupo, no el id de la solicitud) */
+/* Abrir el modal de edición desde el badge ✏️ en el perfil público del usuario.
+   Busca el grupo directamente en las listas públicas (grupos/gruposExtra),
+   que son la fuente real — así funciona tanto para grupos creados por el
+   usuario (con solicitud) como para grupos publicados por el admin (sin
+   solicitud, solo con creadorCorreo asignado). */
 function abrirEditarGrupoDesdeGrid(nombreGrupo,correoCreador){
   const user=obtenerSesion();
   if(!user){ mostrarToast("Bitte anmelden","🔒"); return; }
   if(user.correo!==correoCreador){ mostrarToast("Nur der Ersteller kann diese Gruppe bearbeiten","🔒"); return; }
+  const g=grupos.find(x=>x.nombre===nombreGrupo && x.creadorCorreo===correoCreador)
+    || gruposExtra.find(x=>x.nombre===nombreGrupo && x.creadorCorreo===correoCreador);
+  if(!g){ mostrarToast("Gruppe nicht gefunden","⚠️"); return; }
   const s=obtenerSolicitudes().find(x=>x.nombre===nombreGrupo && x.usuarioCorreo===correoCreador && x.estado==="aprobado");
-  if(!s){ mostrarToast("Gruppe nicht gefunden","⚠️"); return; }
-  _abrirModalEditarGrupo(s);
+  _abrirModalEditarGrupo(g.nombre,g.link,{nombreAnterior:g.nombre,correoCreador,solicitudId:s?s.id:null});
 }
 function cerrarEditarLinkGrupo(){
   document.getElementById("overlayEditarLinkGrupo").classList.remove("abierto");
-  _solicitudEditandoLink=null;
+  _grupoEditando=null;
 }
 function guardarLinkGrupoUsuario(){
   const user=obtenerSesion();
-  if(!user||!_solicitudEditandoLink) return;
+  if(!user||!_grupoEditando) return;
+  const {nombreAnterior,correoCreador,solicitudId}=_grupoEditando;
   const err=document.getElementById("errorEditarLinkGrupo");
+  if(user.correo!==correoCreador){ err.textContent="Gruppe nicht gefunden."; return; }
+
   const inputNombre=document.getElementById("editarNombreGrupoInput");
   const inputLink=document.getElementById("editarLinkGrupoInput");
   const nuevoNombre=inputNombre.value.trim();
@@ -5966,43 +5979,43 @@ function guardarLinkGrupoUsuario(){
   if(!nuevoLink){ err.textContent="Bitte einen Link eingeben."; return; }
   if(!/^https?:\/\//i.test(nuevoLink)){ err.textContent="Der Link muss mit http:// oder https:// beginnen."; return; }
 
-  const solis=obtenerSolicitudes();
-  const s=solis.find(x=>x.id===_solicitudEditandoLink && x.usuarioCorreo===user.correo);
-  if(!s){ err.textContent="Gruppe nicht gefunden."; return; }
-
-  const nombreAnterior=s.nombre;
   const nombreCambio=nuevoNombre!==nombreAnterior;
+  const esElMismoGrupo=(nombre,correo)=>nombre===nombreAnterior&&correo===correoCreador;
 
   // Evitar colisiones: el nombre se usa como identificador en toda la app,
   // así que no se permite renombrar a un nombre que ya use otro grupo.
   if(nombreCambio){
+    const normalizado=nuevoNombre.toLowerCase();
     const enUso =
-      solis.some(x=>x.id!==s.id && x.nombre.trim().toLowerCase()===nuevoNombre.toLowerCase()) ||
-      grupos.some(g=>g.nombre.trim().toLowerCase()===nuevoNombre.toLowerCase() && g.creadorCorreo!==user.correo) ||
-      gruposExtra.some(g=>g.nombre.trim().toLowerCase()===nuevoNombre.toLowerCase() && g.creadorCorreo!==user.correo);
+      obtenerSolicitudes().some(x=>!esElMismoGrupo(x.nombre,x.usuarioCorreo) && x.nombre.trim().toLowerCase()===normalizado) ||
+      grupos.some(g=>!esElMismoGrupo(g.nombre,g.creadorCorreo) && g.nombre.trim().toLowerCase()===normalizado) ||
+      gruposExtra.some(g=>!esElMismoGrupo(g.nombre,g.creadorCorreo) && g.nombre.trim().toLowerCase()===normalizado);
     if(enUso){ err.textContent="Dieser Gruppenname wird bereits verwendet. Bitte wähle einen anderen."; return; }
   }
 
-  // 1. Actualizar la solicitud (fuente de la tarjeta en "Meine Gruppen")
-  s.nombre=nuevoNombre;
-  s.link=nuevoLink;
-  guardarSolicitudes(solis);
-
-  // 2. Si el grupo ya está aprobado y visible públicamente, actualizar también ahí
-  if(s.estado==="aprobado"){
-    [grupos, gruposExtra].forEach(arr=>{
-      const g=arr.find(x=>x.nombre===nombreAnterior && x.creadorCorreo===user.correo);
-      if(g){ g.nombre=nuevoNombre; g.link=nuevoLink; g.linkActualizadoEn=Date.now(); }
-    });
-    _db.collection("grupos_extra").where("nombre","==",nombreAnterior).get().then(snap=>{
-      snap.forEach(doc=>{
-        if(doc.data().creadorCorreo===user.correo){
-          doc.ref.update({nombre:nuevoNombre, link:nuevoLink, linkActualizadoEn:Date.now()});
-        }
-      });
-    }).catch(e=>console.warn("FB link usuario:",e));
-    filtrar(); // re-pintar cards públicas con el nombre/link nuevos
+  // 1. Si el grupo viene de una solicitud de usuario, actualizarla también
+  //    (fuente de la tarjeta en "Meine Gruppen")
+  if(solicitudId){
+    const solis=obtenerSolicitudes();
+    const s=solis.find(x=>x.id===solicitudId && x.usuarioCorreo===correoCreador);
+    if(s){ s.nombre=nuevoNombre; s.link=nuevoLink; guardarSolicitudes(solis); }
   }
+
+  // 2. Actualizar el grupo público (grupos/gruposExtra en memoria + Firestore).
+  //    Esto cubre tanto grupos creados por el usuario como grupos publicados
+  //    directamente por el admin (que no tienen solicitud asociada).
+  [grupos, gruposExtra].forEach(arr=>{
+    const g=arr.find(x=>x.nombre===nombreAnterior && x.creadorCorreo===correoCreador);
+    if(g){ g.nombre=nuevoNombre; g.link=nuevoLink; g.linkActualizadoEn=Date.now(); }
+  });
+  _db.collection("grupos_extra").where("nombre","==",nombreAnterior).get().then(snap=>{
+    snap.forEach(doc=>{
+      if(doc.data().creadorCorreo===correoCreador){
+        doc.ref.update({nombre:nuevoNombre, link:nuevoLink, linkActualizadoEn:Date.now()});
+      }
+    });
+  }).catch(e=>console.warn("FB link usuario:",e));
+  filtrar(); // re-pintar cards públicas con el nombre/link nuevos
 
   cerrarEditarLinkGrupo();
   renderMisGrupos(user);
