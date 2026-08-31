@@ -3280,7 +3280,7 @@ function pintar(arr){
           <a class="btn-unirse ${claseBtn}" target="_blank" rel="noopener" href="${g.link}">
             Gruppe beitreten <span class="flecha">→</span>
           </a>
-          <button class="btn-compartir" type="button" onclick="compartirGrupo(this,'${g.nombre.replace(/'/g,"\\'")}','${g.plataforma}')">
+          <button class="btn-compartir" type="button" onclick="compartirGrupo(this,'${g.nombre.replace(/'/g,"\\'")}','${g.plataforma}','${(g.descripcion||'').replace(/'/g,"\\'").replace(/\n/g,' ')}','${(g.img||'').replace(/'/g,"\\'")}')">
             <span class="compartir-ico">🔗</span> Teilen
           </button>
         </div>
@@ -3508,16 +3508,39 @@ function paginaDeGrupo(nombre){
   return null;
 }
 
-function compartirGrupo(btn,nombre,plataforma){
+async function compartirGrupo(btn,nombre,plataforma,descripcion,img){
   const DOMINIO="https://gruppende.de/";
   const url=`${DOMINIO}?grupo=${generarSlug(nombre)}`;
+  const texto=`📢 ${nombre}${descripcion?`\n${descripcion}`:""}\n\n🔗 ${url}`;
 
   if(navigator.share){
-    navigator.share({url}).catch(()=>{});
-    return;
+    // 1) Intentar compartir con la FOTO del grupo adjunta (WhatsApp, etc. la muestran directamente)
+    if(img && navigator.canShare){
+      try{
+        const resp=await fetch(img,{mode:"cors"});
+        const blob=await resp.blob();
+        const ext=(blob.type.split("/")[1]||"jpg").split("+")[0];
+        const file=new File([blob],`${generarSlug(nombre)||"grupo"}.${ext}`,{type:blob.type});
+        if(navigator.canShare({files:[file]})){
+          await navigator.share({title:nombre,text:texto,files:[file]});
+          return;
+        }
+      }catch(e){
+        if(e && e.name==="AbortError") return; // el usuario cerró el share sheet
+        console.warn("compartirGrupo: no se pudo adjuntar la foto, se comparte solo el link.",e);
+      }
+    }
+    // 2) Sin foto adjunta: compartir título + descripción + enlace (WhatsApp/Telegram
+    //    generan su propia vista previa con foto/info a partir del enlace)
+    try{
+      await navigator.share({title:nombre,text:texto,url});
+      return;
+    }catch(e){
+      if(e && e.name==="AbortError") return;
+    }
   }
 
-  navigator.clipboard.writeText(url).then(()=>{
+  navigator.clipboard.writeText(texto).then(()=>{
     const original=btn.innerHTML;
     btn.classList.add("copiado");
     btn.innerHTML='<span class="compartir-ico">✓</span> Link kopiert!';
@@ -3526,7 +3549,7 @@ function compartirGrupo(btn,nombre,plataforma){
       btn.innerHTML=original;
     },1800);
   }).catch(()=>{
-    prompt("Link kopieren:",url);
+    prompt("Link kopieren:",texto);
   });
 }
 
@@ -5762,7 +5785,7 @@ function renderMisGrupos(user){
         <div class="acciones">
           ${s.estado==="aprobado"
             ?`<a class="btn-unirse ${claseBtn}" target="_blank" rel="noopener" href="${s.link}">Gruppe öffnen <span class="flecha">→</span></a>
-              <button class="btn-compartir" type="button" onclick="compartirGrupo(this,'${s.nombre.replace(/'/g,"\\'")}','${s.plataforma}')">
+              <button class="btn-compartir" type="button" onclick="compartirGrupo(this,'${s.nombre.replace(/'/g,"\\'")}','${s.plataforma}','${(s.descripcion||'').replace(/'/g,"\\'").replace(/\n/g,' ')}','${(img||'').replace(/'/g,"\\'")}')">
                 <span class="compartir-ico">🔗</span> Teilen
               </button>
               <button class="btn-compartir" type="button" onclick="abrirEditarLinkGrupo('${s.id}')">
@@ -6119,7 +6142,7 @@ async function renderPerfilUsuario(correo,pagina){
           <a class="btn-unirse ${claseBtn}" target="_blank" rel="noopener" href="${g.link}">
             Gruppe beitreten <span class="flecha">→</span>
           </a>
-          <button class="btn-compartir" type="button" onclick="compartirGrupo(this,'${g.nombre.replace(/'/g,"\\'")}','${g.plataforma}')">
+          <button class="btn-compartir" type="button" onclick="compartirGrupo(this,'${g.nombre.replace(/'/g,"\\'")}','${g.plataforma}','${(g.descripcion||'').replace(/'/g,"\\'").replace(/\n/g,' ')}','${(g.img||'').replace(/'/g,"\\'")}')">
             <span class="compartir-ico">🔗</span> Teilen
           </button>
         </div>
