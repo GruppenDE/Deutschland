@@ -824,6 +824,15 @@ Mit Google fortfahren
 </svg></span><span class="nombre">Signal</span>
     </div>
    </div>
+   <div class="campo" id="campoInvitado" style="display:none">
+    <label>Dein Name</label>
+    <input type="text" id="agNombreInvitado" placeholder="Wird bei der Gruppe angezeigt">
+    <span class="ayuda">
+      ℹ️ Du veröffentlichst als Gast, ohne Konto. Dadurch kannst du diese Gruppe später nicht in einem eigenen Profil verwalten oder bearbeiten.
+      <a href="#" onclick="event.preventDefault();cerrarAgregar();abrirAuth('registro')" style="color:var(--verde-d);font-weight:600">Jetzt registrieren</a>,
+      wenn du deine Gruppen später verwalten möchtest.
+    </span>
+   </div>
    <div class="campo">
     <label>Gruppenname</label>
     <input type="text" id="agNombre" placeholder="z. B. Deutsche Entwickler">
@@ -3043,11 +3052,8 @@ function poblarSelectCategorias(){
 }
 
 function abrirAgregar(){
-  if(!obtenerSesion()){
-    mostrarToast("Bitte anmelden, um eine Gruppe hinzuzufügen","🔒");
-    abrirAuth("login");
-    return;
-  }
+  const hayInvitado=!obtenerSesion();
+  document.getElementById("campoInvitado").style.display=hayInvitado?"flex":"none";
   document.getElementById("overlayAgregar").classList.add("abierto");
 }
 function cerrarAgregar(){
@@ -3153,6 +3159,15 @@ function publicarGrupo(){
   }
 
   const user=obtenerSesion();
+  let usuarioCorreo=null, usuarioNombre;
+  if(user){
+    usuarioCorreo=user.correo;
+    usuarioNombre=user.nombre;
+  }else{
+    usuarioNombre=document.getElementById("agNombreInvitado").value.trim();
+    if(!usuarioNombre){err.textContent="Bitte gib deinen Namen ein.";return}
+  }
+
   const fotoPreview=document.getElementById("agFotoPreview");
   const imgSrc=(fotoPreview&&fotoPreview.src&&fotoPreview.style.display!=="none")
     ? fotoPreview.src
@@ -3164,8 +3179,9 @@ function publicarGrupo(){
     img:imgSrc,
     miembros:0,favoritosBase:0,
     estado:"pendiente",
-    usuarioCorreo:user.correo,
-    usuarioNombre:user.nombre,
+    usuarioCorreo,
+    usuarioNombre,
+    invitado:!user,
     fecha:new Date().toISOString()
   };
 
@@ -3173,18 +3189,23 @@ function publicarGrupo(){
   solis.push(solicitud);
   guardarSolicitudes(solis);
 
-  const msgSistema={
-    de:"sistema",
-    texto:`📋 Nueva solicitud de grupo:\n*${nombre}* (${categoria} · ${plataformaForm})${descripcion?'\n'+descripcion:''}${hashtags.length?'\n'+hashtags.join(' '):''}`,
-    hora:horaActual(),
-    solicitudId:solicitud.id
-  };
-  agregarMensajeChat(user.correo, msgSistema);
+  // El chat de seguimiento solo existe para usuarios con cuenta (necesita un correo
+  // para guardar/leer la conversación). Los invitados no podrán ver mensajes, así
+  // que no se genera esta conversación para ellos.
+  if(user){
+    const msgSistema={
+      de:"sistema",
+      texto:`📋 Nueva solicitud de grupo:\n*${nombre}* (${categoria} · ${plataformaForm})${descripcion?'\n'+descripcion:''}${hashtags.length?'\n'+hashtags.join(' '):''}`,
+      hora:horaActual(),
+      solicitudId:solicitud.id
+    };
+    agregarMensajeChat(user.correo, msgSistema);
 
-  const convAdmin=obtenerConversacion(user.correo);
-  if(convAdmin.length<=1){
-    const msgAdmin={de:"admin",texto:`Hallo ${user.nombre}! Wir haben deine Anfrage für die Gruppe *${nombre}* erhalten. Wir prüfen sie bald. 👋`,hora:horaActual()};
-    agregarMensajeChat(user.correo, msgAdmin);
+    const convAdmin=obtenerConversacion(user.correo);
+    if(convAdmin.length<=1){
+      const msgAdmin={de:"admin",texto:`Hallo ${user.nombre}! Wir haben deine Anfrage für die Gruppe *${nombre}* erhalten. Wir prüfen sie bald. 👋`,hora:horaActual()};
+      agregarMensajeChat(user.correo, msgAdmin);
+    }
   }
 
   err.textContent="";
@@ -3194,6 +3215,7 @@ function publicarGrupo(){
   document.getElementById("agLink").value="";
   document.getElementById("agDescripcion").value="";
   document.getElementById("agHashtags").value="";
+  document.getElementById("agNombreInvitado").value="";
   if(document.getElementById("agPais")) document.getElementById("agPais").value="DE";
   document.getElementById("cajaConfirma18").style.display="none";
   // reset foto
@@ -3291,9 +3313,14 @@ function pintar(arr){
       <div class="img-wrap">
         <img src="${g.img}" alt="${g.nombre}" loading="lazy">
         <span class="plataforma-badge ${claseBtn}"><span class="circ">${icoPlat}</span>${g.plataforma}</span>
-        ${g.creadorNombre?`<button type="button" class="creador-badge" data-correo="${(g.creadorCorreo||'').replace(/"/g,'&quot;')}" onclick="event.stopPropagation();abrirPerfilUsuario('${(g.creadorCorreo||'').replace(/'/g,"\\'")}')" title="Profil von ${g.creadorNombre.replace(/"/g,'&quot;')} ansehen">
+        ${g.creadorNombre?(g.creadorCorreo
+          ?`<button type="button" class="creador-badge" data-correo="${(g.creadorCorreo||'').replace(/"/g,'&quot;')}" onclick="event.stopPropagation();abrirPerfilUsuario('${(g.creadorCorreo||'').replace(/'/g,"\\'")}')" title="Profil von ${g.creadorNombre.replace(/"/g,'&quot;')} ansehen">
           <span class="creador-avatar-wrap"><img class="creador-foto" src="" alt=""><span class="creador-inicial">${(g.creadorNombre||'?').trim().charAt(0).toUpperCase()}</span></span>${g.creadorNombre}
-        </button>`:""}
+        </button>`
+          :`<span class="creador-badge" style="cursor:default" title="${g.creadorNombre.replace(/"/g,'&quot;')}">
+          <span class="creador-avatar-wrap"><span class="creador-inicial">${(g.creadorNombre||'?').trim().charAt(0).toUpperCase()}</span></span>${g.creadorNombre}
+        </span>`
+        ):""}
         <span class="pais-badge" title="${nombrePais(g.pais)}">${banderaPais(g.pais)}</span>
         <button class="btn-fav ${esFav?'activo':''} ${bloqueado?'fav-bloqueado':''}"
           onclick="alternarFavorito(this,'${g.nombre}')"
@@ -5565,7 +5592,7 @@ function _pintarSolicitudes(){
       <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${s.nombre}">${s.nombre}</td>
       <td>${s.categoria}</td>
       <td>${s.plataforma}</td>
-      <td style="font-size:12px">${s.usuarioNombre||s.usuarioCorreo}</td>
+      <td style="font-size:12px">${s.usuarioNombre||s.usuarioCorreo}${s.invitado?' <span style="color:var(--sub);font-weight:600">· Gast</span>':''}</td>
       <td style="font-size:11px;max-width:200px;word-break:break-all">
         ${s.link?`<a href="${s.link}" target="_blank" rel="noopener" style="color:var(--verde);text-decoration:none;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:5px">🔗 ${s.link.substring(0,45)}${s.link.length>45?"...":""}</a>`:"—"}
       </td>
@@ -5637,16 +5664,18 @@ function adminAprobarSolicitud(id){
     }
   });
 
-  // Notificar usuario por chat
-  const msgAdmin={de:"admin",texto:`✅ Deine Gruppe *${s.nombre}* wurde genehmigt und ist jetzt auf Gruppen🇩🇪 sichtbar! 🎉 Jetzt haben andere die Möglichkeit, deine Gruppe zu favorisieren und ihr Ranking zu verbessern.`,hora:horaActual()};
-  agregarMensajeChat(s.usuarioCorreo, msgAdmin);
+  // Notificar usuario por chat (solo si tiene cuenta; los invitados no tienen chat)
+  if(s.usuarioCorreo){
+    const msgAdmin={de:"admin",texto:`✅ Deine Gruppe *${s.nombre}* wurde genehmigt und ist jetzt auf Gruppen🇩🇪 sichtbar! 🎉 Jetzt haben andere die Möglichkeit, deine Gruppe zu favorisieren und ihr Ranking zu verbessern.`,hora:horaActual()};
+    agregarMensajeChat(s.usuarioCorreo, msgAdmin);
 
-  // Enviar automáticamente el enlace de compartir de su grupo (enlace propio del sitio, no el de WhatsApp/Telegram)
-  const DOMINIO_COMPARTIR="https://gruppende.de/";
-  const urlCompartir=`${DOMINIO_COMPARTIR}?grupo=${generarSlug(s.nombre)}`;
-  const msgEnlace={de:"admin",texto:`🔗 Hier ist dein Teilen-Link, um deine Gruppe zu bewerben:\n${urlCompartir}`,hora:horaActual()};
-  agregarMensajeChat(s.usuarioCorreo, msgEnlace);
-  actualizarBadgeChat(s.usuarioCorreo);
+    // Enviar automáticamente el enlace de compartir de su grupo (enlace propio del sitio, no el de WhatsApp/Telegram)
+    const DOMINIO_COMPARTIR="https://gruppende.de/";
+    const urlCompartir=`${DOMINIO_COMPARTIR}?grupo=${generarSlug(s.nombre)}`;
+    const msgEnlace={de:"admin",texto:`🔗 Hier ist dein Teilen-Link, um deine Gruppe zu bewerben:\n${urlCompartir}`,hora:horaActual()};
+    agregarMensajeChat(s.usuarioCorreo, msgEnlace);
+    actualizarBadgeChat(s.usuarioCorreo);
+  }
 
   // Actualizar vista inmediatamente
   filtrar();
@@ -5661,10 +5690,12 @@ function adminRechazarSolicitud(id){
   s.estado="rechazado";
   guardarSolicitudes(solis);
 
-  // Notificar usuario por chat
-  const msgAdmin={de:"admin",texto:`❌ Deine Anfrage für die Gruppe *${s.nombre}* wurde abgelehnt. Bei Fragen schreib uns hier.`,hora:horaActual()};
-  agregarMensajeChat(s.usuarioCorreo, msgAdmin);
-  actualizarBadgeChat(s.usuarioCorreo);
+  // Notificar usuario por chat (solo si tiene cuenta)
+  if(s.usuarioCorreo){
+    const msgAdmin={de:"admin",texto:`❌ Deine Anfrage für die Gruppe *${s.nombre}* wurde abgelehnt. Bei Fragen schreib uns hier.`,hora:horaActual()};
+    agregarMensajeChat(s.usuarioCorreo, msgAdmin);
+    actualizarBadgeChat(s.usuarioCorreo);
+  }
 
   renderAdminSolicitudes();
   mostrarToast(`Anfrage für „${s.nombre}" abgelehnt`,"❌");
