@@ -3615,14 +3615,37 @@ async function compartirGrupo(btn,nombre,plataforma,descripcion,img){
   });
 }
 
-function compartirPerfilUsuario(btn,correo,nombre){
+async function compartirPerfilUsuario(btn,correo,nombre,foto){
   const DOMINIO="https://gruppende.de/";
   const slug=generarSlug(nombre||"");
   const url=slug?`${DOMINIO}?usuario=${slug}`:`${DOMINIO}?usuario=${encodeURIComponent(correo)}`;
+  const titulo=nombre?`Profil von ${nombre}`:undefined;
 
   if(navigator.share){
-    navigator.share({url,title:nombre?`Profil von ${nombre}`:undefined}).catch(()=>{});
-    return;
+    // 1) Intentar compartir con la FOTO de perfil adjunta (WhatsApp, etc. la muestran directamente)
+    if(foto && navigator.canShare){
+      try{
+        const resp=await fetch(foto,{mode:"cors"});
+        const blob=await resp.blob();
+        const ext=(blob.type.split("/")[1]||"jpg").split("+")[0];
+        const file=new File([blob],`${slug||"perfil"}.${ext}`,{type:blob.type});
+        if(navigator.canShare({files:[file]})){
+          await navigator.share({title:titulo,text:url,files:[file]});
+          return;
+        }
+      }catch(e){
+        if(e && e.name==="AbortError") return; // el usuario cerró el share sheet
+        console.warn("compartirPerfilUsuario: no se pudo adjuntar la foto, se comparte solo el link.",e);
+      }
+    }
+    // 2) Sin foto adjunta: compartir solo el enlace (algunas apps generan su propia
+    //    vista previa a partir del enlace)
+    try{
+      await navigator.share({url,title:titulo});
+      return;
+    }catch(e){
+      if(e && e.name==="AbortError") return;
+    }
   }
 
   const original=btn.innerHTML;
@@ -6157,7 +6180,7 @@ async function renderPerfilUsuario(correo,pagina){
           <div class="perfil-avatar-wrap">${avatarHTML}</div>
           <div class="perfil-top-botones">
             ${esPropio?`<button class="btn-editar-perfil" onclick="abrirEditarPerfil()">✏️ Profil bearbeiten</button>`:""}
-            <button class="btn-editar-perfil" onclick="compartirPerfilUsuario(this,'${correo.replace(/'/g,"\\'")}','${nombre.replace(/'/g,"\\'")}')">🔗 Profil teilen</button>
+            <button class="btn-editar-perfil" onclick="compartirPerfilUsuario(this,'${correo.replace(/'/g,"\\'")}','${nombre.replace(/'/g,"\\'")}','${foto.replace(/'/g,"\\'")}')">🔗 Profil teilen</button>
             ${btnSeguirHTML}
           </div>
         </div>
