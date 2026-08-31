@@ -766,14 +766,18 @@ Mit Google fortfahren
    <button class="btn-principal" onclick="guardarPerfilUsuario()">Speichern</button>
   </div>
  </div>
- <!-- MODAL — EDITAR LINK DE GRUPO (usuario) -->
+ <!-- MODAL — EDITAR GRUPO (nombre y link, usuario) -->
  <div class="overlay" id="overlayEditarLinkGrupo">
   <div class="modal">
    <button class="cerrar" onclick="cerrarEditarLinkGrupo()">✕</button>
-   <h2>Link bearbeiten</h2>
-   <p class="sub">Ist dein Gruppenlink abgelaufen? Trage hier den neuen Link für „<span id="editarLinkGrupoNombre"></span>" ein.</p>
+   <h2>Gruppe bearbeiten</h2>
+   <p class="sub">Aktualisiere den Namen oder Link deiner Gruppe „<span id="editarLinkGrupoNombre"></span>".</p>
    <div class="campo">
-    <label>Neuer Gruppenlink</label>
+    <label>Gruppenname</label>
+    <input type="text" id="editarNombreGrupoInput" placeholder="Name deiner Gruppe" maxlength="80">
+   </div>
+   <div class="campo">
+    <label>Gruppenlink</label>
     <input type="text" id="editarLinkGrupoInput" placeholder="https://chat.whatsapp.com/… oder https://t.me/…">
    </div>
    <p class="error-campo" id="errorEditarLinkGrupo"></p>
@@ -5890,12 +5894,12 @@ function renderMisGrupos(user){
                 <span class="compartir-ico">🔗</span> Teilen
               </button>
               <button class="btn-compartir" type="button" onclick="abrirEditarLinkGrupo('${s.id}')">
-                <span class="compartir-ico">✏️</span> Link bearbeiten
+                <span class="compartir-ico">✏️</span> Gruppe bearbeiten
               </button>`
             :s.estado==="pendiente"
             ?`<button class="btn-unirse ${claseBtn}" disabled style="opacity:.5;cursor:not-allowed">⏳ Wird geprüft…</button>
               <button class="btn-compartir" type="button" onclick="abrirEditarLinkGrupo('${s.id}')">
-                <span class="compartir-ico">✏️</span> Link bearbeiten
+                <span class="compartir-ico">✏️</span> Gruppe bearbeiten
               </button>`
             :`<button class="btn-unirse ${claseBtn}" disabled style="opacity:.5;cursor:not-allowed">❌ Abgelehnt</button>`}
         </div>
@@ -5904,7 +5908,7 @@ function renderMisGrupos(user){
   }).join("");
 }
 
-/* ===== EDITAR LINK DE GRUPO (usuario, ej. link caducado) ===== */
+/* ===== EDITAR GRUPO (nombre y link) del usuario ===== */
 let _solicitudEditandoLink=null;
 function abrirEditarLinkGrupo(idSolicitud){
   const user=obtenerSesion();
@@ -5913,6 +5917,7 @@ function abrirEditarLinkGrupo(idSolicitud){
   if(!s){ mostrarToast("Gruppe nicht gefunden","⚠️"); return; }
   _solicitudEditandoLink=s.id;
   document.getElementById("editarLinkGrupoNombre").textContent=s.nombre;
+  document.getElementById("editarNombreGrupoInput").value=s.nombre||"";
   document.getElementById("editarLinkGrupoInput").value=s.link||"";
   document.getElementById("errorEditarLinkGrupo").textContent="";
   document.getElementById("overlayEditarLinkGrupo").classList.add("abierto");
@@ -5925,36 +5930,57 @@ function guardarLinkGrupoUsuario(){
   const user=obtenerSesion();
   if(!user||!_solicitudEditandoLink) return;
   const err=document.getElementById("errorEditarLinkGrupo");
-  const input=document.getElementById("editarLinkGrupoInput");
-  const val=input.value.trim();
-  if(!val){ err.textContent="Bitte einen Link eingeben."; return; }
-  if(!/^https?:\/\//i.test(val)){ err.textContent="Der Link muss mit http:// oder https:// beginnen."; return; }
+  const inputNombre=document.getElementById("editarNombreGrupoInput");
+  const inputLink=document.getElementById("editarLinkGrupoInput");
+  const nuevoNombre=inputNombre.value.trim();
+  const nuevoLink=inputLink.value.trim();
+
+  if(!nuevoNombre){ err.textContent="Bitte einen Gruppennamen eingeben."; return; }
+  if(nuevoNombre.length<3){ err.textContent="Der Gruppenname ist zu kurz."; return; }
+  if(!nuevoLink){ err.textContent="Bitte einen Link eingeben."; return; }
+  if(!/^https?:\/\//i.test(nuevoLink)){ err.textContent="Der Link muss mit http:// oder https:// beginnen."; return; }
 
   const solis=obtenerSolicitudes();
   const s=solis.find(x=>x.id===_solicitudEditandoLink && x.usuarioCorreo===user.correo);
   if(!s){ err.textContent="Gruppe nicht gefunden."; return; }
 
+  const nombreAnterior=s.nombre;
+  const nombreCambio=nuevoNombre!==nombreAnterior;
+
+  // Evitar colisiones: el nombre se usa como identificador en toda la app,
+  // así que no se permite renombrar a un nombre que ya use otro grupo.
+  if(nombreCambio){
+    const enUso =
+      solis.some(x=>x.id!==s.id && x.nombre.trim().toLowerCase()===nuevoNombre.toLowerCase()) ||
+      grupos.some(g=>g.nombre.trim().toLowerCase()===nuevoNombre.toLowerCase() && g.creadorCorreo!==user.correo) ||
+      gruposExtra.some(g=>g.nombre.trim().toLowerCase()===nuevoNombre.toLowerCase() && g.creadorCorreo!==user.correo);
+    if(enUso){ err.textContent="Dieser Gruppenname wird bereits verwendet. Bitte wähle einen anderen."; return; }
+  }
+
   // 1. Actualizar la solicitud (fuente de la tarjeta en "Meine Gruppen")
-  s.link=val;
+  s.nombre=nuevoNombre;
+  s.link=nuevoLink;
   guardarSolicitudes(solis);
 
   // 2. Si el grupo ya está aprobado y visible públicamente, actualizar también ahí
   if(s.estado==="aprobado"){
     [grupos, gruposExtra].forEach(arr=>{
-      const g=arr.find(x=>x.nombre===s.nombre && x.creadorCorreo===user.correo);
-      if(g){ g.link=val; g.linkActualizadoEn=Date.now(); }
+      const g=arr.find(x=>x.nombre===nombreAnterior && x.creadorCorreo===user.correo);
+      if(g){ g.nombre=nuevoNombre; g.link=nuevoLink; g.linkActualizadoEn=Date.now(); }
     });
-    _db.collection("grupos_extra").where("nombre","==",s.nombre).get().then(snap=>{
+    _db.collection("grupos_extra").where("nombre","==",nombreAnterior).get().then(snap=>{
       snap.forEach(doc=>{
-        if(doc.data().creadorCorreo===user.correo) doc.ref.update({link:val, linkActualizadoEn:Date.now()});
+        if(doc.data().creadorCorreo===user.correo){
+          doc.ref.update({nombre:nuevoNombre, link:nuevoLink, linkActualizadoEn:Date.now()});
+        }
       });
     }).catch(e=>console.warn("FB link usuario:",e));
-    filtrar(); // re-pintar cards públicas con el nuevo link
+    filtrar(); // re-pintar cards públicas con el nombre/link nuevos
   }
 
   cerrarEditarLinkGrupo();
   renderMisGrupos(user);
-  mostrarToast(`🔗 „${s.nombre}": Link aktualisiert`,"✅");
+  mostrarToast(`✏️ „${nuevoNombre}": Gruppe aktualisiert`,"✅");
 }
 
 /* ===== PERFIL PÚBLICO DE USUARIO (grupos activos) ===== */
